@@ -28,24 +28,18 @@
 ### 1. Kurulum (Tek Tık)
 Klasördeki **`kurulum.bat`** dosyasına çift tıklayın. Gerekli tüm kütüphaneler otomatik olarak yüklenecektir.
 
-*(Terminalden kurmak isterseniz:)*
-```bash
-pip install -r requirements.txt
-```
+*(Terminalden kurmak isterseniz: `pip install -r requirements.txt`)*
 
-### 2. API Anahtarı Tanımlama
-Klasördeki `.env.example` dosyasının adını `.env` olarak değiştirin ve içine anahtarınızı yapıştırın:
-```env
-# Google AI Studio'dan tamamen ücretsiz alabilirsiniz: https://aistudio.google.com/app/apikey
-GEMINI_API_KEY=AIzaSy...
-
-# veya OpenRouter kullanmak isterseniz:
-OPENROUTER_API_KEY=sk-or-v1-...
-```
-> **İpucu:** Birden fazla Gemini anahtarını virgülle ayırarak (`key1, key2, key3`) yazabilirsiniz. Sistem kotanız doldukça otomatik olarak diğer hesaba geçer ve 6 sayfayı aynı anda paralel çözer!
-
-### 3. Çalıştırma
+### 2. Başlatma
 Klasördeki **`baslat.bat`** dosyasına çift tıklayın. Tarayıcınızda otomatik olarak `http://localhost:8000` açılacaktır.
+
+### 3. API Anahtarını Tanımlama (Arayüzden Doğrudan)
+Hiçbir dosya veya kodla uğraşmanıza gerek yok:
+- Uygulama açılınca sağ üst köşedeki **"🔑 AI Anahtarı Gir"** butonuna tıklayın.
+- [Google AI Studio](https://aistudio.google.com/app/apikey)'dan tamamen ücretsiz aldığınız anahtarı (veya OpenRouter anahtarınızı) kutuya yapıştırıp **"Kaydet"** deyin.
+- > **⚡ Turbo Hız İpucu:** Kutuya birden fazla hesaba ait anahtarları alt alta veya virgülle yapıştırabilirsiniz. PrepMate PDF otomatik olarak 6 worker havuzu oluşturur ve sayfaları 6'şar 6'şar paralel çözerek saniyeler içinde ödevi bitirir!
+
+*(Geliştiriciler için opsiyonel: Dilerseniz `.env` dosyası oluşturup `GEMINI_API_KEY=...` olarak da tanımlayabilirsiniz).*
 
 ---
 
