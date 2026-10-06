@@ -480,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < state.selectedPages.length; i += step) {
       const opt = document.createElement('option');
       opt.value = i;
+      opt.className = 'bg-[#0b0f19] text-slate-100 py-1 font-medium';
       if (state.isTwoPageMode && i + 1 < state.selectedPages.length) {
         opt.textContent = `${state.selectedPages[i]} - ${state.selectedPages[i + 1]}`;
       } else {

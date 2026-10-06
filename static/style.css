@@ -2,10 +2,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
+  color-scheme: dark;
   --acrobat-red: #ef4444;
   --acrobat-blue: #6366f1;
   --acrobat-dark: #07090e;
   --acrobat-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Force dark color scheme on all form elements & native popups */
+select, input, textarea, button {
+  color-scheme: dark;
+}
+
+select {
+  color-scheme: dark;
+  background-color: transparent;
+  color: #f1f5f9;
+}
+
+select option {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+  padding: 8px 12px;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 12px;
+}
+
+select option:checked {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+select option:hover {
+  background-color: #1e1b4b !important;
+  color: #ffffff !important;
 }
 
 body {
