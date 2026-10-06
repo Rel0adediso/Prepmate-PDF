@@ -1,5 +1,17 @@
 # 🎓 PrepMate PDF — AI Workbook & Homework Solver
 
+[![⬇️ HEMEN İNDİR (ZIP)](https://img.shields.io/badge/⬇️_TEK_TIKLA_İNDİR_(ZIP)-Tıkla_ve_Hemen_İndir-6366f1?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/archive/refs/heads/main.zip)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![Lisans](https://img.shields.io/badge/Lisans-MIT-10b981?style=for-the-badge)](#)
+
+> 💡 **HİÇBİR ŞEY BİLMEYENLER İÇİN 1 DAKİKADA ÇALIŞTIRMA:**  
+> 1. Yukarıdaki mor **[⬇️ TEK TIKLA İNDİR (ZIP)](https://github.com/Rel0adediso/Prepmate-PDF/archive/refs/heads/main.zip)** butonuna tıklayın (dosya doğrudan iner).  
+> 2. İnen ZIP arşivini masaüstünüze bir klasöre çıkartın.  
+> 3. Klasör içindeki **`kurulum.bat`** dosyasına çift tıklayın.  
+> 4. Ardından **`baslat.bat`** dosyasına çift tıklayın. Tarayıcınızda otomatik açılacaktır! 🎉
+
+---
+
 Üniversite hazırlık sınıflarında ve yabancı dil okullarında hocaların verdiği 100–200 sayfalık kalın İngilizce workbook (çalışma kitabı) PDF'lerini yapay zeka ile otomatik çözen, sadece ödev verilen sayfaları seçip **Adobe Acrobat'ta elle yazılmış gibi** doğal ve kusursuz şekilde dolduran masaüstü web uygulaması.
 
 ---
@@ -91,6 +103,8 @@ OPENROUTER_API_KEY=sk-or-v1-...
 
 ---
 
-## 🛡️ Gizlilik ve Güvenlik
-- API anahtarlarınız ve yüklediğiniz PDF dosyaları tamamen kendi yerel bilgisayarınızda kalır.
-- `.gitignore` yapılandırması sayesinde kişisel anahtarlarınız asla GitHub'a yüklenmez.
+## 🛡️ Gizlilik ve Güvenlik (100% Yerel Çalışma)
+
+- **Kişisel Verileriniz ve Dosyalarınız:** Yüklediğiniz PDF kitapları, ödevler ve çözümler yalnızca kendi bilgisayarınızda (localhost) işlenir; harici hiçbir sunucuya kaydedilmez.
+- **API Anahtarları:** Tanımladığınız Gemini ve OpenRouter anahtarları yalnızca kendi tarayıcınızın yerel hafızasında (`localStorage`) ve yerel diskinizde tutulur. GitHub reposuna asla sızmaz.
+- **Açık Kaynak Kod:** Projenin tüm kaynak kodu tamamen şeffaftır ve arka planda çalışan gizli hiçbir telemetri veya veri toplama kodu bulunmaz.
