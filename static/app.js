@@ -187,17 +187,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modeDesc) modeDesc.textContent = 'Cevapların yanında hoca sorarsa diye Türkçe kural/gerekçe açıklamaları eklenir.';
       showToast('Detaylı Mod aktif: Cevap gerekçeleri ve açıklamalar eklenecek.');
     } else {
-      fastModeBtn.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-semibold transition shadow-sm';
-      detailedModeBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
-      if (editorFastModeBtn) editorFastModeBtn.className = 'px-2 py-0.5 rounded bg-blue-600 text-white font-semibold transition shadow-sm';
-      if (editorDetailedModeBtn) editorDetailedModeBtn.className = 'px-2 py-0.5 rounded text-slate-400 hover:text-white transition';
+      fastModeBtn.className = 'px-3 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition shadow-sm';
+      detailedModeBtn.className = 'px-3 py-1 rounded-lg text-slate-400 hover:text-white transition';
+      if (editorFastModeBtn) editorFastModeBtn.className = 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition shadow-sm';
+      if (editorDetailedModeBtn) editorDetailedModeBtn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
       if (modeIcon) modeIcon.textContent = '⚡';
       if (modeTitle) modeTitle.textContent = 'Hızlı Mod (Önerilen)';
       if (modeBadge) {
         modeBadge.textContent = 'Paralel Çözüm';
-        modeBadge.className = 'text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-medium';
+        modeBadge.className = 'text-[10px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-1.5 py-0.5 rounded font-medium';
       }
-      if (modeDesc) modeDesc.textContent = 'Doğrudan net cevaplar, maksimum hız ve paralel çözüm.';
+      if (modeDesc) modeDesc.textContent = 'Doğrudan net cevaplar, maksimum hız ve paralel worker\'lar.';
       showToast('Hızlı Mod aktif: Maksimum hız ve paralel çözüm.');
     }
   }
@@ -212,16 +212,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
-    dropZone.classList.add('border-blue-500', 'bg-blue-500/10');
+    dropZone.classList.add('border-violet-500', 'bg-violet-500/10');
   });
 
   dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('border-blue-500', 'bg-blue-500/10');
+    dropZone.classList.remove('border-violet-500', 'bg-violet-500/10');
   });
 
   dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
-    dropZone.classList.remove('border-blue-500', 'bg-blue-500/10');
+    dropZone.classList.remove('border-violet-500', 'bg-violet-500/10');
     if (e.dataTransfer.files.length > 0) {
       handleFileSelected(e.dataTransfer.files[0]);
     }
@@ -337,16 +337,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // View Mode Toggles
   twoPageViewBtn.addEventListener('click', () => {
     state.isTwoPageMode = true;
-    twoPageViewBtn.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
-    singlePageViewBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
+    twoPageViewBtn.className = 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
+    singlePageViewBtn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
     rebuildDropdown();
     renderCurrentSpread();
   });
 
   singlePageViewBtn.addEventListener('click', () => {
     state.isTwoPageMode = false;
-    singlePageViewBtn.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
-    twoPageViewBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
+    singlePageViewBtn.className = 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
+    twoPageViewBtn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
     rebuildDropdown();
     renderCurrentSpread();
   });
@@ -374,11 +374,11 @@ document.addEventListener('DOMContentLoaded', () => {
     state.isTwoPageMode = pages.length > 1;
 
     if (state.isTwoPageMode) {
-      twoPageViewBtn.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
-      singlePageViewBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
+      twoPageViewBtn.className = 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
+      singlePageViewBtn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
     } else {
-      singlePageViewBtn.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
-      twoPageViewBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
+      singlePageViewBtn.className = 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition flex items-center gap-1 shadow-sm';
+      twoPageViewBtn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-medium transition flex items-center gap-1';
     }
 
     uploadSection.classList.add('hidden');
@@ -686,23 +686,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const isVisible = p === currentLeft || p === currentRight;
 
       const card = document.createElement('div');
-      card.className = `progress-page-card bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 rounded-xl p-3 cursor-pointer transition flex items-center justify-between group ${isVisible ? 'active-spread' : ''}`;
+      card.className = `progress-page-card bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 rounded-2xl p-3 cursor-pointer transition-all duration-200 flex items-center justify-between group ${isVisible ? 'active-spread ring-1 ring-violet-500/50 bg-violet-500/10' : ''}`;
       card.dataset.page = p;
 
       let badgeHtml = '';
       let statusDesc = '';
 
       if (status === 'done') {
-        badgeHtml = `<div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm shrink-0">✓</div>`;
+        badgeHtml = `<div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">✓</div>`;
         statusDesc = `<span class="text-emerald-400 font-medium">${annotations.length} boşluk dolduruldu</span>`;
       } else if (status === 'solving') {
-        badgeHtml = `<div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center shrink-0"><div class="w-3.5 h-3.5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div></div>`;
-        statusDesc = `<span class="text-blue-400 font-medium animate-pulse">Çözülüyor...</span>`;
+        badgeHtml = `<div class="w-7 h-7 rounded-xl bg-violet-500/20 text-violet-400 border border-violet-500/30 flex items-center justify-center shrink-0 shadow-sm"><div class="w-3.5 h-3.5 border-2 border-violet-400 border-t-transparent rounded-full animate-spin"></div></div>`;
+        statusDesc = `<span class="text-violet-300 font-medium animate-pulse">Çözülüyor...</span>`;
       } else if (status === 'error') {
-        badgeHtml = `<div class="w-7 h-7 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center font-bold text-sm shrink-0">✕</div>`;
+        badgeHtml = `<div class="w-7 h-7 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center font-bold text-sm shrink-0">✕</div>`;
         statusDesc = `<span class="text-red-400 font-medium">Hata oluştu</span>`;
       } else {
-        badgeHtml = `<div class="w-7 h-7 rounded-lg bg-slate-700 text-slate-400 border border-slate-600 flex items-center justify-center font-bold text-xs shrink-0">⏱</div>`;
+        badgeHtml = `<div class="w-7 h-7 rounded-xl bg-white/[0.05] text-slate-400 border border-white/10 flex items-center justify-center font-bold text-xs shrink-0">⏱</div>`;
         statusDesc = `<span class="text-slate-400">Sırada bekliyor</span>`;
       }
 
@@ -712,12 +712,12 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="truncate">
             <div class="text-xs font-semibold text-white flex items-center gap-1.5">
               <span>Sayfa ${p}</span>
-              ${isVisible ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 font-normal">Açık</span>' : ''}
+              ${isVisible ? '<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-semibold border border-violet-500/30">Açık</span>' : ''}
             </div>
             <div class="text-[11px] truncate mt-0.5">${statusDesc}</div>
           </div>
         </div>
-        <button class="resolve-card-btn opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-slate-700 text-slate-400 hover:text-amber-400 transition" title="Yeniden Çöz">
+        <button class="resolve-card-btn opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/[0.08] text-slate-400 hover:text-amber-400 transition" title="Yeniden Çöz">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         </button>
       `;

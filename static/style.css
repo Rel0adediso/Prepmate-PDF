@@ -1,34 +1,87 @@
-/* Adobe Acrobat Style Styling */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* PrepMate PDF - Modern Cyber Obsidian & Glassmorphism Theme */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --acrobat-red: #eb1000;
-  --acrobat-blue: #1473e6;
-  --acrobat-dark: #0f172a;
-  --acrobat-border: #d5d5d5;
+  --acrobat-red: #ef4444;
+  --acrobat-blue: #6366f1;
+  --acrobat-dark: #07090e;
+  --acrobat-border: rgba(255, 255, 255, 0.08);
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #0f172a;
-  color: #f8fafc;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #06080d;
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 102, 241, 0.18), transparent 70%),
+    radial-gradient(circle at 95% 95%, rgba(20, 184, 166, 0.08), transparent 45%),
+    radial-gradient(circle at 5% 80%, rgba(168, 85, 247, 0.06), transparent 40%),
+    radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px;
+  color: #f1f5f9;
   margin: 0;
   padding: 0;
   height: 100vh;
   overflow: hidden;
 }
 
-/* Scrollbar */
+/* Modern Minimalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.45);
+}
+
+/* Glassmorphism & Modern Depth Utilities */
+.glass-panel {
+  background: rgba(11, 15, 25, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    0 24px 48px -12px rgba(0, 0, 0, 0.7);
+}
+
+.glow-btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 50%, #06b6d4 100%);
+  color: #ffffff;
+  box-shadow: 0 0 22px -3px rgba(99, 102, 241, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 32px 0px rgba(124, 58, 237, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.glow-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.glow-btn-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+  color: #ffffff;
+  box-shadow: 0 0 18px -3px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-btn-emerald:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 26px 0px rgba(20, 184, 166, 0.6);
+}
+
+.glow-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-card-hover:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 0 35px -5px rgba(99, 102, 241, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Two-Page Book Spread Viewport */
@@ -36,7 +89,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   height: calc(100vh - 105px);
   width: 100%;
   padding: 8px 16px;
@@ -44,17 +97,21 @@ body {
   overflow: hidden;
 }
 
-/* Page canvas container - fits nicely in screen height */
+/* Page canvas container - fits nicely in screen height with modern drop shadow */
 .pdf-page-container {
   position: relative;
   height: calc(100vh - 120px);
-  box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.7);
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.9),
+    0 0 30px -5px rgba(99, 102, 241, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
   background: white;
   user-select: none;
-  border-radius: 4px;
+  border-radius: 6px;
   box-sizing: border-box;
   overflow: hidden;
   flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .pdf-page-image {
