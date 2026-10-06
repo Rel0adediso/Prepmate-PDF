@@ -1,14 +1,13 @@
 # 🎓 PrepMate PDF — AI Workbook & Homework Solver
 
-[![⬇️ HEMEN İNDİR (ZIP)](https://img.shields.io/badge/⬇️_TEK_TIKLA_İNDİR_(ZIP)-Tıkla_ve_Hemen_İndir-6366f1?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/archive/refs/heads/main.zip)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
-[![Lisans](https://img.shields.io/badge/Lisans-MIT-10b981?style=for-the-badge)](#)
+[![⬇️ WINDOWS PROGRAMINI İNDİR (.EXE)](https://img.shields.io/badge/⬇️_WINDOWS_İÇİN_İNDİR_(.EXE)-v1.0.0_Hazır-6366f1?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+[![Sürüm](https://img.shields.io/badge/Sürüm-v1.0.0-10b981?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![Lisans](https://img.shields.io/badge/Lisans-MIT-3b82f6?style=for-the-badge)](#)
 
-> 💡 **HİÇBİR ŞEY BİLMEYENLER İÇİN 1 DAKİKADA ÇALIŞTIRMA:**  
-> 1. Yukarıdaki mor **[⬇️ TEK TIKLA İNDİR (ZIP)](https://github.com/Rel0adediso/Prepmate-PDF/archive/refs/heads/main.zip)** butonuna tıklayın (dosya doğrudan iner).  
-> 2. İnen ZIP arşivini masaüstünüze bir klasöre çıkartın.  
-> 3. Klasör içindeki **`kurulum.bat`** dosyasına çift tıklayın.  
-> 4. Ardından **`baslat.bat`** dosyasına çift tıklayın. Tarayıcınızda otomatik açılacaktır! 🎉
+> 🚀 **HİÇBİR ŞEY BİLMEYENLER İÇİN 10 SANİYEDE BAŞLATMA:**  
+> 1. Yukarıdaki **[⬇️ WINDOWS İÇİN İNDİR (.EXE)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** butonuna basıp **`PrepMate-PDF.exe`** dosyasını indirin.  
+> 2. İnen dosyaya **çift tıklayın**. Program masaüstü penceresi olarak anında açılacaktır!  
+> *(Bilgisayarınızda Python olmasına, ZIP çıkarmaya veya kod çalıştırmaya gerek yoktur).*
 
 ---
 
@@ -35,29 +34,21 @@
 
 ---
 
-## 🚀 Kurulum ve Çalıştırma (Adım Adım)
+## 🚀 Nasıl Başlatılır?
 
-### 0. Ön Gereksinim (Python)
-Bilgisayarınızda **Python 3.10 veya daha yenisi** kurulu olmalıdır.
-> ⚠️ **Önemli:** Python'ı kurarken kurulum ekranının en altındaki **"Add python.exe to PATH"** kutucuğunu MUTLAKA işaretleyin.
-
----
-
-### 1. Projeyi İndirin
-- Bu sayfadaki yeşil **`Code`** butonuna tıklayıp **`Download ZIP`** deyin ve inen zip dosyasını bir klasöre çıkartın.
-- *(Veya Git ile: `git clone https://github.com/Rel0adediso/Prepmate-PDF.git`)*
+### Yöntem 1: Tek Tıkla Masaüstü Programı (Önerilen — En Kolayı)
+1. **[Releases](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** sayfasından **`PrepMate-PDF.exe`** dosyasını indirin.
+2. Dosyaya çift tıklayın. Hepsi bu kadar! 
+*(Python yüklemenize, terminal açmanıza veya paket kurmanıza gerek yoktur).*
 
 ---
 
-### 2. Kurulum (Tek Tık)
-Klasör içindeki **`kurulum.bat`** dosyasına çift tıklayın. Gerekli tüm kütüphaneler (`fastapi`, `pymupdf`, `google-genai` vb.) otomatik kurulacaktır.
-
-*(Terminalden kurmak isterseniz: `pip install -r requirements.txt`)*
-
----
-
-### 3. Çalıştırma
-Klasör içindeki **`baslat.bat`** dosyasına çift tıklayın. Tarayıcınızda otomatik olarak `http://localhost:8000` açılacaktır.
+### Yöntem 2: Kaynak Koddan Çalıştırma (.bat ile)
+Eğer projeyi kaynak kodundan çalıştırmak veya kodları geliştirmek isterseniz:
+1. Bilgisayarınızda **Python 3.10+** kurulu olmalıdır *(Kurarken "Add python.exe to PATH" seçeneğini işaretleyin)*.
+2. Projeyi ZIP olarak indirin ve bir klasöre çıkartın.
+3. Klasör içindeki **`kurulum.bat`** dosyasına çift tıklayın (gerekli kütüphaneleri otomatik kurar).
+4. Ardından **`baslat.bat`** dosyasına çift tıklayın (tarayıcınızda otomatik açılır).
 
 ---
 
