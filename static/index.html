@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ödevmatik AI - Adobe Acrobat Stili Ödev Çözücü</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            acrobat: {
+              red: '#eb1000',
+              blue: '#1473e6',
+              dark: '#0f172a',
+              card: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/95 px-5 py-2.5 flex items-center justify-between shadow-md shrink-0 z-40">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center shadow-md shadow-red-600/30">
+        <span class="text-white font-black text-lg italic tracking-tighter">A</span>
+      </div>
+      <div>
+        <h1 class="font-bold text-base text-white leading-tight flex items-center gap-2">
+          Ödevmatik AI
+          <span class="text-[11px] font-medium px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">Adobe Fill & Sign</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center space-x-3">
+      <button id="apiKeyBtn" class="flex items-center space-x-2 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg transition">
+        <span id="apiKeyStatusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span id="apiKeyBtnText">AI Anahtarı</span>
+      </button>
+
+      <div id="exportGroup" class="hidden flex items-center space-x-2">
+        <!-- Download Only Homework Pages -->
+        <button id="downloadHwBtn" class="flex items-center space-x-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg shadow-md transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span>Sadece Ödev Sayfalarını İndir</span>
+        </button>
+
+        <!-- Download Full Book -->
+        <button id="downloadFullBtn" class="flex items-center space-x-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3 py-1.5 rounded-lg transition">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          <span>Tüm Kitabı İndir</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 flex flex-col overflow-hidden relative">
+
+    <!-- STEP 1: Upload & Range Selection Screen -->
+    <section id="uploadSection" class="max-w-2xl w-full mx-auto my-auto p-6 overflow-y-auto">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-white mb-2">Ödev PDF'ini Yükle</h2>
+          <p class="text-slate-400 text-sm">Hocanın verdiği ders kitabını veya ödev föyünü seç, sayfaları otomatik doldursun.</p>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-xl p-8 text-center cursor-pointer transition bg-slate-950/50 mb-5 group">
+          <input type="file" id="pdfFileInput" accept="application/pdf" class="hidden">
+          <div class="flex flex-col items-center">
+            <div class="w-14 h-14 rounded-full bg-slate-800 group-hover:bg-blue-600/20 text-slate-400 group-hover:text-blue-400 flex items-center justify-center mb-3 transition">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            </div>
+            <p class="text-sm font-medium text-slate-200 mb-1" id="dropZoneText">PDF dosyasını buraya sürükleyin veya tıklayıp seçin</p>
+            <p class="text-xs text-slate-500" id="dropZoneSubText">Workbook, ders kitabı veya ödev föyü (.pdf)</p>
+          </div>
+        </div>
+
+        <!-- PDF Meta Info & Page Range (Shows after upload) -->
+        <div id="fileMetaCard" class="hidden bg-slate-800/60 border border-slate-700/80 rounded-xl p-5 mb-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3 truncate">
+              <div class="w-8 h-8 rounded bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+              </div>
+              <div class="truncate">
+                <p id="fileNameDisplay" class="text-sm font-semibold text-white truncate">Workbook.pdf</p>
+                <p id="totalPagesDisplay" class="text-xs text-slate-400">Toplam: 142 Sayfa</p>
+              </div>
+            </div>
+            <button id="changeFileBtn" class="text-xs text-slate-400 hover:text-red-400 transition underline">Değiştir</button>
+          </div>
+
+          <!-- Page Range Input -->
+          <div class="pt-2 border-t border-slate-700/60">
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+              <span>Hangi Sayfalar Çözülecek? (Ödev Sayfa Aralığı)</span>
+              <span class="text-slate-500 font-normal">Örn: 15-20 veya 14, 15, 18</span>
+            </label>
+            <input type="text" id="pageRangeInput" placeholder="Örn: 15-20" class="w-full bg-slate-900 border border-slate-700 focus:border-blue-500 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none transition font-mono">
+            <p class="text-[11px] text-slate-500 mt-1">İpucu: 15-20 yazarsanız sadece 15, 16, 17, 18, 19 ve 20. sayfalar çözülür.</p>
+          </div>
+        </div>
+
+        <!-- Mode Toggle (Fast vs Detailed) -->
+        <div class="flex items-center justify-between bg-slate-800/40 border border-slate-700/60 rounded-xl p-3 mb-5">
+          <div class="flex items-center space-x-2.5">
+            <span id="modeIcon" class="text-xl">⚡</span>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span id="modeTitle" class="text-xs font-bold text-white">Hızlı Mod</span>
+                <span id="modeBadge" class="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-medium">Paralel Çözüm</span>
+              </div>
+              <p id="modeDesc" class="text-[11px] text-slate-400 mt-0.5">Doğrudan net cevaplar, maksimum hız ve paralel çözüm.</p>
+            </div>
+          </div>
+          <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 text-xs shrink-0 ml-2">
+            <button type="button" id="fastModeBtn" class="px-2.5 py-1 rounded bg-blue-600 text-white font-semibold transition">⚡ Hızlı</button>
+            <button type="button" id="detailedModeBtn" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition">💡 Detaylı</button>
+          </div>
+        </div>
+
+        <!-- Start Solve Button -->
+        <button id="startSolveBtn" disabled class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center space-x-2 text-sm">
+          <span>⚡ Sayfaları Getir ve Otomatik Çöz</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 2: Acrobat-Style Viewer & Interactive Editor Screen -->
+    <section id="editorSection" class="hidden flex-1 flex flex-col overflow-hidden h-full">
+      
+      <!-- Secondary Acrobat Action Bar -->
+      <div class="bg-slate-900 border-b border-slate-800 px-5 py-2 flex items-center justify-between gap-3 shrink-0">
+        
+        <!-- Left: Page Navigator & View Mode -->
+        <div class="flex items-center space-x-2">
+          <button id="prevPageBtn" class="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          </button>
+          
+          <div class="flex items-center space-x-1.5 text-xs font-semibold bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
+            <span class="text-slate-400">Sayfa:</span>
+            <select id="pageSelectDropdown" class="bg-transparent text-white font-bold outline-none cursor-pointer">
+              <!-- Page options injected by JS -->
+            </select>
+          </div>
+
+          <button id="nextPageBtn" class="p-1 rounded hover:bg-slate-800 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+
+          <!-- 2-Page / Single-Page Toggle Buttons -->
+          <div class="flex items-center space-x-1 bg-slate-800/90 border border-slate-700 rounded-lg p-0.5 text-xs ml-2">
+            <button id="twoPageViewBtn" class="px-2.5 py-1 rounded bg-blue-600 text-white font-semibold transition flex items-center gap-1 shadow-sm">
+              <span>📖 2 Sayfa (Kitap)</span>
+            </button>
+            <button id="singlePageViewBtn" class="px-2.5 py-1 rounded text-slate-400 hover:text-white font-medium transition flex items-center gap-1">
+              <span>📄 Tek Sayfa</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center: Acrobat Text Tools -->
+        <div class="flex items-center space-x-2">
+          <!-- Add Text Box Tool -->
+          <button id="addTextBoxBtn" class="flex items-center space-x-1.5 text-xs bg-slate-800 hover:bg-blue-600/30 hover:border-blue-500 border border-slate-700 px-2.5 py-1 rounded-lg text-slate-200 transition">
+            <span class="font-serif font-black text-blue-400 text-sm">T</span>
+            <span>+ Metin Kutusu Ekle</span>
+          </button>
+
+          <!-- Font Size Selector -->
+          <div class="flex items-center space-x-1 text-xs bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">
+            <span class="text-slate-400 text-[11px]">Boyut:</span>
+            <select id="fontSizeSelect" class="bg-transparent text-white text-xs outline-none cursor-pointer font-mono">
+              <option value="9">9 pt</option>
+              <option value="10">10 pt</option>
+              <option value="11" selected>11 pt (Varsayılan)</option>
+              <option value="12">12 pt</option>
+              <option value="14">14 pt</option>
+            </select>
+          </div>
+
+          <!-- Color Indicator (Dümdüz Siyah) -->
+          <div class="flex items-center space-x-1 text-xs text-slate-400 bg-slate-800/80 border border-slate-700 px-2 py-1 rounded-lg">
+            <span class="w-2.5 h-2.5 rounded-full bg-black border border-slate-600 inline-block"></span>
+            <span>Siyah</span>
+          </div>
+
+          <!-- Mode Toggle in Editor Bar -->
+          <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-0.5 text-xs">
+            <button id="editorFastModeBtn" class="px-2 py-0.5 rounded bg-blue-600 text-white font-semibold transition" title="Hızlı Mod (Paralel)">⚡ Hızlı</button>
+            <button id="editorDetailedModeBtn" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition" title="Detaylı Mod (Açıklamalı)">💡 Detaylı</button>
+          </div>
+
+          <!-- Re-solve Button -->
+          <button id="reSolveBtn" title="Bu sayfayı yapay zekayla tekrar çöz" class="p-1.5 text-xs text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+        </div>
+
+        <!-- Right: Actions & Sidebar Toggle -->
+        <div class="flex items-center space-x-2 text-xs">
+          <!-- Add More Pages Button -->
+          <button id="addPagesBtn" title="Mevcut listeye yeni sayfalar ekle" class="flex items-center space-x-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 px-2.5 py-1.5 rounded-lg transition font-medium">
+            <span>➕</span>
+            <span>Sayfa Ekle</span>
+          </button>
+          <!-- Toggle Progress Sidebar Button -->
+          <button id="toggleProgressSidebarBtn" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-slate-200 transition font-medium">
+            <span class="text-sm">📋</span>
+            <span>İlerleme</span>
+            <span id="progressSummaryBadge" class="px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-mono text-[10px] font-bold">0/0</span>
+          </button>
+          <button id="backToUploadBtn" class="text-slate-400 hover:text-white px-2 py-1 rounded transition">Geri Dön</button>
+        </div>
+      </div>
+
+      <!-- Editor Content Area: Canvas + Collapsible Right Sidebar -->
+      <div class="flex-1 flex overflow-hidden relative">
+        <!-- Main Canvas Viewport Area (2-Page Spread or Single) -->
+        <div id="canvasViewport" class="flex-1 book-spread-viewport relative">
+          
+          <!-- Loading Overlay for active page -->
+          <div id="pageLoadingOverlay" class="hidden absolute inset-0 bg-slate-950/70 backdrop-blur-sm z-30 flex flex-col items-center justify-center">
+            <div class="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-3"></div>
+            <p id="loadingStatusText" class="text-sm font-semibold text-white">Yapay zeka soruları çözüyor ve boşluklara yerleştiriyor...</p>
+            <p class="text-xs text-slate-400 mt-1">Lütfen birkaç saniye bekleyin</p>
+          </div>
+
+          <!-- Left Page Container -->
+          <div id="leftPageContainer" class="pdf-page-container">
+            <img id="leftPageImage" src="" alt="Sol Sayfa" class="pdf-page-image">
+            <div id="leftAnnotationsLayer" class="absolute inset-0 pointer-events-auto"></div>
+          </div>
+
+          <!-- Right Page Container (For 2-page view) -->
+          <div id="rightPageContainer" class="pdf-page-container hidden">
+            <img id="rightPageImage" src="" alt="Sağ Sayfa" class="pdf-page-image">
+            <div id="rightAnnotationsLayer" class="absolute inset-0 pointer-events-auto"></div>
+          </div>
+
+        </div>
+
+        <!-- Collapsible Progress Sidebar (Açılır Kapanır İlerleme Barı) -->
+        <aside id="progressSidebar" class="w-80 border-l border-slate-800 bg-slate-900 flex flex-col shrink-0 z-20 shadow-2xl transition-all duration-300">
+          <!-- Sidebar Header -->
+          <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                <span>📋 Çözüm Durumu</span>
+                <span id="overallPercentBadge" class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold font-mono">0%</span>
+              </h3>
+              <p id="progressStatusSubtitle" class="text-[11px] text-slate-400 mt-0.5">Sayfalar kontrol ediliyor...</p>
+            </div>
+            <button id="closeProgressSidebarBtn" title="Paneli Kapat" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition text-lg font-bold">
+              &times;
+            </button>
+          </div>
+
+          <!-- Overall Progress Bar -->
+          <div class="px-4 py-3 border-b border-slate-800/80 bg-slate-950/40">
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div id="overallProgressBar" class="bg-gradient-to-r from-blue-500 to-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-slate-400 mt-2">
+              <span id="completedPagesCount" class="font-medium">0 tamamlandı</span>
+              <span id="totalSelectedPagesCount" class="font-mono">0 sayfa</span>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Page Cards List -->
+          <div id="progressPagesList" class="flex-1 overflow-y-auto p-3 space-y-2">
+            <!-- Dynamic items rendered by app.js -->
+          </div>
+
+          <!-- Sidebar Footer: Add More Pages Button -->
+          <div class="p-3 border-t border-slate-800 bg-slate-950/60">
+            <button id="addPagesSidebarBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-blue-300 border border-slate-700 rounded-xl py-2 px-3 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <span>➕</span>
+              <span>Yeni Sayfa Ekle</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- API Key Modal -->
+  <div id="apiKeyModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <span>🔑 AI API Anahtarı (Gemini / OpenRouter)</span>
+        </h3>
+        <button id="closeApiModalBtn" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-400">
+        Öncelik sırasıyla <b>Gemini 3.8 Flash &gt; 3 Flash &gt; 3.5 Flash Lite</b> modelleri kullanılır. Birden fazla anahtar girerseniz birinin kotası bittiğinde 3.8 Flash'tan düşmemek için <b>otomatik olarak diğer hesaba</b> geçer!
+      </p>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">API Key(ler) - Birden fazla girebilirsiniz (Alt Alta veya Virgülle)</label>
+        <textarea id="apiKeyInput" rows="3" placeholder="AIzaSy...&#10;AIzaSy...&#10;(Kota dolunca sıradaki anahtara geçer)" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 rounded-lg px-3 py-2 text-xs text-white font-mono outline-none resize-none"></textarea>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <div class="flex flex-col gap-1 text-[11px]">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-400 hover:underline flex items-center gap-1">
+            <span>Google AI Studio Key (Ücretsiz Pro/Flash)</span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </a>
+          <a href="https://openrouter.ai/keys" target="_blank" class="text-purple-400 hover:underline flex items-center gap-1">
+            <span>OpenRouter Key Al</span>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </a>
+        </div>
+
+        <button id="saveApiKeyBtn" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md">
+          Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add More Pages Modal -->
+  <div id="addPagesModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <span>📄 Listeye Yeni Sayfalar Ekle</span>
+        </h3>
+        <button id="closeAddPagesModalBtn" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-400">
+        Mevcut çözülen sayfaları ve cevaplarınızı kaybetmeden listeye yeni ödev sayfaları ekleyin.
+      </p>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs flex items-center justify-between">
+        <span class="text-slate-400">Şu Anki Sayfalar:</span>
+        <span id="currentPagesListDisplay" class="text-blue-400 font-mono font-semibold">15-20</span>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Eklenecek Yeni Sayfa Aralığı</label>
+        <input type="text" id="addPageRangeInput" placeholder="Örn: 21-25 veya 22, 24" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 rounded-lg px-3 py-2 text-sm text-white font-mono outline-none">
+        <p class="text-[11px] text-slate-500 mt-1">Sadece yeni eklenen sayfalar arka planda otomatik çözülür.</p>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button id="cancelAddPagesBtn" class="px-3 py-2 text-xs text-slate-400 hover:text-white transition">Vazgeç</button>
+        <button id="confirmAddPagesBtn" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5">
+          <span>⚡ Ekle ve Çöz</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transition transform translate-y-24 opacity-0 flex items-center space-x-2">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMessage">Bildirim mesajı</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

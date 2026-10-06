@@ -1,0 +1,28 @@
+# Environment Variables (CRITICAL - NEVER COMMIT REAL KEYS)
+.env
+.env.local
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# User Data, Uploads and Output PDFs
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+scratch/
+
+# OS and IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

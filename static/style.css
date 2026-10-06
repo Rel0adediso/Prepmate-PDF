@@ -1,0 +1,346 @@
+/* Adobe Acrobat Style Styling */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --acrobat-red: #eb1000;
+  --acrobat-blue: #1473e6;
+  --acrobat-dark: #0f172a;
+  --acrobat-border: #d5d5d5;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #0f172a;
+  color: #f8fafc;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+/* Two-Page Book Spread Viewport */
+.book-spread-viewport {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  height: calc(100vh - 105px);
+  width: 100%;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Page canvas container - fits nicely in screen height */
+.pdf-page-container {
+  position: relative;
+  height: calc(100vh - 120px);
+  box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.7);
+  background: white;
+  user-select: none;
+  border-radius: 4px;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pdf-page-image {
+  height: 100%;
+  width: 100%;
+  display: block;
+  object-fit: fill;
+  pointer-events: none;
+}
+
+/* Acrobat Native Text Box */
+.acrobat-annotation {
+  position: absolute;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000000; /* Pure black as requested */
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px dashed transparent;
+  border-radius: 2px;
+  padding: 0px 3px;
+  cursor: move;
+  z-index: 10;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.15;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.acrobat-annotation:hover {
+  border-color: var(--acrobat-blue);
+  background: rgba(235, 245, 255, 0.85);
+  box-shadow: 0 0 0 1px var(--acrobat-blue);
+}
+
+.acrobat-annotation.active {
+  border-color: var(--acrobat-blue);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 0 0 2px var(--acrobat-blue);
+  z-index: 50;
+}
+
+.acrobat-annotation .delete-btn {
+  display: none;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 60;
+}
+
+.acrobat-annotation:hover .delete-btn,
+.acrobat-annotation.active .delete-btn {
+  display: flex;
+}
+
+.acrobat-annotation .text-content {
+  outline: none;
+  min-width: 15px;
+  display: block;
+  font-weight: 500;
+}
+
+/* Collapsible Progress Sidebar */
+#progressSidebar {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.25s ease,
+              padding 0.3s ease;
+}
+
+#progressSidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+  border-left-width: 0 !important;
+  overflow: hidden;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.progress-page-card {
+  transition: all 0.2s ease;
+}
+.progress-page-card:hover {
+  transform: translateY(-1px);
+}
+.progress-page-card.active-spread {
+  border-color: #3b82f6 !important;
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Acrobat Straight Highlighter Annotation (Flat warm peach-orange marker stripe, no border, no radius) */
+.acrobat-highlight-annotation {
+  position: absolute;
+  background-color: rgba(251, 146, 60, 0.45);
+  border: none !important;
+  border-radius: 0px !important;
+  cursor: move;
+  z-index: 15;
+  box-sizing: border-box;
+  mix-blend-mode: multiply;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.acrobat-highlight-annotation:hover {
+  background-color: rgba(249, 115, 22, 0.60);
+  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.6);
+}
+
+.acrobat-highlight-annotation.active {
+  background-color: rgba(249, 115, 22, 0.70);
+  box-shadow: 0 0 0 2px rgba(194, 65, 12, 0.8);
+  z-index: 50;
+}
+
+.acrobat-highlight-annotation .delete-btn {
+  display: none;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 60;
+}
+
+.acrobat-highlight-annotation:hover .delete-btn,
+.acrobat-highlight-annotation.active .delete-btn {
+  display: flex;
+}
+
+/* Acrobat Native Correction Annotation (Strikethrough line + corrected text above) */
+.acrobat-correction-annotation {
+  position: absolute;
+  cursor: move;
+  z-index: 20;
+  box-sizing: border-box;
+}
+
+.acrobat-correction-annotation .strike-line {
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  right: -2px;
+  height: 2px;
+  background-color: #ef4444;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.acrobat-correction-annotation .correction-text {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: -1px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0 2px;
+  border-radius: 2px;
+  border: 1px solid #bfdbfe;
+  line-height: 1.1;
+  white-space: nowrap;
+  outline: none;
+  cursor: text;
+}
+
+.acrobat-correction-annotation .correction-text:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.acrobat-correction-annotation .delete-btn {
+  display: none;
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 18px;
+  height: 18px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 60;
+}
+
+.acrobat-correction-annotation:hover .delete-btn,
+.acrobat-correction-annotation.active .delete-btn {
+  display: flex;
+}
+
+/* Explanation Tooltip & Pill */
+.explanation-pill {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 15px;
+  height: 15px;
+  background: #f59e0b;
+  color: #000;
+  border-radius: 50%;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 45;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  font-weight: bold;
+}
+
+.explanation-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 180px;
+  max-width: 280px;
+  color: #f8fafc;
+  font-size: 11px;
+  line-height: 1.4;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  pointer-events: none;
+  white-space: normal;
+  text-align: left;
+}
+
+.explanation-tooltip .tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fbbf24;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  letter-spacing: 0.5px;
+}
+
+.explanation-tooltip .tooltip-body {
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.acrobat-annotation:hover .explanation-tooltip,
+.acrobat-highlight-annotation:hover .explanation-tooltip,
+.acrobat-correction-annotation:hover .explanation-tooltip {
+  display: block;
+}
+
+
