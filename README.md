@@ -23,23 +23,49 @@
 
 ---
 
-## 🚀 Hızlı Başlangıç (Windows)
+## 🚀 Kurulum ve Çalıştırma (Adım Adım)
 
-### 1. Kurulum (Tek Tık)
-Klasördeki **`kurulum.bat`** dosyasına çift tıklayın. Gerekli tüm kütüphaneler otomatik olarak yüklenecektir.
+### 0. Ön Gereksinim (Python)
+Bilgisayarınızda **Python 3.10 veya daha yenisi** kurulu olmalıdır.
+> ⚠️ **Önemli:** Python'ı kurarken kurulum ekranının en altındaki **"Add python.exe to PATH"** kutucuğunu MUTLAKA işaretleyin.
+
+---
+
+### 1. Projeyi İndirin
+- Bu sayfadaki yeşil **`Code`** butonuna tıklayıp **`Download ZIP`** deyin ve inen zip dosyasını bir klasöre çıkartın.
+- *(Veya Git ile: `git clone https://github.com/Rel0adediso/Prepmate-PDF.git`)*
+
+---
+
+### 2. Kurulum (Tek Tık)
+Klasör içindeki **`kurulum.bat`** dosyasına çift tıklayın. Gerekli tüm kütüphaneler (`fastapi`, `pymupdf`, `google-genai` vb.) otomatik kurulacaktır.
 
 *(Terminalden kurmak isterseniz: `pip install -r requirements.txt`)*
 
-### 2. Başlatma
-Klasördeki **`baslat.bat`** dosyasına çift tıklayın. Tarayıcınızda otomatik olarak `http://localhost:8000` açılacaktır.
+---
 
-### 3. API Anahtarını Tanımlama (Arayüzden Doğrudan)
-Hiçbir dosya veya kodla uğraşmanıza gerek yok:
-- Uygulama açılınca sağ üst köşedeki **"🔑 AI Anahtarı Gir"** butonuna tıklayın.
-- [Google AI Studio](https://aistudio.google.com/app/apikey)'dan tamamen ücretsiz aldığınız anahtarı (veya OpenRouter anahtarınızı) kutuya yapıştırıp **"Kaydet"** deyin.
-- > **⚡ Turbo Hız İpucu:** Kutuya birden fazla hesaba ait anahtarları alt alta veya virgülle yapıştırabilirsiniz. PrepMate PDF otomatik olarak 6 worker havuzu oluşturur ve sayfaları 6'şar 6'şar paralel çözerek saniyeler içinde ödevi bitirir!
+### 3. Çalıştırma
+Klasör içindeki **`baslat.bat`** dosyasına çift tıklayın. Tarayıcınızda otomatik olarak `http://localhost:8000` açılacaktır.
 
-*(Geliştiriciler için opsiyonel: Dilerseniz `.env` dosyası oluşturup `GEMINI_API_KEY=...` olarak da tanımlayabilirsiniz).*
+---
+
+### 4. API Anahtarını Tanımlama
+İki farklı şekilde kolayca tanımlayabilirsiniz:
+
+#### Yöntem A: Arayüzden Doğrudan (En Kolayı - Kodsuz)
+1. Uygulama açılınca sağ üst köşedeki **"🔑 AI Anahtarı Gir"** butonuna tıklayın.
+2. [Google AI Studio](https://aistudio.google.com/app/apikey)'dan tamamen ücretsiz aldığınız anahtarı kutuya yapıştırıp **"Kaydet"** deyin.
+3. > **⚡ 6x Turbo Paralel Hız:** Kutuya birden fazla hesaba ait anahtarları alt alta veya virgülle yapıştırırsanız, PrepMate PDF 6 worker havuzu oluşturur ve sayfaları 6'şar 6'şar paralel çözerek saniyeler içinde ödevi bitirir!
+
+#### Yöntem B: Dosya ile (.env)
+Klasördeki **`.env.example`** dosyasının adını **`.env`** olarak değiştirin ve içine anahtarınızı yapıştırın:
+```env
+# Ücretsiz almak için: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=AIzaSy1..., AIzaSy2...
+
+# veya OpenRouter:
+OPENROUTER_API_KEY=sk-or-v1-...
+```
 
 ---
 
