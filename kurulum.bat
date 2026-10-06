@@ -1,8 +1,8 @@
 @echo off
-title Odevmatik AI - Kurulum Sihirbazi
+title PrepMate PDF - Otomatik Kurulum Sihirbazi
 color 0A
 echo ================================================================
-echo           ODEVMATIK AI - Otomatik Kurulum Sihirbazi
+echo           PREPMATE PDF - Otomatik Kurulum Sihirbazi
 echo ================================================================
 echo.
 echo Gerekli Python kutuphaneleri yukleniyor...
@@ -22,7 +22,7 @@ echo.
 echo ================================================================
 echo [BASARILI] Kurulum tamamlandi!
 echo.
-echo Simdi 'baslat.bat' dosyasina cift tiklayarak uygulamayi acabilirsin.
+echo Simdi 'baslat.bat' dosyasina cift tiklayarak PrepMate PDF'i acabilirsin.
 echo ================================================================
 echo.
 pause

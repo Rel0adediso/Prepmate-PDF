@@ -42,7 +42,7 @@ OUTPUTS_DIR.mkdir(exist_ok=True)
 CACHE_DIR.mkdir(exist_ok=True)
 STATIC_DIR.mkdir(exist_ok=True)
 
-app = FastAPI(title="Ödevmatik AI - Adobe Acrobat Style")
+app = FastAPI(title="PrepMate PDF - AI Workbook Solver")
 
 app.add_middleware(
     CORSMiddleware,
@@ -128,6 +128,28 @@ async def upload_pdf(file: UploadFile = File(...)):
     return {
         "file_id": file_id,
         "filename": file.filename,
+        "total_pages": info["total_pages"]
+    }
+
+@app.post("/api/load-sample")
+def load_sample():
+    sample_path = BASE_DIR / "ornek_ingilizce_odev.pdf"
+    if not sample_path.exists():
+        raise HTTPException(status_code=404, detail="Örnek dosya bulunamadı.")
+    
+    file_id = "sample_prep"
+    save_path = UPLOADS_DIR / f"{file_id}.pdf"
+    import shutil
+    shutil.copy(sample_path, save_path)
+    
+    try:
+        info = get_pdf_info(str(save_path))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Örnek PDF okunamadı: {str(e)}")
+        
+    return {
+        "file_id": file_id,
+        "filename": "ornek_ingilizce_odev.pdf",
         "total_pages": info["total_pages"]
     }
 

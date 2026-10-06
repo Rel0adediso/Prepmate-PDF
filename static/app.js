@@ -233,15 +233,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const demoPdfBtn = document.getElementById('demoPdfBtn');
+
   changeFileBtn.addEventListener('click', () => {
     dropZone.classList.remove('hidden');
+    if (demoPdfBtn) demoPdfBtn.classList.remove('hidden');
     fileMetaCard.classList.add('hidden');
     startSolveBtn.disabled = true;
     pdfFileInput.value = '';
     state.fileId = null;
   });
 
+  if (demoPdfBtn) {
+    demoPdfBtn.addEventListener('click', async () => {
+      demoPdfBtn.disabled = true;
+      demoPdfBtn.innerHTML = '<span>⏳ Örnek PDF Hazırlanıyor...</span>';
+      try {
+        const res = await fetch('/api/load-sample', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Örnek dosya yüklenemedi');
+
+        state.fileId = data.file_id;
+        state.fileName = data.filename;
+        state.totalPages = data.total_pages;
+
+        fileNameDisplay.textContent = data.filename;
+        totalPagesDisplay.textContent = `Toplam: ${data.total_pages} Sayfa`;
+
+        dropZone.classList.add('hidden');
+        demoPdfBtn.classList.add('hidden');
+        fileMetaCard.classList.remove('hidden');
+        pageRangeInput.value = '1-2';
+        startSolveBtn.disabled = false;
+        showToast('Örnek ödev yüklendi! "Sayfaları Getir" butonuna basarak deneyebilirsin.');
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        demoPdfBtn.disabled = false;
+        demoPdfBtn.innerHTML = '<span>🎯 Örnek İngilizce Ödev ile Hemen Dene</span><span class="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">Tek Tıkla Başla</span>';
+      }
+    });
+  }
+
   async function handleFileSelected(file) {
+    if (demoPdfBtn) demoPdfBtn.classList.add('hidden');
     if (!file.name.toLowerCase().endsWith('.pdf')) {
       showToast('Lütfen sadece PDF dosyası yükleyin.', true);
       return;
@@ -1048,6 +1083,35 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.disabled = false;
     }
   }
+
+  // Desktop Keyboard Shortcuts (← / → for page navigation, Del to delete annotation)
+  document.addEventListener('keydown', (e) => {
+    const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) ||
+      document.activeElement.isContentEditable;
+
+    if (e.key === 'Escape') {
+      if (state.activeAnnotationEl) {
+        state.activeAnnotationEl.classList.remove('active');
+        state.activeAnnotationEl = null;
+      }
+      apiKeyModal?.classList.add('hidden');
+      return;
+    }
+
+    if (isTyping) return;
+
+    if (e.key === 'ArrowLeft' && !editorSection.classList.contains('hidden')) {
+      e.preventDefault();
+      prevPageBtn.click();
+    } else if (e.key === 'ArrowRight' && !editorSection.classList.contains('hidden')) {
+      e.preventDefault();
+      nextPageBtn.click();
+    } else if ((e.key === 'Delete' || e.key === 'Backspace') && state.activeAnnotationEl) {
+      e.preventDefault();
+      const deleteBtn = state.activeAnnotationEl.querySelector('.delete-btn');
+      if (deleteBtn) deleteBtn.click();
+    }
+  });
 
   function escapeHtml(text) {
     const div = document.createElement('div');

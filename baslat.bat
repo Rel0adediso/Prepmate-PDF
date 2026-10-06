@@ -1,8 +1,8 @@
 @echo off
-title Odevmatik AI - Adobe Acrobat Stili Odev Cozucu
+title PrepMate PDF - AI Workbook & Homework Solver
 color 0B
 echo ================================================================
-echo           ODEVMATIK AI - Adobe Acrobat Stili Odev Cozucu
+echo           PREPMATE PDF - AI Workbook & Homework Solver
 echo ================================================================
 echo.
 
