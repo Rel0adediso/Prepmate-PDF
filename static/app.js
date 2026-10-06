@@ -96,6 +96,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const addPageRangeInput = document.getElementById('addPageRangeInput');
   const currentPagesListDisplay = document.getElementById('currentPagesListDisplay');
 
+  // Preview Quality Notice Modal
+  const previewNoticeModal = document.getElementById('previewNoticeModal');
+  const dismissPreviewNoticeBtn = document.getElementById('dismissPreviewNoticeBtn');
+  const dontShowPreviewNoticeAgain = document.getElementById('dontShowPreviewNoticeAgain');
+
+  function checkAndShowPreviewNotice() {
+    if (!localStorage.getItem('prepmate_preview_notice_dismissed')) {
+      if (previewNoticeModal) previewNoticeModal.classList.remove('hidden');
+      return true;
+    }
+    return false;
+  }
+
+  if (dismissPreviewNoticeBtn) {
+    dismissPreviewNoticeBtn.addEventListener('click', () => {
+      if (dontShowPreviewNoticeAgain && dontShowPreviewNoticeAgain.checked) {
+        localStorage.setItem('prepmate_preview_notice_dismissed', 'true');
+      }
+      if (previewNoticeModal) previewNoticeModal.classList.add('hidden');
+    });
+  }
+
   // Initialize Config Check
   checkConfig();
 
@@ -890,6 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       const textEl = el.querySelector('.correction-text');
+      textEl.addEventListener('focus', () => checkAndShowPreviewNotice());
       textEl.addEventListener('input', () => {
         item.answer = textEl.innerText.trim();
       });
@@ -937,6 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     const textEl = el.querySelector('.text-content');
+    textEl.addEventListener('focus', () => checkAndShowPreviewNotice());
     textEl.addEventListener('input', () => {
       item.answer = textEl.innerText.trim();
     });
@@ -988,6 +1012,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isDragging) return;
         const dx = ev.clientX - startX;
         const dy = ev.clientY - startY;
+
+        // If user starts dragging, halt and warn on first time
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+          if (checkAndShowPreviewNotice()) {
+            isDragging = false;
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+            return;
+          }
+        }
 
         const deltaNormX = (dx / parentRect.width) * 1000;
         const deltaNormY = (dy / parentRect.height) * 1000;
