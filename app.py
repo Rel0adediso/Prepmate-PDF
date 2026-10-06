@@ -31,11 +31,18 @@ from solver import solve_page_hybrid, parse_page_range
 # Load environment variables (.env if exists)
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent
+if getattr(sys, 'frozen', False):
+    BUNDLE_DIR = Path(getattr(sys, '_MEIPASS', os.path.dirname(sys.executable)))
+    BASE_DIR = Path(os.path.dirname(sys.executable))
+else:
+    BUNDLE_DIR = Path(__file__).resolve().parent
+    BASE_DIR = Path(__file__).resolve().parent
+
 UPLOADS_DIR = BASE_DIR / "uploads"
 OUTPUTS_DIR = BASE_DIR / "outputs"
 CACHE_DIR = OUTPUTS_DIR / "cache"
-STATIC_DIR = BASE_DIR / "static"
+STATIC_DIR = BUNDLE_DIR / "static"
+ASSETS_DIR = BUNDLE_DIR / "assets"
 
 UPLOADS_DIR.mkdir(exist_ok=True)
 OUTPUTS_DIR.mkdir(exist_ok=True)
@@ -133,7 +140,9 @@ async def upload_pdf(file: UploadFile = File(...)):
 
 @app.post("/api/load-sample")
 def load_sample():
-    sample_path = BASE_DIR / "ornek_ingilizce_odev.pdf"
+    sample_path = BUNDLE_DIR / "ornek_ingilizce_odev.pdf"
+    if not sample_path.exists():
+        sample_path = BASE_DIR / "ornek_ingilizce_odev.pdf"
     if not sample_path.exists():
         raise HTTPException(status_code=404, detail="Örnek dosya bulunamadı.")
     
