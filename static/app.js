@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const apiKeyModal = document.getElementById('apiKeyModal');
   const apiKeyInput = document.getElementById('apiKeyInput');
   const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+  const clearApiKeyBtn = document.getElementById('clearApiKeyBtn');
   const closeApiModalBtn = document.getElementById('closeApiModalBtn');
 
   // Mode Elements
@@ -169,6 +170,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     apiKeyModal.classList.add('hidden');
   });
+
+  if (clearApiKeyBtn) {
+    clearApiKeyBtn.addEventListener('click', () => {
+      apiKeyInput.value = '';
+      state.apiKey = '';
+      state.keyCount = 1;
+      localStorage.removeItem('gemini_api_key');
+      updateApiKeyUI(false, 'AI Anahtarı Gir');
+      showToast('API Anahtarı temizlendi.');
+      apiKeyModal.classList.add('hidden');
+    });
+  }
 
   // Mode Selection Logic (Fast vs Detailed)
   function setSolveMode(detailed) {

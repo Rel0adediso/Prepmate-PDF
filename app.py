@@ -93,7 +93,9 @@ def extract_keys_pool(user_input: str) -> list[str]:
     for src in combined_sources:
         for chunk in re.split(r"[\r\n,;]+", src):
             k = chunk.strip()
-            if k and k not in keys:
+            # Ignore template placeholders like AIzaSy1..., sk-or-v1-..., etc.
+            if (k and not k.startswith("AIzaSy1...") and not k.startswith("sk-or-v1-...") 
+                and k != "AIzaSy..." and k != "your_api_key" and k not in keys):
                 keys.append(k)
     return keys
 
