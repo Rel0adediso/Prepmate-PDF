@@ -1165,10 +1165,10 @@ Return ONLY a valid JSON object with this schema:
         rects = find_choice_rectangles(page, phrase)
         if rects:
             for r in rects:
-                ymin = int(((r.y0 - 2) / h_page) * 1000)
-                xmin = int(((r.x0 - 2) / w_page) * 1000)
-                ymax = int(((r.y1 + 2) / h_page) * 1000)
-                xmax = int(((r.x1 + 2) / w_page) * 1000)
+                ymin = max(0, min(1000, int((r.y0 / h_page) * 1000)))
+                xmin = max(0, min(1000, int(((r.x0 - 1) / w_page) * 1000)))
+                ymax = max(0, min(1000, int((r.y1 / h_page) * 1000)))
+                xmax = max(0, min(1000, int(((r.x1 + 1) / w_page) * 1000)))
 
                 cleaned.append({
                     "id": f"hl_{hl_id}",
@@ -1694,10 +1694,10 @@ Return ONLY a valid JSON object with this schema:
             rects = find_choice_rectangles(page, phrase)
             if rects:
                 for r in rects:
-                    ymin = int(((r.y0 - 2) / h_page) * 1000)
-                    xmin = int(((r.x0 - 2) / w_page) * 1000)
-                    ymax = int(((r.y1 + 2) / h_page) * 1000)
-                    xmax = int(((r.x1 + 2) / w_page) * 1000)
+                    ymin = max(0, min(1000, int((r.y0 / h_page) * 1000)))
+                    xmin = max(0, min(1000, int(((r.x0 - 1) / w_page) * 1000)))
+                    ymax = max(0, min(1000, int((r.y1 / h_page) * 1000)))
+                    xmax = max(0, min(1000, int(((r.x1 + 1) / w_page) * 1000)))
 
                     cleaned.append({
                         "id": f"hl_{hl_id}",

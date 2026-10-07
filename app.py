@@ -79,11 +79,45 @@ class ExportRequest(BaseModel):
     selected_pages: list[int]
     pages_annotations: dict[str, list[dict]]
 
+# Permanent user config file (survives app restarts and portable exe runs)
+USER_CONFIG_DIR = Path.home() / ".prepmate_pdf"
+USER_CONFIG_FILE = USER_CONFIG_DIR / "config.json"
+USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
+def load_saved_user_keys() -> str:
+    try:
+        if USER_CONFIG_FILE.exists():
+            data = json.loads(USER_CONFIG_FILE.read_text(encoding="utf-8"))
+            return str(data.get("api_key", "")).strip()
+    except Exception:
+        pass
+    return ""
+
+def save_user_keys(key_str: str):
+    try:
+        USER_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        if key_str:
+            USER_CONFIG_FILE.write_text(json.dumps({"api_key": key_str}, indent=2), encoding="utf-8")
+        else:
+            if USER_CONFIG_FILE.exists():
+                USER_CONFIG_FILE.unlink(missing_ok=True)
+    except Exception as e:
+        print(f"[PrepMate PDF] Config save error: {e}")
+
+class SaveKeyRequest(BaseModel):
+    api_key: str = ""
+
 def extract_keys_pool(user_input: str) -> list[str]:
     combined_sources = []
     if user_input and user_input != "ENV_KEY_ACTIVE":
         combined_sources.append(user_input)
     
+    # 1. Permanently saved user keys
+    saved_key = load_saved_user_keys()
+    if saved_key:
+        combined_sources.append(saved_key)
+
+    # 2. Environment variables (.env if exists)
     for env_name in ["GEMINI_API_KEY", "GEMINI_API_KEYS", "OPENROUTER_API_KEY", "OPENROUTER_API_KEYS"]:
         val = os.getenv(env_name, "").strip()
         if val:
@@ -103,8 +137,9 @@ def extract_keys_pool(user_input: str) -> list[str]:
 def get_config():
     keys = extract_keys_pool("")
     count = len(keys)
+    saved_raw = load_saved_user_keys()
     if count == 0:
-        return {"has_env_key": False, "key_count": 0, "key_type": "", "masked_key": ""}
+        return {"has_env_key": False, "key_count": 0, "key_type": "", "saved_key": ""}
     
     first = keys[0]
     is_or = any(k.startswith("sk-or-") or k.startswith("sk-") for k in keys)
@@ -113,7 +148,21 @@ def get_config():
         "has_env_key": True,
         "key_count": count,
         "key_type": label,
-        "masked_key": f"{first[:4]}...{first[-4:]}" if len(first) > 8 else ""
+        "saved_key": saved_raw if saved_raw else ""
+    }
+
+@app.post("/api/save-key")
+def save_key_endpoint(req: SaveKeyRequest):
+    save_user_keys(req.api_key.strip())
+    keys = extract_keys_pool("")
+    count = len(keys)
+    is_or = any(k.startswith("sk-or-") or k.startswith("sk-") for k in keys)
+    label = f"{count} Anahtar Aktif" if count > 1 else ("OpenRouter" if is_or else "Gemini 3.8")
+    return {
+        "status": "ok",
+        "has_key": count > 0,
+        "key_count": count,
+        "key_type": label if count > 0 else ""
     }
 
 @app.post("/api/upload")

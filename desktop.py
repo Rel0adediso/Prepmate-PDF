@@ -49,8 +49,11 @@ def main():
         zoomable=True
     )
     
-    # Start webview event loop
-    webview.start(debug=False)
+    user_data_dir = os.path.join(os.path.expanduser("~"), ".prepmate_pdf", "webview_data")
+    os.makedirs(user_data_dir, exist_ok=True)
+
+    # Start webview event loop with persistent user storage
+    webview.start(storage_path=user_data_dir, private_mode=False, debug=False)
     sys.exit(0)
 
 if __name__ == "__main__":

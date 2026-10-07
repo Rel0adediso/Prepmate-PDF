@@ -126,10 +126,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/config');
       const data = await res.json();
       if (data.key_count) state.keyCount = data.key_count;
-      if (data.has_env_key && !state.apiKey) {
+
+      if (data.saved_key) {
+        state.apiKey = data.saved_key;
+        localStorage.setItem('gemini_api_key', data.saved_key);
+        const keys = state.apiKey.split(/[\r\n,;]+/).map(k => k.trim()).filter(Boolean);
+        state.keyCount = keys.length || 1;
+        const lbl = keys.length > 1 ? `${keys.length} Hesap / Anahtar` : (state.apiKey.startsWith('sk-or-') ? 'OpenRouter Aktif' : 'Gemini 3.8 Aktif');
+        updateApiKeyUI(true, lbl);
+      } else if (data.has_env_key && !state.apiKey) {
         state.apiKey = 'ENV_KEY_ACTIVE';
         updateApiKeyUI(true, data.key_type ? `${data.key_type} Aktif` : 'Sistem Anahtarı Aktif');
-      } else if (state.apiKey) {
+      } else if (state.apiKey && state.apiKey !== 'ENV_KEY_ACTIVE') {
         const keys = state.apiKey.split(/[\r\n,;]+/).map(k => k.trim()).filter(Boolean);
         state.keyCount = keys.length || 1;
         const lbl = keys.length > 1 ? `${keys.length} Hesap / Anahtar` : (state.apiKey.startsWith('sk-or-') ? 'OpenRouter Aktif' : 'Gemini 3.8 Aktif');
@@ -138,11 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateApiKeyUI(false, 'AI Anahtarı Gir');
       }
     } catch (e) {
-      if (state.apiKey) {
+      if (state.apiKey && state.apiKey !== 'ENV_KEY_ACTIVE') {
         const keys = state.apiKey.split(/[\r\n,;]+/).map(k => k.trim()).filter(Boolean);
         state.keyCount = keys.length || 1;
         const lbl = keys.length > 1 ? `${keys.length} Hesap / Anahtar` : (state.apiKey.startsWith('sk-or-') ? 'OpenRouter Aktif' : 'Gemini 3.8 Aktif');
         updateApiKeyUI(true, lbl);
+      } else {
+        updateApiKeyUI(false, 'AI Anahtarı Gir');
       }
     }
   }
@@ -174,11 +184,19 @@ document.addEventListener('DOMContentLoaded', () => {
     apiKeyModal.classList.add('hidden');
   });
 
-  saveApiKeyBtn.addEventListener('click', () => {
+  saveApiKeyBtn.addEventListener('click', async () => {
     const val = apiKeyInput.value.trim();
     if (val) {
       state.apiKey = val;
       localStorage.setItem('gemini_api_key', val);
+      try {
+        await fetch('/api/save-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: val })
+        });
+      } catch (e) {}
+
       const keys = val.split(/[\r\n,;]+/).map(k => k.trim()).filter(Boolean);
       state.keyCount = keys.length || 1;
       const lbl = keys.length > 1 ? `${keys.length} Hesap / Anahtar` : (val.startsWith('sk-or-') ? 'OpenRouter Aktif' : 'Gemini 3.8 Aktif');
@@ -188,17 +206,31 @@ document.addEventListener('DOMContentLoaded', () => {
       state.apiKey = '';
       state.keyCount = 1;
       localStorage.removeItem('gemini_api_key');
+      try {
+        await fetch('/api/save-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: '' })
+        });
+      } catch (e) {}
       updateApiKeyUI(false, 'AI Anahtarı Gir');
     }
     apiKeyModal.classList.add('hidden');
   });
 
   if (clearApiKeyBtn) {
-    clearApiKeyBtn.addEventListener('click', () => {
+    clearApiKeyBtn.addEventListener('click', async () => {
       apiKeyInput.value = '';
       state.apiKey = '';
       state.keyCount = 1;
       localStorage.removeItem('gemini_api_key');
+      try {
+        await fetch('/api/save-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: '' })
+        });
+      } catch (e) {}
       updateApiKeyUI(false, 'AI Anahtarı Gir');
       showToast('API Anahtarı temizlendi.');
       apiKeyModal.classList.add('hidden');

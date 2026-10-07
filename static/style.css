@@ -247,12 +247,12 @@ body {
   box-shadow: 0 0 0 1px #3b82f6;
 }
 
-/* Acrobat Straight Highlighter Annotation (Flat warm peach-orange marker stripe, no border, no radius) */
+/* Acrobat Straight Highlighter Annotation (Authentic Adobe Acrobat Yellow marker stripe) */
 .acrobat-highlight-annotation {
   position: absolute;
-  background-color: rgba(251, 146, 60, 0.45);
+  background-color: rgba(255, 235, 59, 0.55);
   border: none !important;
-  border-radius: 0px !important;
+  border-radius: 1px !important;
   cursor: move;
   z-index: 15;
   box-sizing: border-box;
@@ -261,13 +261,13 @@ body {
 }
 
 .acrobat-highlight-annotation:hover {
-  background-color: rgba(249, 115, 22, 0.60);
-  box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.6);
+  background-color: rgba(255, 235, 59, 0.75);
+  box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.8);
 }
 
 .acrobat-highlight-annotation.active {
-  background-color: rgba(249, 115, 22, 0.70);
-  box-shadow: 0 0 0 2px rgba(194, 65, 12, 0.8);
+  background-color: rgba(255, 235, 59, 0.85);
+  box-shadow: 0 0 0 2px rgba(202, 138, 4, 1);
   z-index: 50;
 }
 

@@ -65,13 +65,19 @@ def export_annotated_pdf(
                 rect = pymupdf.Rect(x0, y0, x1, y1)
                 
                 if item.get("type") == "highlight":
-                    # Acrobat Straight Flat Peach-Orange Highlighter Marker (sharp rectangle, no border, matching user photo)
-                    page.draw_rect(
-                        rect,
-                        color=None,
-                        fill=(1.0, 0.68, 0.42),
-                        fill_opacity=0.45
-                    )
+                    # Adobe Acrobat Native Highlighter Annotation (Exact text bounds, ISO 32000 compliant /Highlight)
+                    try:
+                        annot = page.add_highlight_annot(rect)
+                        annot.set_colors(stroke=(1.0, 0.92, 0.23))
+                        annot.set_opacity(0.55)
+                        annot.update()
+                    except Exception:
+                        page.draw_rect(
+                            rect,
+                            color=None,
+                            fill=(1.0, 0.92, 0.23),
+                            fill_opacity=0.55
+                        )
                     continue
 
                 if item.get("type") == "correction":
