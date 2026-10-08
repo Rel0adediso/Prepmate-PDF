@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     apiKey: localStorage.getItem('gemini_api_key') || '',
     keyCount: 1,
     isDetailedMode: false,
+    isCheckMode: false,
     activeAnnotationEl: null
   };
 
@@ -30,12 +31,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mode Elements
   const fastModeBtn = document.getElementById('fastModeBtn');
   const detailedModeBtn = document.getElementById('detailedModeBtn');
+  const checkModeBtn = document.getElementById('checkModeBtn');
   const editorFastModeBtn = document.getElementById('editorFastModeBtn');
   const editorDetailedModeBtn = document.getElementById('editorDetailedModeBtn');
+  const editorCheckModeBtn = document.getElementById('editorCheckModeBtn');
   const modeTitle = document.getElementById('modeTitle');
   const modeDesc = document.getElementById('modeDesc');
   const modeBadge = document.getElementById('modeBadge');
   const modeIcon = document.getElementById('modeIcon');
+
+  // Summary Report Modal Elements
+  const summaryReportModal = document.getElementById('summaryReportModal');
+  const closeSummaryModalBtn = document.getElementById('closeSummaryModalBtn');
+  const reportTotalPages = document.getElementById('reportTotalPages');
+  const reportSolvedPages = document.getElementById('reportSolvedPages');
+  const reportGuidePages = document.getElementById('reportGuidePages');
+  const reportTotalAnswers = document.getElementById('reportTotalAnswers');
+  const reportDownloadHwBtn = document.getElementById('reportDownloadHwBtn');
+  const reportDownloadFullBtn = document.getElementById('reportDownloadFullBtn');
+  const downloadZipBtn = document.getElementById('downloadZipBtn');
 
   const uploadSection = document.getElementById('uploadSection');
   const editorSection = document.getElementById('editorSection');
@@ -237,27 +251,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Mode Selection Logic (Fast vs Detailed)
-  function setSolveMode(detailed) {
-    state.isDetailedMode = detailed;
-    if (detailed) {
-      fastModeBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
-      detailedModeBtn.className = 'px-2.5 py-1 rounded bg-amber-600 text-white font-semibold transition shadow-sm';
-      if (editorFastModeBtn) editorFastModeBtn.className = 'px-2 py-0.5 rounded text-slate-400 hover:text-white transition';
-      if (editorDetailedModeBtn) editorDetailedModeBtn.className = 'px-2 py-0.5 rounded bg-amber-600 text-white font-semibold transition shadow-sm';
+  // Mode Selection Logic (Fast vs Detailed vs Check)
+  function setSolveMode(mode) {
+    state.isDetailedMode = (mode === 'detailed');
+    state.isCheckMode = (mode === 'check');
+
+    // Reset styles
+    const fClass = (mode === 'fast') ? 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
+    const dClass = (mode === 'detailed') ? 'px-2.5 py-1 rounded bg-amber-600 text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
+    const cClass = (mode === 'check') ? 'px-2.5 py-1 rounded bg-emerald-600 text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-slate-400 hover:text-emerald-400 transition';
+
+    if (fastModeBtn) fastModeBtn.className = fClass;
+    if (editorFastModeBtn) editorFastModeBtn.className = fClass;
+    if (detailedModeBtn) detailedModeBtn.className = dClass;
+    if (editorDetailedModeBtn) editorDetailedModeBtn.className = dClass;
+    if (checkModeBtn) checkModeBtn.className = cClass;
+    if (editorCheckModeBtn) editorCheckModeBtn.className = cClass;
+
+    if (mode === 'check') {
+      if (modeIcon) modeIcon.textContent = '🔍';
+      if (modeTitle) modeTitle.textContent = 'Ödev Kontrol Modu';
+      if (modeBadge) {
+        modeBadge.textContent = 'Puanlama & Düzeltme';
+        modeBadge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-medium border border-emerald-500/30';
+      }
+      if (modeDesc) modeDesc.textContent = 'Mevcut öğrenci cevapları kontrol edilir; doğruysa ✔, yanlışsa ✘ ve doğrusu yazılır.';
+      showToast('Ödev Kontrol Modu aktif: Cevaplarınız doğrulanacak.');
+    } else if (mode === 'detailed') {
       if (modeIcon) modeIcon.textContent = '💡';
       if (modeTitle) modeTitle.textContent = 'Detaylı / Açıklamalı Mod';
       if (modeBadge) {
         modeBadge.textContent = 'Cevap Mantığı';
-        modeBadge.className = 'text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-medium';
+        modeBadge.className = 'text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-medium border border-amber-500/30';
       }
       if (modeDesc) modeDesc.textContent = 'Cevapların yanında hoca sorarsa diye Türkçe kural/gerekçe açıklamaları eklenir.';
       showToast('Detaylı Mod aktif: Cevap gerekçeleri ve açıklamalar eklenecek.');
     } else {
-      fastModeBtn.className = 'px-3 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition shadow-sm';
-      detailedModeBtn.className = 'px-3 py-1 rounded-lg text-slate-400 hover:text-white transition';
-      if (editorFastModeBtn) editorFastModeBtn.className = 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition shadow-sm';
-      if (editorDetailedModeBtn) editorDetailedModeBtn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
       if (modeIcon) modeIcon.textContent = '⚡';
       if (modeTitle) modeTitle.textContent = 'Hızlı Mod (Önerilen)';
       if (modeBadge) {
@@ -269,10 +298,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (fastModeBtn) fastModeBtn.addEventListener('click', () => setSolveMode(false));
-  if (detailedModeBtn) detailedModeBtn.addEventListener('click', () => setSolveMode(true));
-  if (editorFastModeBtn) editorFastModeBtn.addEventListener('click', () => setSolveMode(false));
-  if (editorDetailedModeBtn) editorDetailedModeBtn.addEventListener('click', () => setSolveMode(true));
+  if (fastModeBtn) fastModeBtn.addEventListener('click', () => setSolveMode('fast'));
+  if (detailedModeBtn) detailedModeBtn.addEventListener('click', () => setSolveMode('detailed'));
+  if (checkModeBtn) checkModeBtn.addEventListener('click', () => setSolveMode('check'));
+  if (editorFastModeBtn) editorFastModeBtn.addEventListener('click', () => setSolveMode('fast'));
+  if (editorDetailedModeBtn) editorDetailedModeBtn.addEventListener('click', () => setSolveMode('detailed'));
+  if (editorCheckModeBtn) editorCheckModeBtn.addEventListener('click', () => setSolveMode('check'));
 
   // Drag & Drop Upload
   dropZone.addEventListener('click', () => pdfFileInput.click());
@@ -653,6 +684,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const workers = Array.from({ length: concurrency }, () => worker());
     await Promise.all(workers);
+
+    // Show Completion Summary Report if multi-page solve completed
+    if (pages.length >= 2) {
+      showSummaryReport(pages);
+    }
+  }
+
+  function showSummaryReport(pages) {
+    if (!summaryReportModal) return;
+    let solved = 0;
+    let guides = 0;
+    let totalAnswers = 0;
+    pages.forEach(p => {
+      const annots = state.pagesData[p] || [];
+      if (annots.length > 0) {
+        solved++;
+        totalAnswers += annots.length;
+      } else {
+        guides++;
+      }
+    });
+    if (reportTotalPages) reportTotalPages.textContent = pages.length;
+    if (reportSolvedPages) reportSolvedPages.textContent = `${solved} sayfa`;
+    if (reportGuidePages) reportGuidePages.textContent = `${guides} sayfa`;
+    if (reportTotalAnswers) reportTotalAnswers.textContent = `${totalAnswers} adet`;
+    summaryReportModal.classList.remove('hidden');
+  }
+
+  if (closeSummaryModalBtn) {
+    closeSummaryModalBtn.addEventListener('click', () => {
+      if (summaryReportModal) summaryReportModal.classList.add('hidden');
+    });
+  }
+
+  if (reportDownloadHwBtn) {
+    reportDownloadHwBtn.addEventListener('click', () => {
+      if (summaryReportModal) summaryReportModal.classList.add('hidden');
+      if (downloadHwBtn) downloadHwBtn.click();
+    });
+  }
+
+  if (reportDownloadFullBtn) {
+    reportDownloadFullBtn.addEventListener('click', () => {
+      if (summaryReportModal) summaryReportModal.classList.add('hidden');
+      if (downloadFullBtn) downloadFullBtn.click();
+    });
+  }
+
+  if (downloadZipBtn) {
+    downloadZipBtn.addEventListener('click', async () => {
+      if (!state.fileId) return;
+      showToast('📦 ZIP arşivi hazırlanıyor...');
+      try {
+        const payload = {
+          files: [
+            {
+              file_id: state.fileId,
+              mode: 'only_homework',
+              selected_pages: state.selectedPages,
+              pages_annotations: state.pagesData
+            }
+          ]
+        };
+        const res = await fetch('/api/export-zip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.download_url) {
+          window.location.href = data.download_url;
+          showToast('✅ ZIP dosyası indiriliyor!');
+        } else {
+          throw new Error(data.detail || 'ZIP oluşturulamadı');
+        }
+      } catch (e) {
+        showToast('ZIP indirme hatası: ' + e.message, true);
+      }
+    });
   }
 
   async function solveSinglePage(pageNum, force = false) {
@@ -672,6 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
           page_num: pageNum,
           api_key: state.apiKey === 'ENV_KEY_ACTIVE' ? '' : state.apiKey,
           detailed: !!state.isDetailedMode,
+          check_mode: !!state.isCheckMode,
           force: !!force
         })
       });

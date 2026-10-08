@@ -61,6 +61,12 @@
           <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
           <span>Tüm Kitabı İndir</span>
         </button>
+
+        <!-- Download All as ZIP -->
+        <button id="downloadZipBtn" class="flex items-center space-x-1.5 text-xs font-semibold bg-violet-900/60 hover:bg-violet-800/80 border border-violet-500/40 text-violet-200 px-3 py-1.5 rounded-lg transition" title="Tüm çözülen ödevleri tek bir ZIP arşivi olarak indir">
+          <svg class="w-3.5 h-3.5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+          <span>ZIP İndir</span>
+        </button>
       </div>
     </div>
   </header>
@@ -142,6 +148,7 @@
           <div class="flex items-center bg-black/50 border border-white/10 rounded-xl p-0.5 text-xs shrink-0 ml-2">
             <button type="button" id="fastModeBtn" class="px-3 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition shadow-sm">⚡ Hızlı</button>
             <button type="button" id="detailedModeBtn" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition">💡 Detaylı</button>
+            <button type="button" id="checkModeBtn" class="px-3 py-1 rounded-lg text-slate-400 hover:text-emerald-400 transition" title="Ödev Kontrol Modu: Mevcut cevapları doğrula ve puanla">🔍 Kontrol</button>
           </div>
         </div>
 
@@ -224,6 +231,7 @@
           <div class="flex items-center bg-black/40 border border-white/10 rounded-xl p-0.5 text-xs">
             <button id="editorFastModeBtn" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition" title="Hızlı Mod (Paralel)">⚡ Hızlı</button>
             <button id="editorDetailedModeBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition" title="Detaylı Mod (Açıklamalı)">💡 Detaylı</button>
+            <button id="editorCheckModeBtn" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-emerald-400 transition" title="Ödev Kontrol Modu (Puanlama & Düzeltme)">🔍 Kontrol</button>
           </div>
 
           <!-- Re-solve Button -->
@@ -438,6 +446,41 @@
         <button id="dismissPreviewNoticeBtn" class="glow-btn-primary text-white text-xs font-bold px-4 py-2 rounded-xl transition">
           Anladım, Devam Et
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toplu Çözüm Raporu Modal -->
+  <div id="summaryReportModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-white/20 shadow-2xl relative text-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🎉</span>
+          <h3 class="text-lg font-bold text-white">Toplu Çözüm Raporu</h3>
+        </div>
+        <button id="closeSummaryModalBtn" class="p-1 text-slate-400 hover:text-white rounded-lg transition text-sm">✕</button>
+      </div>
+      <div class="py-4 space-y-2.5">
+        <div class="flex justify-between items-center bg-white/[0.04] p-3 rounded-xl border border-white/5">
+          <span class="text-xs text-slate-300">İncelenen Toplam Sayfa:</span>
+          <span id="reportTotalPages" class="font-bold text-white font-mono text-sm">0</span>
+        </div>
+        <div class="flex justify-between items-center bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+          <span class="text-xs text-emerald-300">✅ Çözülen Ödev Sayfası:</span>
+          <span id="reportSolvedPages" class="font-bold text-emerald-400 font-mono text-sm">0</span>
+        </div>
+        <div class="flex justify-between items-center bg-blue-500/10 p-3 rounded-xl border border-blue-500/20">
+          <span class="text-xs text-blue-300">ℹ️ Konu Anlatımı / Bilgi Sayfası:</span>
+          <span id="reportGuidePages" class="font-bold text-blue-400 font-mono text-sm">0</span>
+        </div>
+        <div class="flex justify-between items-center bg-violet-500/10 p-3 rounded-xl border border-violet-500/20">
+          <span class="text-xs text-violet-300">✨ Yerleştirilen Toplam Cevap & Vurgu:</span>
+          <span id="reportTotalAnswers" class="font-bold text-violet-400 font-mono text-sm">0</span>
+        </div>
+      </div>
+      <div class="pt-3 flex gap-2">
+        <button id="reportDownloadHwBtn" class="flex-1 glow-btn-primary py-2.5 rounded-xl font-bold text-white text-xs">Sadece Ödevi İndir</button>
+        <button id="reportDownloadFullBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl font-bold text-slate-200 text-xs border border-slate-700">Tüm Kitabı İndir</button>
       </div>
     </div>
   </div>

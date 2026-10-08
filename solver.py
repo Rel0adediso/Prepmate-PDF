@@ -161,9 +161,13 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
             else:
                 continue
             
-        # Check if it has underscores or dots
-        if not ('__' in text or '..' in text):
+        # Check if it has underscores, dots, or empty brackets (T/F, Matching: (), [], etc.)
+        is_blank_like = ('__' in text or '..' in text or bool(re.match(r'^[\(\[\{]\s*[\)\]\}]$', text)))
+        if not is_blank_like:
             continue
+            
+        if bool(re.match(r'^[\(\[\{]\s*[\)\]\}]$', text)):
+            width_pt = max(width_pt, 16.0)
 
         raw_unders.append({
             "w": w,
@@ -1326,6 +1330,157 @@ Return ONLY a valid JSON object:
     return [annot]
 
 
+# Coordinates for 9 Bubbles on Clustering Template (1 center topic + 8 surrounding ovals)
+CLUSTERING_9_BUBBLES = [
+    # 0: Center Topic line (on the underscore)
+    {"id": 1, "box_2d": [488, 390, 512, 605], "font_size": 11, "align": 1, "role": "center_topic"},
+    # 1: Top (12 o'clock)
+    {"id": 2, "box_2d": [262, 390, 295, 595], "font_size": 10, "align": 1, "role": "top"},
+    # 2: Top-Right (1:30)
+    {"id": 3, "box_2d": [342, 650, 375, 840], "font_size": 10, "align": 1, "role": "top_right"},
+    # 3: Right (3 o'clock)
+    {"id": 4, "box_2d": [485, 705, 520, 860], "font_size": 10, "align": 1, "role": "right"},
+    # 4: Bottom-Right (4:30)
+    {"id": 5, "box_2d": [635, 650, 670, 840], "font_size": 10, "align": 1, "role": "bottom_right"},
+    # 5: Bottom (6 o'clock)
+    {"id": 6, "box_2d": [695, 390, 730, 595], "font_size": 10, "align": 1, "role": "bottom"},
+    # 6: Bottom-Left (7:30)
+    {"id": 7, "box_2d": [635, 155, 670, 345], "font_size": 10, "align": 1, "role": "bottom_left"},
+    # 7: Left (9 o'clock)
+    {"id": 8, "box_2d": [485, 130, 520, 290], "font_size": 10, "align": 1, "role": "left"},
+    # 8: Top-Left (10:30)
+    {"id": 9, "box_2d": [342, 155, 375, 345], "font_size": 10, "align": 1, "role": "top_left"}
+]
+
+def detect_clustering_template(doc, page, page_num: int, page_text: str, prev_page_text: str) -> bool:
+    """
+    Detects if page is a Brainstorming Clustering Template (mind-map / bubble diagram).
+    """
+    text_recent = page_text.lower()
+    if page_num > 1:
+        start_p = max(0, page_num - 4)
+        for p_i in range(start_p, page_num - 1):
+            try:
+                text_recent += " " + doc[p_i].get_text("text").lower()
+            except Exception:
+                pass
+                
+    if "clustering" not in text_recent:
+        return False
+        
+    has_large_img = False
+    for img_tuple in page.get_images():
+        rects = page.get_image_rects(img_tuple[0])
+        if rects and rects[0].width > 0.65 * page.rect.width and rects[0].height > 0.55 * page.rect.height:
+            has_large_img = True
+            break
+            
+    if not has_large_img:
+        return False
+        
+    lines = extract_listing_template_lines(doc, page)
+    if len(lines) >= 6:
+        return False
+        
+    return True
+
+def solve_clustering_template_page(doc, page_num: int, page_text: str, prev_page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+    """
+    Solves Brainstorming Clustering Template exercises with center topic and 8 idea bubbles.
+    """
+    recent_context = ""
+    if page_num > 1:
+        start_p = max(0, page_num - 4)
+        for p_i in range(start_p, page_num - 1):
+            try:
+                t = doc[p_i].get_text("text").strip()
+                if len(t) > 50:
+                    recent_context += f"\n--- Page {p_i+1} ---\n" + t
+            except Exception:
+                pass
+
+    prompt = f"""You are an expert English language student and teacher.
+This workbook page is a Brainstorming Clustering Template (Mind Map / Bubble Diagram).
+It has a CENTER oval for the TOPIC, and 8 SURROUNDING ovals for brainstormed ideas/keywords.
+
+=== RECENT UNIT CONTEXT / TOPIC CHOICES ===
+{recent_context[-1600:] if recent_context else "(No previous context)"}
+
+=== CURRENT PAGE CONTEXT ===
+{page_text[:1200]}
+
+=== INSTRUCTIONS ===
+1. Choose one of the unit topics from the previous page that is suitable for clustering:
+   - For example: "A restaurant you would recommend to a friend" (e.g., "A favourite Italian restaurant" or "Bella Italia") OR "A part of your house where you like to relax" (e.g., "My bedroom balcony").
+2. Set "topic": A concise topic title (2 to 5 words).
+3. Set "ideas": An array of EXACTLY 8 distinct, authentic student brainstorming keywords/phrases (2 to 4 words each) describing different aspects (e.g. food, atmosphere, music, prices, staff, location, seating, desserts).
+
+Return ONLY a valid JSON object:
+{{
+  "topic": "A favourite Italian restaurant",
+  "ideas": [
+    "delicious wood-fired pizza",
+    "friendly and polite staff",
+    "fresh homemade pasta",
+    "affordable student prices",
+    "cozy garden terrace",
+    "relaxing jazz music",
+    "convenient central location",
+    "warm candlelit atmosphere"
+  ]
+}}
+"""
+    raw_json = call_gemini_json(prompt, image_bytes, api_key)
+    try:
+        data_obj = json.loads(raw_json)
+    except Exception:
+        data_obj = {}
+
+    topic = str(data_obj.get("topic") or "A restaurant to recommend").strip()
+    ideas = data_obj.get("ideas") or data_obj.get("answers") or []
+    if not isinstance(ideas, list):
+        ideas = []
+
+    clean_ideas = [re.sub(r'^\d+[\.\)]\s*', '', str(x)).strip() for x in ideas if str(x).strip()]
+    fallback_ideas = [
+        "delicious food & drinks", "friendly welcoming staff", "fresh ingredients",
+        "reasonable menu prices", "comfortable outdoor seating", "calm background music",
+        "central accessible location", "warm pleasant atmosphere"
+    ]
+    while len(clean_ideas) < 8:
+        clean_ideas.append(fallback_ideas[len(clean_ideas)])
+
+    results = []
+    # Bubble 0: Center Topic
+    center_annot = {
+        "id": 1,
+        "answer": topic,
+        "box_2d": CLUSTERING_9_BUBBLES[0]["box_2d"],
+        "font_size": CLUSTERING_9_BUBBLES[0]["font_size"],
+        "align": 1
+    }
+    if detailed:
+        center_annot["explanation"] = "Merkez baloncuk için seçilen ana konu başlığı."
+    results.append(center_annot)
+
+    # Bubbles 1..8
+    for idx in range(8):
+        b = CLUSTERING_9_BUBBLES[idx + 1]
+        annot = {
+            "id": idx + 2,
+            "answer": clean_ideas[idx],
+            "box_2d": b["box_2d"],
+            "font_size": b["font_size"],
+            "align": 1
+        }
+        if detailed:
+            annot["explanation"] = f"{idx+1}. dış baloncuk için beyin fırtınası fikri."
+        results.append(annot)
+
+    log_msg(f"[Odevmatik AI] Sayfa {page_num}: Clustering şablonu (1 merkez konu + 8 fikir balonu) başarıyla dolduruldu.")
+    return results
+
+
 BANNED_HIGHLIGHT_WORDS = {
     "now", "right now", "at the moment", "today", "tonight", "yesterday", "last month",
     "next year", "every day", "every week", "every morning", "always", "usually", "often",
@@ -1758,6 +1913,13 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
             safe_close_doc(doc)
             return solve_listing_template_page(page_num, listing_lines, page_text, prev_page_text, image_bytes, api_key, detailed=detailed)
 
+        # Check for clustering template (mind-map / bubble diagram, e.g. Page 26)
+        if detect_clustering_template(doc, page, page_num, page_text, prev_page_text):
+            log_msg(f"[Odevmatik AI] Sayfa {page_num}: Clustering sablonu (akil haritasi / baloncuk diyagrami) tespit edildi, cozuyor...")
+            res = solve_clustering_template_page(doc, page_num, page_text, prev_page_text, image_bytes, api_key, detailed=detailed)
+            safe_close_doc(doc)
+            return res
+
         # Check for raster image exercise tables (e.g. Page 24 Galata/Pisa/Powder columns)
         image_columns = extract_image_table_blanks(doc, page)
         valid_cols = [c for c in image_columns if 3 <= len(c["blanks"]) <= 30]
@@ -1893,16 +2055,30 @@ Solve all exercises on this workbook page completely and realistically.
      * Possessive adjectives: "their", "her", "his", "my", "our", "your"
      * Reflexive pronouns: "myself", "yourself", "himself", "herself", "itself", "ourselves", "themselves"
 
-8. STRICT WRITING LINE CONSTRAINTS:
+8. MATCHING EXERCISES (e.g. 'Match 1-6 with a-f', 'Match headings/words to definitions'):
+   - Output ONLY the single matching letter (e.g. "c", "a", "f") or single number (e.g. "3", "5").
+   - NEVER rewrite the entire sentence or long definition into the blank!
+
+9. TRUE / FALSE / DOESN'T SAY (T / F / DS) EXERCISES:
+   - When an exercise asks "Write T or F" or "True / False / Doesn't say":
+   - Output ONLY "T" or "F" (or "DS" if in options). If full words requested, write "True" or "False".
+   - NEVER write long explanations inside the bracket/blank!
+
+10. READING COMPREHENSION SHORT-ANSWER QUESTIONS:
+   - When questions follow a reading passage (e.g. '1. Where did Emma go?'):
+   - Output ONE concise, direct sentence answering that specific question.
+   - Do NOT treat numbered lines as an uninterrupted essay; answer each question directly!
+
+11. STRICT WRITING LINE CONSTRAINTS:
    - Distribute the writing into an array of EXACTLY {len(writing_lines)} strings in "writing_lines".
    - Each line MUST contain strictly 6 to 10 words (maximum 48 characters).
    - NEVER exceed 50 characters on any line so words are NEVER cut off at the edge of the ruled line!
    - NEVER break words across lines (e.g. 'old t' instead of 'old town') and NEVER end mid-conjunction (e.g. 'and').
 
-9. STRICT ANTI-PLACEHOLDER RULE:
+12. STRICT ANTI-PLACEHOLDER RULE:
    - NEVER output placeholders like "[Your Name]", "[Country]", "[City]". Use "Alex", 20, "Ankara, Turkey", "student at AGÜ".
-10. DO NOT SKIP ANY BLANK: Provide the exact answer for each numbered blank [1] to [{len(normal_blanks)}].{f"""
-11. DETAILED EXPLANATION: For each answer in 'answers', include a short 1-sentence pedagogical explanation in Turkish in 'explanation' justifying why this answer was chosen (e.g. 'Tekil isim kuralı').""" if detailed else ""}
+13. DO NOT SKIP ANY BLANK: Provide the exact answer for each numbered blank [1] to [{len(normal_blanks)}].{f"""
+14. DETAILED EXPLANATION: For each answer in 'answers', include a short 1-sentence pedagogical explanation in Turkish in 'explanation' justifying why this answer was chosen (e.g. 'Tekil isim kuralı').""" if detailed else ""}
 
 Return ONLY a valid JSON object with this schema:
 {{
@@ -2072,3 +2248,83 @@ Return ONLY a valid JSON object with this schema:
     cleaned.sort(key=lambda x: (round(x["box_2d"][0] / 10) * 10, x["box_2d"][1]))
     log_msg(f"[Odevmatik AI] Toplam {len(cleaned)} adet cevap/satir/vurgu basariyla yerlestirildi.")
     return cleaned
+
+
+def check_page_answers(pdf_path: str, page_num: int, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+    """
+    Homework Checker / Grading Mode:
+    Reads existing student answers on the page, grades each answer (correct vs incorrect),
+    draws green checkmarks ✔ for correct items, and red ✘ + blue corrections for incorrect ones.
+    """
+    doc = pymupdf.open(pdf_path)
+    page = doc[page_num - 1]
+    page_text = page.get_text("text").strip()
+    safe_close_doc(doc)
+    
+    prompt = f"""You are an expert English language teacher grading a student's homework.
+Analyze this workbook page (Page {page_num}). The student has attempted the exercises.
+
+=== PAGE TEXT ===
+{page_text[:2800]}
+
+=== GRADING INSTRUCTIONS ===
+1. Examine all student answers visible on this page (handwritten, typed, or written in blanks).
+2. For each answered item:
+   - Determine whether it is grammatically/contextually CORRECT or INCORRECT.
+   - Estimate the exact bounding box [ymin, xmin, ymax, xmax] of the student's answer on the page (0-1000 normalized scale).
+   - If CORRECT: set "status": "correct", "explanation": "Doğru!".
+   - If INCORRECT: set "status": "incorrect", provide "correction": "Correct answer", and "explanation": "Short 1-sentence Turkish reason".
+
+Return ONLY a valid JSON object:
+{{
+  "evaluations": [
+    {{
+      "status": "correct",
+      "box_2d": [250, 150, 275, 250],
+      "student_answer": "is",
+      "explanation": "Doğru kullanım."
+    }},
+    {{
+      "status": "incorrect",
+      "box_2d": [320, 150, 345, 250],
+      "student_answer": "go",
+      "correction": "goes",
+      "explanation": "Özne tekil olduğu için goes olmalı."
+    }}
+  ]
+}}
+"""
+    raw_json = call_gemini_json(prompt, image_bytes, api_key)
+    try:
+        data_obj = json.loads(raw_json)
+    except Exception:
+        data_obj = {}
+
+    evals = data_obj.get("evaluations") or []
+    annotations = []
+    for idx, ev in enumerate(evals, 1):
+        status = ev.get("status", "correct")
+        box = ev.get("box_2d")
+        if not box or len(box) != 4:
+            continue
+
+        if status == "correct":
+            annotations.append({
+                "id": idx,
+                "type": "check_correct",
+                "box_2d": box,
+                "answer": "✔",
+                "explanation": ev.get("explanation", "Doğru cevap!")
+            })
+        else:
+            annotations.append({
+                "id": idx,
+                "type": "correction",
+                "box_2d": box,
+                "answer": ev.get("correction", ""),
+                "explanation": ev.get("explanation", f"Hatalı: '{ev.get('student_answer', '')}' yerine '{ev.get('correction', '')}' olmalı.")
+            })
+
+    log_msg(f"[Ödev Kontrol] Sayfa {page_num}: Toplam {len(annotations)} adet cevap kontrol edildi ve derecelendirildi.")
+    return annotations
+

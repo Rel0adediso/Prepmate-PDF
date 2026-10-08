@@ -26,7 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from pdf_utils import get_pdf_info, render_page_image, export_annotated_pdf
-from solver import solve_page_hybrid, parse_page_range
+from solver import solve_page_hybrid, parse_page_range, check_page_answers
 
 # Load environment variables (.env if exists)
 load_dotenv()
@@ -72,12 +72,16 @@ class SolvePageRequest(BaseModel):
     api_key: str = ""
     detailed: bool = False
     force: bool = False
+    check_mode: bool = False
 
 class ExportRequest(BaseModel):
     file_id: str
     mode: str # "only_homework" or "full_book"
     selected_pages: list[int]
     pages_annotations: dict[str, list[dict]]
+
+class ZipExportRequest(BaseModel):
+    files: list[ExportRequest]
 
 # Permanent user config file (survives app restarts and portable exe runs)
 USER_CONFIG_DIR = Path.home() / ".prepmate_pdf"
@@ -233,7 +237,8 @@ def solve_page(req: SolvePageRequest):
         
     # 1. Instant Cache Check (Sub-millisecond fast-path)
     det_suffix = "_det" if req.detailed else ""
-    cache_file = CACHE_DIR / f"{req.file_id}_{req.page_num}{det_suffix}.json"
+    chk_suffix = "_chk" if req.check_mode else ""
+    cache_file = CACHE_DIR / f"{req.file_id}_{req.page_num}{det_suffix}{chk_suffix}.json"
     if not req.force and cache_file.exists():
         try:
             with open(cache_file, "r", encoding="utf-8") as f:
@@ -260,7 +265,10 @@ def solve_page(req: SolvePageRequest):
         raise HTTPException(status_code=500, detail=f"Sayfa görseli alınamadı: {str(e)}")
         
     try:
-        annotations = solve_page_hybrid(str(pdf_path), req.page_num, img_bytes, keys_pool, detailed=req.detailed)
+        if req.check_mode:
+            annotations = check_page_answers(str(pdf_path), req.page_num, img_bytes, keys_pool, detailed=req.detailed)
+        else:
+            annotations = solve_page_hybrid(str(pdf_path), req.page_num, img_bytes, keys_pool, detailed=req.detailed)
         # Save to cache
         try:
             with open(cache_file, "w", encoding="utf-8") as f:
@@ -314,6 +322,53 @@ def download_file(filename: str):
         path=str(file_path),
         filename=filename,
         media_type="application/pdf"
+    )
+
+@app.post("/api/export-zip")
+def export_zip(req: ZipExportRequest):
+    import zipfile
+    if not req.files:
+        raise HTTPException(status_code=400, detail="Dışa aktarılacak dosya bulunamadı.")
+        
+    zip_id = uuid.uuid4().hex[:8]
+    zip_filename = f"PrepMate_Cozulmus_Odevler_{zip_id}.zip"
+    zip_path = OUTPUTS_DIR / zip_filename
+    
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for idx, f_req in enumerate(req.files, 1):
+            src_pdf = UPLOADS_DIR / f"{f_req.file_id}.pdf"
+            if not src_pdf.exists():
+                continue
+            temp_pdf_name = f"Odev_{idx}_{f_req.file_id[:6]}.pdf"
+            temp_out = OUTPUTS_DIR / f"temp_{temp_pdf_name}"
+            try:
+                export_annotated_pdf(
+                    pdf_path=str(src_pdf),
+                    pages_annotations=f_req.pages_annotations,
+                    output_path=str(temp_out),
+                    mode=f_req.mode,
+                    selected_pages=f_req.selected_pages
+                )
+                zip_file.write(temp_out, arcname=temp_pdf_name)
+                temp_out.unlink(missing_ok=True)
+            except Exception:
+                continue
+                
+    return {
+        "success": True,
+        "download_url": f"/api/download-zip/{zip_filename}",
+        "filename": zip_filename
+    }
+
+@app.get("/api/download-zip/{filename}")
+def download_zip(filename: str):
+    file_path = OUTPUTS_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="ZIP dosyası bulunamadı.")
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type="application/zip"
     )
 
 # Mount static folder for frontend

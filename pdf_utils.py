@@ -80,6 +80,16 @@ def export_annotated_pdf(
                         )
                     continue
 
+                if item.get("type") == "check_correct":
+                    page.insert_text(
+                        pymupdf.Point(x1 + 3, y1),
+                        "✔",
+                        fontsize=12,
+                        fontname="helv",
+                        color=(0.12, 0.65, 0.15)
+                    )
+                    continue
+
                 if item.get("type") == "correction":
                     # Acrobat Error Correction: strikethrough line through wrong word + neat compact correction in line gap
                     y_mid = (y0 + y1) / 2.0
@@ -130,7 +140,7 @@ def export_annotated_pdf(
                         fontsize=float(sz),
                         fontname="helv",
                         color=(0, 0, 0),
-                        align=0
+                        align=int(item.get("align", 0))
                     )
                     if rc >= 0:
                         fit_success = True
