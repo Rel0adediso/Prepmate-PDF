@@ -95,8 +95,17 @@ def deduplicate_overlapping_annotations(annotations: list[dict]) -> list[dict]:
             h_len_b = max(1, xmax_b - xmin_b)
             v_len_b = max(1, ymax_b - ymin_b)
             
-            # If vertical overlap >= 60% and horizontal overlap >= 50%
-            if v_ovlp >= 0.6 * min(v_len_a, v_len_b) and h_ovlp >= 0.5 * min(h_len_a, h_len_b):
+            min_h = min(h_len_a, h_len_b)
+            min_v = min(v_len_a, v_len_b)
+
+            # 1. Standard bounding box overlap (>= 40% horizontally, >= 40% vertically)
+            if v_ovlp >= 0.4 * min_v and h_ovlp >= 0.4 * min_h:
+                is_duplicate = True
+                break
+
+            # 2. Collision / Pile-up prevention: if both items start at roughly same X position
+            # and their vertical tops are within 18 points (typical text line height is 12-20pt)
+            if h_ovlp >= 0.5 * min_h and abs(ymin_a - ymin_b) < 18:
                 is_duplicate = True
                 break
                 
@@ -315,6 +324,59 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
             "width": width_pt
         })
         
+    # 3. Extract empty cells in vector tables (e.g. matching tables, fill-in tables)
+    try:
+        tabs = page.find_tables()
+        for t in tabs.tables:
+            df = t.extract()
+            if not df or len(df) < 2:
+                continue
+                
+            col_count = t.col_count
+            empty_cols = []
+            for c_idx in range(col_count):
+                empty_count = sum(1 for row in df if not row[c_idx] or not row[c_idx].strip())
+                if empty_count >= 2:
+                    empty_cols.append(c_idx)
+                    
+            if not empty_cols:
+                continue
+                
+            w_table = t.bbox[2] - t.bbox[0]
+            for r_idx, row in enumerate(df):
+                r_bbox = t.rows[r_idx].bbox
+                row_desc = " | ".join(c.strip() for c in row if c and c.strip())
+                if not row_desc:
+                    continue
+                    
+                for c_idx in empty_cols:
+                    cell_val = row[c_idx]
+                    if not cell_val or not cell_val.strip():
+                        x0 = t.bbox[0] + w_table * (c_idx / col_count)
+                        x1 = t.bbox[0] + w_table * ((c_idx + 1) / col_count)
+                        y0 = r_bbox[1]
+                        y1 = r_bbox[3]
+                        
+                        if any(abs(b["y0"] - y0) < 6 and abs(b["x0"] - x0) < 30 for b in normal_blanks):
+                            continue
+                            
+                        ymin = int((y0 / h_page) * 1000)
+                        xmin = int(((x0 + 6) / w_page) * 1000)
+                        ymax = int((y1 / h_page) * 1000)
+                        xmax = int(((x1 - 6) / w_page) * 1000)
+                        
+                        normal_blanks.append({
+                            "context": f"[Table Row: {row_desc}]",
+                            "box_2d": [ymin, xmin, ymax, xmax],
+                            "font_size": 10,
+                            "y0": y0,
+                            "x0": x0,
+                            "width": (x1 - x0) - 12,
+                            "is_table_cell": True
+                        })
+    except Exception:
+        pass
+
     normal_blanks.sort(key=lambda b: (round(b["y0"] / 8) * 8, b["x0"]))
     writing_lines.sort(key=lambda b: b["y0"])
     return normal_blanks, writing_lines, occupied_count
