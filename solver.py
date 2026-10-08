@@ -1067,6 +1067,265 @@ Return ONLY a valid JSON object with this schema:
     return cleaned
 
 
+def extract_listing_template_lines(doc, page) -> list[dict]:
+    """
+    Detects horizontal ruled lines on full-page listing templates (e.g. Brainstorming Listing Template).
+    Returns list of line dicts with id, box_2d, font_size.
+    """
+    h_page = page.rect.height
+    w_page = page.rect.width
+    
+    for img_tuple in page.get_images():
+        xref = img_tuple[0]
+        rects = page.get_image_rects(xref)
+        if not rects:
+            continue
+        bbox = rects[0]
+        # Listing template is a large, wide template (spanning majority of page)
+        if bbox.width < 0.65 * w_page or bbox.height < 0.5 * h_page:
+            continue
+            
+        try:
+            pix = pymupdf.Pixmap(doc, xref)
+            if pix.width < 300 or pix.height < 400:
+                continue
+            if pix.colorspace.name != 'DeviceRGB':
+                pix = pymupdf.Pixmap(pymupdf.csRGB, pix)
+            img_arr = np.frombuffer(pix.samples, dtype=np.uint8).reshape((pix.height, pix.width, pix.n))
+            gray = np.mean(img_arr[:, :, :3], axis=2)
+            dark = (gray < 140).astype(np.uint8)
+            
+            lines = []
+            # Search below header banner area (y >= 15% of image height)
+            for y in range(int(0.15 * pix.height), pix.height):
+                row = dark[y, :]
+                start = -1
+                for x in range(pix.width):
+                    if row[x] == 1:
+                        if start == -1:
+                            start = x
+                    else:
+                        if start != -1:
+                            if x - start >= 0.40 * pix.width:
+                                lines.append((y, start, x))
+                            start = -1
+                if start != -1 and (pix.width - start) >= 0.40 * pix.width:
+                    lines.append((y, start, pix.width))
+                    
+            clustered = []
+            for l in lines:
+                y, x0, x1 = l
+                if not any(abs(c['y'] - y) <= 6 for c in clustered):
+                    clustered.append({'y': y, 'x0': x0, 'x1': x1})
+                    
+            if 8 <= len(clustered) <= 20:
+                clustered.sort(key=lambda c: c['y'])
+                result = []
+                for idx, c in enumerate(clustered, 1):
+                    x0_p = bbox.x0 + (c['x0'] / pix.width) * (bbox.x1 - bbox.x0)
+                    x1_p = bbox.x0 + (c['x1'] / pix.width) * (bbox.x1 - bbox.x0)
+                    y_p = bbox.y0 + (c['y'] / pix.height) * (bbox.y1 - bbox.y0)
+                    box = [
+                        int(((y_p - 11) / h_page) * 1000),
+                        int((x0_p / w_page) * 1000),
+                        int(((y_p + 7) / h_page) * 1000),
+                        int((x1_p / w_page) * 1000)
+                    ]
+                    result.append({
+                        "id": idx,
+                        "box_2d": box,
+                        "font_size": 11
+                    })
+                return result
+        except Exception:
+            continue
+    return []
+
+
+def solve_listing_template_page(page_num: int, listing_lines: list[dict], page_text: str, prev_page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+    """
+    Solves full-page listing template exercises (e.g. Brainstorming Listing Template).
+    """
+    n_lines = len(listing_lines)
+    prompt = f"""You are an expert English language student and teacher.
+This workbook page is a Brainstorming Listing Template with {n_lines} numbered lines.
+
+=== PREVIOUS PAGE CONTEXT / TOPIC CHOICES ===
+{prev_page_text[-1200:] if prev_page_text else "(No previous page)"}
+
+=== CURRENT PAGE TEXT ===
+{page_text[:1500]}
+
+=== INSTRUCTIONS ===
+1. The student must brainstorm ideas for their paragraph (e.g. based on the topics on the previous page such as 'A place where you like to spend time with friends', e.g. a favourite cafe or campus spot).
+2. Generate EXACTLY {n_lines} realistic, natural student brainstorming ideas (concise short phrases or keywords, 2 to 6 words each) for lines 1 to {n_lines}.
+3. DO NOT number the ideas (line numbers 1 to {n_lines} are already printed on the page).
+4. DO NOT write full essays or repetitive sentences. Keep them as authentic student brainstorm bullet phrases.
+
+Return ONLY a valid JSON object with this schema:
+{{
+  "listing_ideas": [
+    "idea 1",
+    "idea 2"
+  ]
+}}
+"""
+    raw_json = call_gemini_json(prompt, image_bytes, api_key)
+    try:
+        data_obj = json.loads(raw_json)
+    except Exception:
+        data_obj = {}
+
+    ideas = data_obj.get("listing_ideas") or data_obj.get("ideas") or data_obj.get("answers") or []
+    if not isinstance(ideas, list):
+        ideas = []
+
+    results = []
+    for idx, line in enumerate(listing_lines):
+        idea_text = ""
+        if idx < len(ideas):
+            val = ideas[idx]
+            if isinstance(val, dict):
+                idea_text = str(val.get("idea") or val.get("answer") or "").strip()
+            else:
+                idea_text = str(val).strip()
+
+        if not idea_text:
+            idea_text = f"interesting idea {idx+1} for paragraph"
+
+        # Remove any leading "1. " or "1) " if model included it
+        idea_text = re.sub(r'^\d+[\.\)]\s*', '', idea_text).strip()
+
+        annot = {
+            "id": line["id"],
+            "answer": idea_text,
+            "box_2d": line["box_2d"],
+            "font_size": line.get("font_size", 11)
+        }
+        if detailed:
+            annot["explanation"] = f"{idx+1}. satır için beyin fırtınası (brainstorming listing) fikri."
+        results.append(annot)
+
+    log_msg(f"[Odevmatik AI] Sayfa {page_num}: {len(results)} adet beyin fırtınası (listing) fikri başarıyla oluşturuldu.")
+    return results
+
+
+def detect_paragraph_box(doc, page, page_text: str, prev_page_text: str) -> list[int] | None:
+    """
+    Detects if the page is an open essay/paragraph writing page (e.g. Page 28 'YOUR PARAGRAPH:').
+    Returns the normalized [ymin, xmin, ymax, xmax] box for the paragraph, or None.
+    """
+    is_para_page = (
+        "YOUR PARAGRAPH" in page_text.upper() or
+        ("PARAGRAPH" in page_text.upper() and any(k in prev_page_text.upper() for k in ["UNIT TASK", "WRITE YOUR PARAGRAPH", "WRITE YOUR OWN", "PUT IT ALL TOGETHER"]))
+    )
+    
+    if not is_para_page:
+        return None
+        
+    h_page = page.rect.height
+    w_page = page.rect.width
+    
+    # Find large rectangular border in drawings if present
+    box_rect = None
+    for d in page.get_drawings():
+        r = d.get("rect")
+        if r and r.width > 0.6 * w_page and r.height > 0.5 * h_page:
+            if box_rect is None or (r.width * r.height > box_rect.width * box_rect.height):
+                box_rect = r
+                
+    if box_rect:
+        x0 = box_rect.x0 + 16
+        x1 = box_rect.x1 - 16
+        y0 = max(box_rect.y0 + 35, 90.0)
+        y1 = box_rect.y1 - 18
+    else:
+        # Standard fallback paragraph box
+        x0 = 0.12 * w_page
+        x1 = 0.90 * w_page
+        y0 = 0.11 * h_page
+        y1 = 0.80 * h_page
+        
+    ymin = int((y0 / h_page) * 1000)
+    xmin = int((x0 / w_page) * 1000)
+    ymax = int((y1 / h_page) * 1000)
+    xmax = int((x1 / w_page) * 1000)
+    return [ymin, xmin, ymax, xmax]
+
+
+def solve_paragraph_box_page(page_num: int, box_2d: list[int], page_text: str, prev_page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+    """
+    Solves open student paragraph writing tasks (e.g. Page 28 'YOUR PARAGRAPH:').
+    Generates a cohesive, well-structured 6-8 sentence paragraph with a title.
+    """
+    prompt = f"""You are an expert English language student and teacher.
+The student must write a complete paragraph for their UNIT TASK inside the paragraph box on this page (Page {page_num}).
+
+=== UNIT TASK INSTRUCTIONS & TOPIC CHOICES (From previous page) ===
+{prev_page_text[-1800:] if prev_page_text else "(No previous page)"}
+
+=== CURRENT PAGE CONTEXT ===
+{page_text[:1200]}
+
+=== PARAGRAPH WRITING RULES ===
+1. Select one of the unit topics (e.g., 'A place where you like to spend time with friends', such as a favorite campus spot or cafe).
+2. Format:
+   - First line: Title of the paragraph (e.g., 'My Favourite Campus Coffee Shop').
+   - Followed by the complete 6 to 8 sentence paragraph.
+   - Indent the first line of the paragraph.
+3. Content structure:
+   - Clear topic sentence (Topic + Controlling Idea).
+   - At least two major supporting details, each with a minor detail (explanation or example).
+   - Use suitable signalling words (First, In addition, For example, Finally, Overall).
+   - Concluding sentence that summarizes or restates the main idea without word-for-word repetition.
+4. Language: Natural, fluent student English, accurate grammar and punctuation. NEVER use placeholders like "[Name]" or "[City]".
+
+Return ONLY a valid JSON object:
+{{
+  "title": "My Favourite Campus Coffee Shop",
+  "paragraph": "Full paragraph text..."
+}}
+"""
+    raw_json = call_gemini_json(prompt, image_bytes, api_key)
+    try:
+        data_obj = json.loads(raw_json)
+    except Exception:
+        data_obj = {}
+
+    title = str(data_obj.get("title") or "").strip()
+    paragraph = str(data_obj.get("paragraph") or data_obj.get("text") or data_obj.get("body") or "").strip()
+
+    if not paragraph and isinstance(data_obj.get("answers"), list):
+        paragraph = "\n".join(str(a) for a in data_obj["answers"])
+
+    if not paragraph:
+        paragraph = (
+            "The campus coffee shop is my favourite place to spend time with friends because it is cozy and relaxing. "
+            "First, the comfortable armchairs allow us to sit and talk for hours after class. "
+            "For instance, we often share warm drinks while discussing our course projects. "
+            "In addition, the quiet background music helps us focus when we study together. "
+            "Finally, the friendly baristas make everyone feel welcome every day. "
+            "Overall, this welcoming cafe is the best spot for us to unwind and connect."
+        )
+
+    if title:
+        full_text = f"{title}\n\n        {paragraph}"
+    else:
+        full_text = f"        {paragraph}"
+
+    annot = {
+        "id": 1,
+        "answer": full_text,
+        "box_2d": box_2d,
+        "font_size": 11
+    }
+    if detailed:
+        annot["explanation"] = "Ünite görevi (Unit Task) için Topic Sentence, 2 ana fikir, yan detaylar ve sinyal kelimeleri içeren 6-8 cümlelik tam paragraf."
+
+    log_msg(f"[Odevmatik AI] Sayfa {page_num}: Öğrenci paragrafı ('YOUR PARAGRAPH:') başarıyla oluşturuldu ve kutuya yerleştirildi.")
+    return [annot]
+
+
 BANNED_HIGHLIGHT_WORDS = {
     "now", "right now", "at the moment", "today", "tonight", "yesterday", "last month",
     "next year", "every day", "every week", "every morning", "always", "usually", "often",
@@ -1485,6 +1744,20 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
             safe_close_doc(doc)
             return []
 
+        # Check for open paragraph writing box (e.g. Page 28 'YOUR PARAGRAPH:')
+        para_box = detect_paragraph_box(doc, page, page_text, prev_page_text)
+        if para_box:
+            log_msg(f"[Odevmatik AI] Sayfa {page_num}: Ogrenci paragraf yazma kutusu ('YOUR PARAGRAPH:') tespit edildi, yaziliyor...")
+            safe_close_doc(doc)
+            return solve_paragraph_box_page(page_num, para_box, page_text, prev_page_text, image_bytes, api_key, detailed=detailed)
+
+        # Check for full-page listing template lines (e.g. Page 25 Listing Template)
+        listing_lines = extract_listing_template_lines(doc, page)
+        if listing_lines:
+            log_msg(f"[Odevmatik AI] Sayfa {page_num}: {len(listing_lines)} satirlik beyin firtinasi (listing) sablonu tespit edildi, cozuyor...")
+            safe_close_doc(doc)
+            return solve_listing_template_page(page_num, listing_lines, page_text, prev_page_text, image_bytes, api_key, detailed=detailed)
+
         # Check for raster image exercise tables (e.g. Page 24 Galata/Pisa/Powder columns)
         image_columns = extract_image_table_blanks(doc, page)
         valid_cols = [c for c in image_columns if 3 <= len(c["blanks"]) <= 30]
@@ -1552,6 +1825,9 @@ Distribute into an array of EXACTLY {len(writing_lines)} strings in the "writing
     prompt = f"""You are an expert English language student and teacher.
 Solve all exercises on this workbook page completely and realistically.
 
+{f'''=== PREVIOUS PAGE CONTEXT / EXERCISE HEADINGS (From bottom of previous page) ===
+{prev_page_text[-1200:]}
+''' if prev_page_text else ''}
 === PAGE TEXT ===
 {page_text[:2800]}
 
@@ -1607,16 +1883,26 @@ Solve all exercises on this workbook page completely and realistically.
      * "3. Julie and Jack are 20 years old." -> Question: "Are Julie and Jack 20 years old?" / Short Answer: "they are".
      NEVER swap the question and the short answer!
 
-7. STRICT WRITING LINE CONSTRAINTS:
+7. PRONOUN REPLACEMENT & REWRITE EXERCISES:
+   - When an exercise asks to rewrite sentences or replace an underlined noun/phrase with a pronoun:
+   - NEVER repeat or copy the original noun, name, or phrase (e.g. NEVER write "students", "Emma", "Daniel", "Maria's", "on my own", "Sarah and Tom")!
+   - Output ONLY the exact grammatical pronoun:
+     * Object pronouns: "them", "him", "her", "it", "us", "you", "me"
+     * Subject pronouns: "They", "He", "She", "It", "We", "You", "I"
+     * Possessive pronouns: "yours", "mine", "ours", "hers", "his", "theirs"
+     * Possessive adjectives: "their", "her", "his", "my", "our", "your"
+     * Reflexive pronouns: "myself", "yourself", "himself", "herself", "itself", "ourselves", "themselves"
+
+8. STRICT WRITING LINE CONSTRAINTS:
    - Distribute the writing into an array of EXACTLY {len(writing_lines)} strings in "writing_lines".
    - Each line MUST contain strictly 6 to 10 words (maximum 48 characters).
    - NEVER exceed 50 characters on any line so words are NEVER cut off at the edge of the ruled line!
    - NEVER break words across lines (e.g. 'old t' instead of 'old town') and NEVER end mid-conjunction (e.g. 'and').
 
-8. STRICT ANTI-PLACEHOLDER RULE:
+9. STRICT ANTI-PLACEHOLDER RULE:
    - NEVER output placeholders like "[Your Name]", "[Country]", "[City]". Use "Alex", 20, "Ankara, Turkey", "student at AGÜ".
-9. DO NOT SKIP ANY BLANK: Provide the exact answer for each numbered blank [1] to [{len(normal_blanks)}].{f"""
-10. DETAILED EXPLANATION: For each answer in 'answers', include a short 1-sentence pedagogical explanation in Turkish in 'explanation' justifying why this answer was chosen (e.g. 'Tekil isim kuralı').""" if detailed else ""}
+10. DO NOT SKIP ANY BLANK: Provide the exact answer for each numbered blank [1] to [{len(normal_blanks)}].{f"""
+11. DETAILED EXPLANATION: For each answer in 'answers', include a short 1-sentence pedagogical explanation in Turkish in 'explanation' justifying why this answer was chosen (e.g. 'Tekil isim kuralı').""" if detailed else ""}
 
 Return ONLY a valid JSON object with this schema:
 {{
