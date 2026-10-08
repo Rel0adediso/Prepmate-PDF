@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await Promise.all(workers);
   }
 
-  async function solveSinglePage(pageNum) {
+  async function solveSinglePage(pageNum, force = false) {
     if (state.pagesStatus[pageNum] === 'solving') return;
     state.pagesStatus[pageNum] = 'solving';
     updateProgressSidebarUI();
@@ -671,7 +671,8 @@ document.addEventListener('DOMContentLoaded', () => {
           file_id: state.fileId,
           page_num: pageNum,
           api_key: state.apiKey === 'ENV_KEY_ACTIVE' ? '' : state.apiKey,
-          detailed: !!state.isDetailedMode
+          detailed: !!state.isDetailedMode,
+          force: !!force
         })
       });
 
@@ -804,7 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reSolveCardBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           state.pagesData[p] = null;
-          solveSinglePage(p);
+          solveSinglePage(p, true);
         });
       }
 
@@ -840,7 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
   reSolveBtn.addEventListener('click', () => {
     if (confirm(`Sayfa ${state.activePageNum} tekrar çözülsün mü?`)) {
       state.pagesData[state.activePageNum] = null;
-      solveSinglePage(state.activePageNum);
+      solveSinglePage(state.activePageNum, true);
     }
   });
 

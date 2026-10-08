@@ -62,11 +62,56 @@ def parse_page_range(range_str: str, max_pages: int) -> list[int]:
     return sorted(list(pages))
 
 
-def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict]]:
+def deduplicate_overlapping_annotations(annotations: list[dict]) -> list[dict]:
+    """
+    Guarantees no two annotations ever overlap or collide on top of each other.
+    If two annotations occupy essentially the same box, retains the first one.
+    """
+    if not annotations:
+        return []
+    
+    unique_items = []
+    for item in annotations:
+        box_a = item.get("box_2d")
+        if not box_a or len(box_a) != 4:
+            unique_items.append(item)
+            continue
+            
+        ymin_a, xmin_a, ymax_a, xmax_a = box_a
+        is_duplicate = False
+        
+        for kept in unique_items:
+            box_b = kept.get("box_2d")
+            if not box_b or len(box_b) != 4:
+                continue
+            ymin_b, xmin_b, ymax_b, xmax_b = box_b
+            
+            # Check overlap
+            v_ovlp = max(0, min(ymax_a, ymax_b) - max(ymin_a, ymin_b))
+            h_ovlp = max(0, min(xmax_a, xmax_b) - max(xmin_a, xmin_b))
+            
+            h_len_a = max(1, xmax_a - xmin_a)
+            v_len_a = max(1, ymax_a - ymin_a)
+            h_len_b = max(1, xmax_b - xmin_b)
+            v_len_b = max(1, ymax_b - ymin_b)
+            
+            # If vertical overlap >= 60% and horizontal overlap >= 50%
+            if v_ovlp >= 0.6 * min(v_len_a, v_len_b) and h_ovlp >= 0.5 * min(h_len_a, h_len_b):
+                is_duplicate = True
+                break
+                
+        if not is_duplicate:
+            unique_items.append(item)
+            
+    return unique_items
+
+
+def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
     """
     Analyzes the PDF page and cleanly separates:
     1. Normal blanks (fill in the blanks, missing words, questions, word-order corrections)
     2. Ruled writing lines (empty notebook lines for free writing paragraphs)
+    3. Occupied lines count (blanks/lines already filled with text, e.g. from previous solves)
     Filters out table headers, dots, and merges split/wrapped underscores cleanly.
     """
     w_page = page.rect.width
@@ -74,6 +119,7 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict]]:
     
     normal_blanks = []
     writing_lines = []
+    occupied_count = 0
     
     words = page.get_text("words")
     raw_unders = []
@@ -176,6 +222,22 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict]]:
         text = u["text"]
         w = u["w"]
         
+        # Check if this underscore/blank or line ALREADY has text sitting directly on it
+        # (e.g. an already solved/exported PDF, or a pre-filled textbook example).
+        overlapping_words_found = []
+        for sw in words:
+            if sw == w or '__' in sw[4] or '..' in sw[4]:
+                continue
+            v_ovlp = max(0.0, min(y1, sw[3]) - max(y0, sw[1]))
+            h_ovlp = max(0.0, min(x1, sw[2]) - max(x0, sw[0]))
+            if v_ovlp >= 4.0 and h_ovlp >= 6.0:
+                if re.search(r'[a-zA-Z0-9]', sw[4]):
+                    overlapping_words_found.append(sw[4])
+
+        if overlapping_words_found:
+            occupied_count += 1
+            continue
+        
         same_line = [sw for sw in words if abs(sw[1] - y0) < 6]
         same_line.sort(key=lambda sw: sw[0])
         try:
@@ -251,7 +313,7 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict]]:
         
     normal_blanks.sort(key=lambda b: (round(b["y0"] / 8) * 8, b["x0"]))
     writing_lines.sort(key=lambda b: b["y0"])
-    return normal_blanks, writing_lines
+    return normal_blanks, writing_lines, occupied_count
 
 
 NON_VISION_KEYWORDS = [
@@ -735,6 +797,7 @@ If this page is purely an informational lecture with NO student exercises or bla
                 if detailed and it.get("explanation"):
                     res_item["explanation"] = str(it["explanation"]).strip()
                 res.append(res_item)
+        res = deduplicate_overlapping_annotations(res)
         log_msg(f"[Vision Fallback] Sayfa {page_num} icin {len(res)} gorsel cevap tespit edildi.")
         return res
     except Exception as e:
@@ -1397,7 +1460,7 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
         raise ValueError(f"Gecersiz sayfa numarasi: {page_num}")
         
     page = doc[page_num - 1]
-    normal_blanks, writing_lines = extract_page_blanks_and_lines(page)
+    normal_blanks, writing_lines, occupied_count = extract_page_blanks_and_lines(page)
     page_text = page.get_text("text").strip()
     
     prev_page_text = ""
@@ -1408,6 +1471,10 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
 
     # If no vector blanks or ruled lines are found
     if len(normal_blanks) == 0 and len(writing_lines) == 0:
+        if occupied_count > 0:
+            log_msg(f"[Odevmatik AI] Sayfa {page_num}: Mevcut {occupied_count} adet bosluk/satir zaten metinle dolu (daha once cozulmus veya ornek), ustune tekrar yazilmiyor.")
+            safe_close_doc(doc)
+            return []
         # Check if page is purely informational explanation
         is_pure_guide = (
             ("grammar focus" in page_text.lower() or "summary table" in page_text.lower() or "contents" in page_text.lower()) and 
@@ -1715,6 +1782,7 @@ Return ONLY a valid JSON object with this schema:
             cleaned.extend(edit_corrections)
 
     safe_close_doc(doc)
+    cleaned = deduplicate_overlapping_annotations(cleaned)
     cleaned.sort(key=lambda x: (round(x["box_2d"][0] / 10) * 10, x["box_2d"][1]))
     log_msg(f"[Odevmatik AI] Toplam {len(cleaned)} adet cevap/satir/vurgu basariyla yerlestirildi.")
     return cleaned
