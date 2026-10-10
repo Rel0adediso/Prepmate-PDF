@@ -709,9 +709,9 @@ def call_gemini_json(prompt: str, image_bytes: bytes, api_key: str | list[str]) 
             if model_name in _DISABLED_MODELS:
                 continue
 
-            # Prioritize keys that are not on 429 cooldown
+            # Prioritize keys that are not on 429 cooldown for THIS model
             now = time.time()
-            active_keys = [k for k in gemini_keys if _KEY_COOLDOWN.get(k, 0) <= now]
+            active_keys = [k for k in gemini_keys if _KEY_COOLDOWN.get((k, model_name), 0) <= now]
             if not active_keys:
                 active_keys = list(gemini_keys)
 
@@ -755,8 +755,9 @@ def call_gemini_json(prompt: str, image_bytes: bytes, api_key: str | list[str]) 
 
                     elif resp.status_code == 429 or "RESOURCE_EXHAUSTED" in resp.text:
                         log_msg(f"[Kota Doldu] {masked} anahtarında {model_name} kotası doldu! Aynı modelde diğer anahtara geçiliyor...")
-                        _KEY_COOLDOWN[current_key] = time.time() + 60.0
+                        _KEY_COOLDOWN[(current_key, model_name)] = time.time() + 45.0
                         last_error_msg = f"429 Quota Exhausted on {masked}"
+                        time.sleep(1.2) # Short jitter backoff to allow Google burst rate-limiter to recover
                         continue # KEEP SAME MODEL, TRY NEXT KEY!
 
                     elif resp.status_code == 400 and "API_KEY_INVALID" in resp.text:
@@ -893,8 +894,10 @@ def extract_image_table_blanks(doc, page) -> list[dict]:
             continue
         bbox = rects[0]
         
-        # Filter out tiny icons or banners
-        if bbox.height < 150 or bbox.width < 80:
+        # Filter out tiny icons, banners, and non-column diagrams (columns are tall vertical text blocks)
+        if bbox.height < 180 or bbox.width < 80:
+            continue
+        if (bbox.height / bbox.width) < 1.4:
             continue
         if bbox.width > 0.8 * w_page and bbox.height < 0.4 * h_page:
             continue
@@ -956,7 +959,20 @@ def extract_image_table_blanks(doc, page) -> list[dict]:
                         continue
                 deduped.append(clustered[i])
                 
-            if len(deduped) >= 2:
+            # Text line spacing validation: in workbook fill-in tables, blank lines are spaced like text lines (>= 12pt)
+            scale_y = (bbox.y1 - bbox.y0) / pix.height
+            spaced = []
+            for b in deduped:
+                if not spaced or (b['y'] - spaced[-1]['y']) * scale_y >= 12.0:
+                    spaced.append(b)
+            if len(spaced) >= 3:
+                diffs = [(spaced[idx+1]['y'] - spaced[idx]['y']) * scale_y for idx in range(len(spaced) - 1)]
+                avg_diff = sum(diffs) / len(diffs)
+                if avg_diff < 15.0:
+                    spaced = []
+            deduped = spaced
+
+            if len(deduped) >= 3:
                 image_entries.append({
                     "xref": xref,
                     "bbox": bbox,
@@ -1413,6 +1429,115 @@ CLUSTERING_9_BUBBLES = [
     # 8: Top-Left (10:30)
     {"id": 9, "box_2d": [342, 155, 375, 345], "font_size": 10, "align": 1, "role": "top_left"}
 ]
+
+def detect_sunburst_mindmap(doc, page, page_text: str) -> list[dict] | None:
+    """
+    Detects if page contains a Brainstorming Sunburst / Spider Mindmap diagram (center circle with 8 radiating rays, e.g. Page 12 Part A).
+    Returns list of 8 ray bounding boxes [ymin, xmin, ymax, xmax] with appropriate alignment.
+    """
+    p_text = page_text.lower()
+    keywords = ['items you get before a trip', 'sunburst', 'spider diagram', 'mind map', 'mind-map', 'brainstorming diagram']
+    has_kw = any(k in p_text for k in keywords) or ('items' in p_text and 'trip' in p_text and 'pairs' in p_text)
+    if not has_kw:
+        return None
+        
+    w_page = page.rect.width
+    h_page = page.rect.height
+    
+    for img_tuple in page.get_images():
+        rects = page.get_image_rects(img_tuple[0])
+        if not rects:
+            continue
+        r = rects[0]
+        w = r.width
+        h = r.height
+        cx = (r.x0 + r.x1) / 2
+        cy = (r.y0 + r.y1) / 2
+        # Must be in upper 65% of page and roughly balanced aspect ratio (0.7 - 1.6)
+        if 80 < w < 400 and 80 < h < 350 and 0.7 < (w / h) < 1.6 and cy < 0.65 * h_page:
+            ymin_img = (r.y0 / h_page) * 1000
+            xmin_img = (r.x0 / w_page) * 1000
+            ymax_img = (r.y1 / h_page) * 1000
+            xmax_img = (r.x1 / w_page) * 1000
+            cx_n = (xmin_img + xmax_img) / 2
+            cy_n = (ymin_img + ymax_img) / 2
+            
+            ray_boxes = [
+                # 1: Top (12:00)
+                {'role': 'top', 'box_2d': [int(ymin_img - 32), int(cx_n - 50), int(ymin_img - 4), int(cx_n + 50)], 'align': 1, 'font_size': 10},
+                # 2: Top-Right (1:30)
+                {'role': 'top_right', 'box_2d': [int(ymin_img + 3), int(xmax_img - 61), int(ymin_img + 30), int(xmax_img + 54)], 'align': 0, 'font_size': 10},
+                # 3: Right (3:15)
+                {'role': 'right', 'box_2d': [int(cy_n - 8), int(xmax_img - 11), int(cy_n + 19), int(xmax_img + 99)], 'align': 0, 'font_size': 10},
+                # 4: Bottom-Right (4:45)
+                {'role': 'bottom_right', 'box_2d': [int(ymax_img - 30), int(xmax_img - 61), int(ymax_img - 3), int(xmax_img + 54)], 'align': 0, 'font_size': 10},
+                # 5: Bottom (6:00)
+                {'role': 'bottom', 'box_2d': [int(ymax_img + 5), int(cx_n - 50), int(ymax_img + 33), int(cx_n + 50)], 'align': 1, 'font_size': 10},
+                # 6: Bottom-Left (7:30)
+                {'role': 'bottom_left', 'box_2d': [int(ymax_img - 30), int(xmin_img - 49), int(ymax_img - 3), int(xmin_img + 61)], 'align': 2, 'font_size': 10},
+                # 7: Left (9:00)
+                {'role': 'left', 'box_2d': [int(cy_n - 8), int(xmin_img - 109), int(cy_n + 19), int(xmin_img + 1)], 'align': 2, 'font_size': 10},
+                # 8: Top-Left (10:30)
+                {'role': 'top_left', 'box_2d': [int(ymin_img + 3), int(xmin_img - 49), int(ymin_img + 30), int(xmin_img + 61)], 'align': 2, 'font_size': 10}
+            ]
+            return ray_boxes
+    return None
+
+def solve_sunburst_diagram_page(page_num: int, sunburst_rays: list[dict], page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+    """
+    Solves standalone Brainstorming Sunburst / Mind-Map diagram with 8 rays.
+    """
+    prompt = f"""You are an expert English language student and teacher.
+This workbook page contains a Brainstorming Sunburst / Mind-Map diagram.
+It has a central topic with {len(sunburst_rays)} rays radiating outwards.
+
+=== PAGE CONTEXT ===
+{page_text[:1200]}
+
+=== INSTRUCTIONS ===
+Provide an array of EXACTLY {len(sunburst_rays)} distinct, authentic student items/keywords (1-2 words each) brainstorming around the topic.
+For example, for travel items: "passport", "suitcase", "flight tickets", "sunscreen", "camera", "phone charger", "sunglasses", "warm clothes".
+
+Return ONLY a valid JSON object:
+{{
+  "ideas": [
+    "passport",
+    "suitcase",
+    "flight tickets",
+    "sunscreen",
+    "camera",
+    "phone charger",
+    "sunglasses",
+    "clothes"
+  ]
+}}
+"""
+    try:
+        raw_json = call_gemini_json(prompt, image_bytes, api_key)
+        data = json.loads(raw_json)
+    except Exception:
+        data = {}
+
+    ideas = data.get("ideas") or data.get("sunburst_answers") or data.get("answers") or []
+    clean_ideas = [re.sub(r'^\d+[\.\)]\s*', '', str(x)).strip() for x in ideas if str(x).strip()]
+    fallback_items = ["passport", "suitcase", "flight tickets", "sunscreen", "camera", "phone charger", "sunglasses", "clothes"]
+    while len(clean_ideas) < len(sunburst_rays):
+        clean_ideas.append(fallback_items[len(clean_ideas) % len(fallback_items)])
+
+    results = []
+    for s_idx, ray in enumerate(sunburst_rays):
+        ans = clean_ideas[s_idx]
+        entry = {
+            "id": f"sunburst_{s_idx+1}",
+            "answer": ans,
+            "box_2d": ray["box_2d"],
+            "font_size": ray.get("font_size", 10),
+            "align": ray.get("align", 0)
+        }
+        if detailed:
+            entry["explanation"] = f"Zihin haritası için seyahat eşyası: {ans}"
+        results.append(entry)
+    return results
 
 def detect_clustering_template(doc, page, page_num: int, page_text: str, prev_page_text: str) -> bool:
     """
@@ -1943,6 +2068,11 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
     if page_num > 1:
         prev_page_text = doc[page_num - 2].get_text("text").strip()
 
+    # Check for Sunburst / Spider Mindmap diagram on page (e.g. Page 12 Part A)
+    sunburst_rays = detect_sunburst_mindmap(doc, page, page_text)
+    if sunburst_rays:
+        log_msg(f"[Odevmatik AI] Sayfa {page_num}: Sunburst zihin haritasi ({len(sunburst_rays)} isin) tespit edildi.")
+
     log_msg(f"[Odevmatik AI] Sayfa {page_num}: {len(normal_blanks)} bosluk, {len(writing_lines)} yazma satiri tespit edildi.")
 
     # If no vector blanks or ruled lines are found
@@ -1960,6 +2090,13 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
             log_msg(f"[Odevmatik AI] Sayfa {page_num} konu anlatimi veya icindekiler sayfasi, bosluk eklenmiyor.")
             safe_close_doc(doc)
             return []
+
+        # Check for standalone sunburst / mindmap diagram
+        if sunburst_rays:
+            log_msg(f"[Odevmatik AI] Sayfa {page_num}: Sunburst zihin haritasi ({len(sunburst_rays)} isin) tespit edildi, cozuyor...")
+            res = solve_sunburst_diagram_page(page_num, sunburst_rays, page_text, image_bytes, api_key, detailed=detailed)
+            safe_close_doc(doc)
+            return res
 
         # Check for open paragraph writing box (e.g. Page 28 'YOUR PARAGRAPH:')
         para_box = detect_paragraph_box(doc, page, page_text, prev_page_text)
@@ -2046,6 +2183,26 @@ Distribute into an array of EXACTLY {len(writing_lines)} strings in the "writing
         else:
             writing_instructions = extract_writing_prompt_context(page_text, prev_page_text, len(writing_lines))
 
+    sunburst_instructions = ""
+    sunburst_schema = ""
+    if sunburst_rays:
+        sunburst_instructions = f"""
+=== SUNBURST / MIND-MAP DIAGRAM (PART A - {len(sunburst_rays)} ITEMS) ===
+This page contains a central mind map / spider diagram around a topic (e.g. Travel items).
+Provide an array of EXACTLY {len(sunburst_rays)} distinct, authentic student items/keywords (1-2 words each, e.g. "passport", "suitcase", "flight tickets", "sunscreen", "camera", "phone charger", "sunglasses", "clothes") in the "sunburst_answers" field.
+"""
+        sunburst_schema = """,
+  "sunburst_answers": [
+    "passport",
+    "suitcase",
+    "flight tickets",
+    "sunscreen",
+    "camera",
+    "phone charger",
+    "sunglasses",
+    "clothes"
+  ]"""
+
     prompt = f"""You are an expert English language student and teacher.
 Solve all exercises on this workbook page completely and realistically.
 
@@ -2058,6 +2215,7 @@ Solve all exercises on this workbook page completely and realistically.
 === NUMBERED BLANKS ({len(normal_blanks)} items) ===
 {blanks_listing}
 {writing_instructions}
+{sunburst_instructions}
 
 === STRICT CONCISENESS & EXERCISE RULES ===
 1. CONCISE DIRECT ANSWERS ONLY (FIT THE BLANK):
@@ -2119,6 +2277,8 @@ Solve all exercises on this workbook page completely and realistically.
 
 8. MATCHING EXERCISES (e.g. 'Match 1-6 with a-f', 'Match headings/words to definitions'):
    - Output ONLY the single matching letter (e.g. "c", "a", "f") or single number (e.g. "3", "5").
+   - For verb-noun collocation / matching tables (e.g. "Match the actions with the nouns"):
+     Combine the verb from the row with its correct matching noun (e.g. 'pack a suitcase', 'check the weather', 'print the boarding pass', 'organize itinerary', 'apply for a visa', 'charge phone', 'write packing list', 'exchange currency', 'plan a trip', 'buy flight tickets').
    - NEVER rewrite the entire sentence or long definition into the blank!
 
 9. TRUE / FALSE / DOESN'T SAY (T / F / DS) EXERCISES:
@@ -2155,7 +2315,7 @@ Return ONLY a valid JSON object with this schema:
   "highlights": [
     "am recording",
     "isn't raining"
-  ]
+  ]{sunburst_schema}
 }}
 """
 
@@ -2304,6 +2464,37 @@ Return ONLY a valid JSON object with this schema:
         edit_corrections = solve_page_edit_corrections(doc, page, page_num, page_text, image_bytes, api_key)
         if edit_corrections:
             cleaned.extend(edit_corrections)
+
+    # 5. Process Sunburst / Mind Map Diagram (e.g. Page 12 Part A)
+    if sunburst_rays:
+        raw_sb = (
+            data_obj.get("sunburst_answers") or 
+            data_obj.get("mindmap_items") or 
+            data_obj.get("mindmap") or 
+            data_obj.get("part_a") or 
+            []
+        )
+        clean_sb = [re.sub(r'^\d+[\.\)]\s*', '', str(x)).strip() for x in raw_sb if str(x).strip()]
+        fallback_travel_items = [
+            "passport", "suitcase", "flight tickets", "sunscreen",
+            "camera", "phone charger", "sunglasses", "clothes"
+        ]
+        while len(clean_sb) < len(sunburst_rays):
+            clean_sb.append(fallback_travel_items[len(clean_sb) % len(fallback_travel_items)])
+            
+        for s_idx, ray in enumerate(sunburst_rays):
+            sb_ans = clean_sb[s_idx]
+            sb_entry = {
+                "id": f"sunburst_{s_idx+1}",
+                "answer": sb_ans,
+                "box_2d": ray["box_2d"],
+                "font_size": ray.get("font_size", 10),
+                "align": ray.get("align", 0)
+            }
+            if detailed:
+                sb_entry["explanation"] = f"Part A zihin haritası için seyahat eşyası: {sb_ans}"
+            cleaned.append(sb_entry)
+        log_msg(f"[Odevmatik AI] Sayfa {page_num}: Sunburst zihin haritası ({len(sunburst_rays)} ışın) başarıyla eklendi.")
 
     safe_close_doc(doc)
     cleaned = deduplicate_overlapping_annotations(cleaned)

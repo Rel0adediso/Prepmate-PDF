@@ -179,12 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showToast(msg, isError = false) {
-    toastMessage.textContent = msg;
+    toastMessage.innerHTML = msg;
     document.getElementById('toastIcon').textContent = isError ? '⚠️' : '✅';
     toastNotification.classList.remove('translate-y-24', 'opacity-0');
     setTimeout(() => {
       toastNotification.classList.add('translate-y-24', 'opacity-0');
-    }, 3500);
+    }, 4500);
   }
 
   // API Key Modal Events
@@ -670,19 +670,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const queue = pages.filter(p => !state.pagesData[p] && state.pagesStatus[p] !== 'solving');
     if (queue.length === 0) return;
 
-    // Concurrency: 3 parallel workers per API key (e.g. 2 keys = 6 parallel workers!)
+    // Concurrency: 2-3 parallel workers with stagger to prevent Google Gemini 429 quota spikes
     const keyMultiplier = Math.max(1, state.keyCount || 1);
-    const concurrency = Math.min(queue.length, Math.max(3, keyMultiplier * 3));
+    const concurrency = Math.min(queue.length, Math.max(2, Math.min(3, keyMultiplier * 2)));
     let index = 0;
 
-    async function worker() {
+    async function worker(workerId) {
+      if (workerId > 0) {
+        await new Promise(r => setTimeout(r, workerId * 400));
+      }
       while (index < queue.length) {
         const pageNum = queue[index++];
         await solveSinglePage(pageNum);
       }
     }
 
-    const workers = Array.from({ length: concurrency }, () => worker());
+    const workers = Array.from({ length: concurrency }, (_, i) => worker(i));
     await Promise.all(workers);
 
     // Show Completion Summary Report if multi-page solve completed
@@ -721,14 +724,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (reportDownloadHwBtn) {
     reportDownloadHwBtn.addEventListener('click', () => {
       if (summaryReportModal) summaryReportModal.classList.add('hidden');
-      if (downloadHwBtn) downloadHwBtn.click();
+      triggerExport('only_homework');
     });
   }
 
   if (reportDownloadFullBtn) {
     reportDownloadFullBtn.addEventListener('click', () => {
       if (summaryReportModal) summaryReportModal.classList.add('hidden');
-      if (downloadFullBtn) downloadFullBtn.click();
+      triggerExport('full_book');
     });
   }
 
@@ -765,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  async function solveSinglePage(pageNum, force = false) {
+  async function solveSinglePage(pageNum, force = false, retryCount = 0) {
     if (state.pagesStatus[pageNum] === 'solving') return;
     state.pagesStatus[pageNum] = 'solving';
     updateProgressSidebarUI();
@@ -795,7 +798,15 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(text || `Sunucu yanıt veremedi (HTTP ${res.status})`);
       }
 
-      if (!res.ok) throw new Error(data.detail || `Sayfa çözülemedi (HTTP ${res.status})`);
+      if (!res.ok) {
+        // If server hit temporary rate limit or 503 spike, wait and auto-retry once
+        if (retryCount < 2) {
+          state.pagesStatus[pageNum] = 'idle';
+          await new Promise(r => setTimeout(r, 2500));
+          return solveSinglePage(pageNum, force, retryCount + 1);
+        }
+        throw new Error(data.detail || `Sayfa çözülemedi (HTTP ${res.status})`);
+      }
 
       state.pagesData[pageNum] = data.annotations || [];
       state.pagesStatus[pageNum] = 'done';
@@ -1241,38 +1252,58 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!state.fileId) return;
 
     const btn = mode === 'only_homework' ? downloadHwBtn : downloadFullBtn;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="animate-spin mr-1">⏳</span> Hazırlanıyor...`;
-    btn.disabled = true;
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = `<span class="animate-spin mr-1">⏳</span> Hazırlanıyor...`;
+      btn.disabled = true;
+    }
 
     try {
+      showToast('📄 PDF hazırlanıyor, lütfen birkaç saniye bekleyin...');
+
+      // Clean annotations so null/undefined/empty values never cause 422 or crash server
+      const cleanAnnotations = {};
+      if (state.pagesData) {
+        for (const [k, v] of Object.entries(state.pagesData)) {
+          if (Array.isArray(v) && v.length > 0) {
+            cleanAnnotations[k] = v;
+          }
+        }
+      }
+
       const res = await fetch('/api/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           file_id: state.fileId,
           mode: mode,
-          selected_pages: state.selectedPages,
-          pages_annotations: state.pagesData
+          selected_pages: state.selectedPages || [],
+          pages_annotations: cleanAnnotations
         })
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Dışa aktarma başarısız');
+      if (!res.ok) {
+        const errorMsg = typeof data.detail === 'string'
+          ? data.detail
+          : (Array.isArray(data.detail) ? data.detail.map(d => d.msg || JSON.stringify(d)).join(', ') : 'Dışa aktarma başarısız');
+        throw new Error(errorMsg);
+      }
 
-      const link = document.createElement('a');
-      link.href = data.download_url;
-      link.download = data.filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      showToast(`PDF başarıyla indirildi: ${data.filename}`);
+      if (data.download_url) {
+        // Direct browser navigation to download attachment (never blocked by popup / untrusted synthetic click blockers)
+        window.location.href = data.download_url;
+        showToast(`✅ PDF indiriliyor: <b>${data.filename}</b>`);
+      } else {
+        throw new Error('İndirme bağlantısı alınamadı.');
+      }
     } catch (err) {
-      showToast(err.message, true);
+      showToast('İndirme hatası: ' + err.message, true);
     } finally {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
+      if (btn) {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
     }
   }
 

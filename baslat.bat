@@ -1,8 +1,8 @@
 @echo off
-title PrepMate PDF - AI Workbook & Homework Solver
+title PrepMate PDF - AI Workbook ^& Homework Solver
 color 0B
 echo ================================================================
-echo           PREPMATE PDF - AI Workbook & Homework Solver
+echo           PREPMATE PDF - AI Workbook ^& Homework Solver
 echo ================================================================
 echo.
 

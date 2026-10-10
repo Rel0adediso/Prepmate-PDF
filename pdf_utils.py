@@ -47,15 +47,25 @@ def export_annotated_pdf(
     total_pages = len(doc)
     
     # 1. Apply annotations to the document pages
-    for page_num_str, annotations in pages_annotations.items():
-        page_num = int(page_num_str)
+    for page_num_str, annotations in (pages_annotations or {}).items():
+        if not annotations or not isinstance(annotations, list):
+            continue
+        try:
+            page_num = int(page_num_str)
+        except (ValueError, TypeError):
+            continue
+
         if 1 <= page_num <= total_pages:
             page = doc[page_num - 1]
             page_w = page.rect.width
             page_h = page.rect.height
             
             for item in annotations:
+                if not isinstance(item, dict):
+                    continue
                 box = item.get("box_2d", [100, 100, 150, 300])
+                if not isinstance(box, (list, tuple)) or len(box) != 4:
+                    box = [100, 100, 150, 300]
                 ymin, xmin, ymax, xmax = box
                 
                 x0 = (xmin / 1000.0) * page_w
@@ -165,8 +175,11 @@ def export_annotated_pdf(
         for p in selected_pages:
             if 1 <= p <= total_pages:
                 new_doc.insert_pdf(doc, from_page=p - 1, to_page=p - 1)
-        new_doc.save(output_path)
-        new_doc.close()
+        if len(new_doc) > 0:
+            new_doc.save(output_path)
+            new_doc.close()
+        else:
+            doc.save(output_path)
     else:
         doc.save(output_path)
         

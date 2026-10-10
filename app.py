@@ -23,6 +23,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
 from fastapi.responses import FileResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Any, Optional
 from pydantic import BaseModel
 
 from pdf_utils import get_pdf_info, render_page_image, export_annotated_pdf
@@ -76,9 +77,9 @@ class SolvePageRequest(BaseModel):
 
 class ExportRequest(BaseModel):
     file_id: str
-    mode: str # "only_homework" or "full_book"
-    selected_pages: list[int]
-    pages_annotations: dict[str, list[dict]]
+    mode: str = "only_homework" # "only_homework" or "full_book"
+    selected_pages: list[int] = []
+    pages_annotations: dict[str, Any] = {}
 
 class ZipExportRequest(BaseModel):
     files: list[ExportRequest]
@@ -296,13 +297,40 @@ def export_pdf(req: ExportRequest):
     out_filename = f"cozulmus_{suffix}_{export_id}.pdf"
     out_path = OUTPUTS_DIR / out_filename
     
+    # Merge disk cache so that ALL solved pages are included,
+    # even if client refreshed or only sent partial annotations
+    merged_annotations = {}
+    
+    # 1. First, load all solved pages from CACHE_DIR for this file_id
+    for c_path in CACHE_DIR.glob(f"{req.file_id}_*.json"):
+        m = re.match(rf"^{req.file_id}_(\d+)\.json$", c_path.name)
+        if m:
+            p_num_str = m.group(1)
+            try:
+                with open(c_path, "r", encoding="utf-8") as f:
+                    cached_data = json.load(f)
+                if isinstance(cached_data, list) and cached_data:
+                    merged_annotations[p_num_str] = cached_data
+            except Exception:
+                pass
+
+    # 2. Then overlay / override with annotations passed from client (e.g. user manual edits)
+    if isinstance(req.pages_annotations, dict):
+        for p_num_str, annots in req.pages_annotations.items():
+            if isinstance(annots, list) and annots:
+                merged_annotations[str(p_num_str)] = annots
+
+    selected_pages = req.selected_pages
+    if req.mode == "only_homework" and not selected_pages:
+        selected_pages = sorted([int(k) for k in merged_annotations.keys()])
+
     try:
         export_annotated_pdf(
             pdf_path=str(pdf_path),
-            pages_annotations=req.pages_annotations,
+            pages_annotations=merged_annotations,
             output_path=str(out_path),
             mode=req.mode,
-            selected_pages=req.selected_pages
+            selected_pages=selected_pages
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF oluşturulurken hata: {str(e)}")
@@ -341,13 +369,35 @@ def export_zip(req: ZipExportRequest):
                 continue
             temp_pdf_name = f"Odev_{idx}_{f_req.file_id[:6]}.pdf"
             temp_out = OUTPUTS_DIR / f"temp_{temp_pdf_name}"
+
+            merged_annotations = {}
+            for c_path in CACHE_DIR.glob(f"{f_req.file_id}_*.json"):
+                m = re.match(rf"^{f_req.file_id}_(\d+)\.json$", c_path.name)
+                if m:
+                    p_num_str = m.group(1)
+                    try:
+                        with open(c_path, "r", encoding="utf-8") as f:
+                            cached_data = json.load(f)
+                        if isinstance(cached_data, list) and cached_data:
+                            merged_annotations[p_num_str] = cached_data
+                    except Exception:
+                        pass
+            if isinstance(f_req.pages_annotations, dict):
+                for p_num_str, annots in f_req.pages_annotations.items():
+                    if isinstance(annots, list) and annots:
+                        merged_annotations[str(p_num_str)] = annots
+
+            sel_pages = f_req.selected_pages
+            if f_req.mode == "only_homework" and not sel_pages:
+                sel_pages = sorted([int(k) for k in merged_annotations.keys()])
+
             try:
                 export_annotated_pdf(
                     pdf_path=str(src_pdf),
-                    pages_annotations=f_req.pages_annotations,
+                    pages_annotations=merged_annotations,
                     output_path=str(temp_out),
                     mode=f_req.mode,
-                    selected_pages=f_req.selected_pages
+                    selected_pages=sel_pages
                 )
                 zip_file.write(temp_out, arcname=temp_pdf_name)
                 temp_out.unlink(missing_ok=True)
