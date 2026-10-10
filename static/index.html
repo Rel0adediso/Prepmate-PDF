@@ -461,14 +461,52 @@
         <h3 class="font-serif font-medium text-base text-white">Yeni Sayfalar Ekle</h3>
         <button id="closeAddPagesModalBtn" class="p-1 rounded-lg text-[#a39e97] hover:text-white transition">&times;</button>
       </div>
+      <div class="bg-[#171614] border border-[#383530] rounded-xl p-2.5 text-xs flex items-center justify-between">
+        <span class="text-[#a39e97]">Mevcut Sayfalar:</span>
+        <span id="currentPagesListDisplay" class="text-[#d4a373] font-mono font-semibold">-</span>
+      </div>
       <div>
         <label class="block text-xs font-semibold text-[#ece8e1] mb-1">Eklenecek Sayfa Aralığı:</label>
-        <input type="text" id="addPagesRangeInput" placeholder="Örn: 21-25 veya 30" class="w-full bg-[#171614] border border-[#383530] focus:border-[#cc785c] focus:ring-2 focus:ring-[#cc785c]/20 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none transition font-mono">
+        <input type="text" id="addPageRangeInput" placeholder="Örn: 21-25 veya 30" class="w-full bg-[#171614] border border-[#383530] focus:border-[#cc785c] focus:ring-2 focus:ring-[#cc785c]/20 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none transition font-mono">
       </div>
       <div class="flex items-center justify-end space-x-2 pt-2">
         <button id="cancelAddPagesBtn" class="px-3.5 py-2 text-xs text-[#a39e97] hover:text-white transition">Vazgeç</button>
         <button id="confirmAddPagesBtn" class="glow-btn-primary text-white text-xs font-bold px-4 py-2.5 rounded-xl transition">
           Ekle ve Çöz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Quality Notice Modal (Claude Style) -->
+  <div id="previewNoticeModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-panel border border-[#cc785c]/35 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 relative overflow-hidden">
+      <div class="flex items-center space-x-3 relative z-10">
+        <div class="w-10 h-10 rounded-2xl bg-[#cc785c]/20 border border-[#cc785c]/40 text-[#e58f74] flex items-center justify-center text-lg shrink-0">
+          🎯
+        </div>
+        <div>
+          <h3 class="font-serif font-medium text-white text-base">Önizleme Hakkında Önemli Not</h3>
+          <p class="text-[11px] text-[#d4a373] font-medium">Adobe Acrobat Vektörel Çıktı Standardı</p>
+        </div>
+      </div>
+
+      <div class="text-xs text-[#a39e97] space-y-2.5 relative z-10 leading-relaxed bg-[#171614] border border-[#383530] rounded-2xl p-4">
+        <p>
+          Tarayıcı ekranındaki önizleme, ekran çözünürlüğünüze göre hafif farklı görünebilir.
+        </p>
+        <div class="p-2.5 rounded-xl bg-[#cc785c]/10 border border-[#cc785c]/20 text-[#e58f74] font-medium">
+          ✨ <b>Merak etmeyin:</b> <i>"İndir"</i> dediğinizde oluşturulan PDF çıktısı orijinal kitap üzerine <b>milimetrik hassasiyetle ve saf siyah Acrobat vektör metni</b> olarak kusursuz basılır!
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-1 relative z-10">
+        <label class="flex items-center space-x-2 text-[11px] text-[#a39e97] cursor-pointer select-none">
+          <input type="checkbox" id="dontShowPreviewNoticeAgain" checked class="rounded bg-[#171614] border-[#383530] text-[#cc785c]">
+          <span>Bu uyarıyı bir daha gösterme</span>
+        </label>
+        <button id="dismissPreviewNoticeBtn" class="glow-btn-primary text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+          Anladım, Devam Et
         </button>
       </div>
     </div>
