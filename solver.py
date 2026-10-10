@@ -1224,13 +1224,16 @@ def extract_listing_template_lines(doc, page) -> list[dict]:
     return []
 
 
-def solve_listing_template_page(page_num: int, listing_lines: list[dict], page_text: str, prev_page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+def solve_listing_template_page(page_num: int, listing_lines: list[dict], page_text: str, prev_page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False, cefr_level: str = "B1") -> list[dict]:
     """
     Solves full-page listing template exercises (e.g. Brainstorming Listing Template).
     """
     n_lines = len(listing_lines)
+    cefr_clean = (cefr_level or "B1").strip().upper()
     prompt = f"""You are an expert English language student and teacher.
 This workbook page is a Brainstorming Listing Template with {n_lines} numbered lines.
+Target CEFR English Level: {cefr_clean}
+
 
 === PREVIOUS PAGE CONTEXT / TOPIC CHOICES ===
 {prev_page_text[-1200:] if prev_page_text else "(No previous page)"}
@@ -1335,13 +1338,16 @@ def detect_paragraph_box(doc, page, page_text: str, prev_page_text: str) -> list
     return [ymin, xmin, ymax, xmax]
 
 
-def solve_paragraph_box_page(page_num: int, box_2d: list[int], page_text: str, prev_page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+def solve_paragraph_box_page(page_num: int, box_2d: list[int], page_text: str, prev_page_text: str, image_bytes: bytes, api_key: str | list[str], detailed: bool = False, cefr_level: str = "B1") -> list[dict]:
     """
     Solves open student paragraph writing tasks (e.g. Page 28 'YOUR PARAGRAPH:').
     Generates a cohesive, well-structured 6-8 sentence paragraph with a title.
     """
+    cefr_clean = (cefr_level or "B1").strip().upper()
     prompt = f"""You are an expert English language student and teacher.
 The student must write a complete paragraph for their UNIT TASK inside the paragraph box on this page (Page {page_num}).
+Target CEFR English Level: {cefr_clean} (Strictly write at {cefr_clean} vocabulary and sentence complexity).
+
 
 === UNIT TASK INSTRUCTIONS & TOPIC CHOICES (From previous page) ===
 {prev_page_text[-1800:] if prev_page_text else "(No previous page)"}
@@ -2045,7 +2051,7 @@ If no editing/correction exercise exists on the page, return:
     return cleaned
 
 
-def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key: str | list[str], detailed: bool = False) -> list[dict]:
+def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key: str | list[str], detailed: bool = False, cefr_level: str = "B1", human_touch: bool = False) -> list[dict]:
     """
     Advanced Hybrid Solver:
     - Extracts precise vector blanks & ruled writing lines from PDF.
@@ -2054,6 +2060,7 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
     - Accurately detects and solves raster table columns (e.g. Galata/Pisa/Powder on Page 24).
     - Uses Vision Fallback if blanks are embedded inside arbitrary graphics.
     - Supports Fast Mode vs Detailed Mode (with pedagogical explanations).
+    - Supports CEFR Level (A1, A2, B1, B2, C1) & Natural Student Human Touch Mode.
     """
     doc = pymupdf.open(pdf_path)
     if page_num < 1 or page_num > len(doc):
@@ -2103,14 +2110,14 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
         if para_box:
             log_msg(f"[Odevmatik AI] Sayfa {page_num}: Ogrenci paragraf yazma kutusu ('YOUR PARAGRAPH:') tespit edildi, yaziliyor...")
             safe_close_doc(doc)
-            return solve_paragraph_box_page(page_num, para_box, page_text, prev_page_text, image_bytes, api_key, detailed=detailed)
+            return solve_paragraph_box_page(page_num, para_box, page_text, prev_page_text, image_bytes, api_key, detailed=detailed, cefr_level=cefr_level)
 
         # Check for full-page listing template lines (e.g. Page 25 Listing Template)
         listing_lines = extract_listing_template_lines(doc, page)
         if listing_lines:
             log_msg(f"[Odevmatik AI] Sayfa {page_num}: {len(listing_lines)} satirlik beyin firtinasi (listing) sablonu tespit edildi, cozuyor...")
             safe_close_doc(doc)
-            return solve_listing_template_page(page_num, listing_lines, page_text, prev_page_text, image_bytes, api_key, detailed=detailed)
+            return solve_listing_template_page(page_num, listing_lines, page_text, prev_page_text, image_bytes, api_key, detailed=detailed, cefr_level=cefr_level)
 
         # Check for clustering template (mind-map / bubble diagram, e.g. Page 26)
         if detect_clustering_template(doc, page, page_num, page_text, prev_page_text):
@@ -2203,6 +2210,24 @@ Provide an array of EXACTLY {len(sunburst_rays)} distinct, authentic student ite
     "clothes"
   ]"""
 
+    cefr_clean = (cefr_level or "B1").strip().upper()
+    cefr_instructions = f"""
+=== TARGET CEFR LEVEL: {cefr_clean} ===
+Align vocabulary and grammatical complexity with CEFR {cefr_clean}:
+- For A1/A2: Use simple everyday vocabulary, direct syntax, and basic structures. Do not use advanced idioms or complex vocabulary.
+- For B1/B2: Standard intermediate workbook student level with natural phrasing.
+- For C1: Advanced, sophisticated phrasing and nuanced grammatical structures.
+"""
+
+    human_touch_instructions = ""
+    if human_touch:
+        human_touch_instructions = """
+=== NATURAL STUDENT IMPERFECTIONS / HUMAN TOUCH MODE (ACTIVE) ===
+Simulate an authentic, diligent human student (aiming for ~92-95% grade, NOT an artificial 100% robot):
+- Most answers should be 100% accurate.
+- If there are 6 or more questions on the page, leave 1 very minor, realistic student oversight (e.g. an innocent minor synonym, missing apostrophe like 'dont' or 'cant', or an authentic, minor student slip) that a teacher would expect from a real student.
+"""
+
     prompt = f"""You are an expert English language student and teacher.
 Solve all exercises on this workbook page completely and realistically.
 
@@ -2216,6 +2241,8 @@ Solve all exercises on this workbook page completely and realistically.
 {blanks_listing}
 {writing_instructions}
 {sunburst_instructions}
+{cefr_instructions}
+{human_touch_instructions}
 
 === STRICT CONCISENESS & EXERCISE RULES ===
 1. CONCISE DIRECT ANSWERS ONLY (FIT THE BLANK):

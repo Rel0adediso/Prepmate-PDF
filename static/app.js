@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     keyCount: 1,
     isDetailedMode: false,
     isCheckMode: false,
+    cefrLevel: 'B1',
+    humanTouch: false,
     activeAnnotationEl: null
   };
 
@@ -28,17 +30,108 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearApiKeyBtn = document.getElementById('clearApiKeyBtn');
   const closeApiModalBtn = document.getElementById('closeApiModalBtn');
 
-  // Mode Elements
+  // Mode & Level Elements
   const fastModeBtn = document.getElementById('fastModeBtn');
   const detailedModeBtn = document.getElementById('detailedModeBtn');
   const checkModeBtn = document.getElementById('checkModeBtn');
   const editorFastModeBtn = document.getElementById('editorFastModeBtn');
   const editorDetailedModeBtn = document.getElementById('editorDetailedModeBtn');
   const editorCheckModeBtn = document.getElementById('editorCheckModeBtn');
+  const cefrLevelSelect = document.getElementById('cefrLevelSelect');
+  const humanTouchCheckbox = document.getElementById('humanTouchCheckbox');
+  const copyPageImageBtn = document.getElementById('copyPageImageBtn');
+  const parchmentToggleBtn = document.getElementById('parchmentToggleBtn');
+  const cheatSheetBtn = document.getElementById('cheatSheetBtn');
+  const cheatSheetModal = document.getElementById('cheatSheetModal');
+  const closeCheatSheetBtn = document.getElementById('closeCheatSheetBtn');
+  const closeCheatSheetFooterBtn = document.getElementById('closeCheatSheetFooterBtn');
+  const cheatSheetList = document.getElementById('cheatSheetList');
+  const cheatSheetPageTitle = document.getElementById('cheatSheetPageTitle');
+  const copyCheatSheetTextBtn = document.getElementById('copyCheatSheetTextBtn');
+  const canvasViewport = document.getElementById('canvasViewport');
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
   const modeTitle = document.getElementById('modeTitle');
   const modeDesc = document.getElementById('modeDesc');
   const modeBadge = document.getElementById('modeBadge');
   const modeIcon = document.getElementById('modeIcon');
+
+  // Undo / Redo History Stack (Ctrl + Z / Ctrl + Y)
+  const undoStack = [];
+  const redoStack = [];
+  const MAX_HISTORY = 40;
+
+  function pushUndoSnapshot(pageNum) {
+    if (!pageNum || !state.pagesData[pageNum]) return;
+    undoStack.push({
+      pageNum: pageNum,
+      data: JSON.parse(JSON.stringify(state.pagesData[pageNum]))
+    });
+    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+    redoStack.length = 0;
+    updateUndoRedoUI();
+  }
+
+  function updateUndoRedoUI() {
+    if (undoBtn) undoBtn.style.opacity = undoStack.length === 0 ? '0.35' : '1';
+    if (redoBtn) redoBtn.style.opacity = redoStack.length === 0 ? '0.35' : '1';
+  }
+
+  function refreshVisiblePageAnnotations(pageNum) {
+    const leftIndex = state.currentPageIndex;
+    const leftPage = state.selectedPages[leftIndex];
+    const rightIndex = leftIndex + 1;
+    const rightPage = state.isTwoPageMode && rightIndex < state.selectedPages.length ? state.selectedPages[rightIndex] : null;
+
+    if (leftPage === pageNum) {
+      renderAnnotationsForPage(pageNum, leftAnnotationsLayer, leftPageContainer);
+    } else if (rightPage === pageNum) {
+      renderAnnotationsForPage(pageNum, rightAnnotationsLayer, rightPageContainer);
+    }
+  }
+
+  function performUndo() {
+    if (undoStack.length === 0) {
+      showToast('ℹ️ Geri alınacak işlem yok.');
+      return;
+    }
+    const lastState = undoStack.pop();
+    const pageNum = lastState.pageNum;
+
+    if (state.pagesData[pageNum]) {
+      redoStack.push({
+        pageNum: pageNum,
+        data: JSON.parse(JSON.stringify(state.pagesData[pageNum]))
+      });
+      if (redoStack.length > MAX_HISTORY) redoStack.shift();
+    }
+
+    state.pagesData[pageNum] = lastState.data;
+    refreshVisiblePageAnnotations(pageNum);
+    updateUndoRedoUI();
+    showToast(`↩️ <b>Geri Alındı</b> (Sayfa ${pageNum})`);
+  }
+
+  function performRedo() {
+    if (redoStack.length === 0) {
+      showToast('ℹ️ İleri alınacak işlem yok.');
+      return;
+    }
+    const nextState = redoStack.pop();
+    const pageNum = nextState.pageNum;
+
+    if (state.pagesData[pageNum]) {
+      undoStack.push({
+        pageNum: pageNum,
+        data: JSON.parse(JSON.stringify(state.pagesData[pageNum]))
+      });
+    }
+
+    state.pagesData[pageNum] = nextState.data;
+    refreshVisiblePageAnnotations(pageNum);
+    updateUndoRedoUI();
+    showToast(`↪️ <b>İleri Alındı</b> (Sayfa ${pageNum})`);
+  }
 
   // Summary Report Modal Elements
   const summaryReportModal = document.getElementById('summaryReportModal');
@@ -304,6 +397,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (editorFastModeBtn) editorFastModeBtn.addEventListener('click', () => setSolveMode('fast'));
   if (editorDetailedModeBtn) editorDetailedModeBtn.addEventListener('click', () => setSolveMode('detailed'));
   if (editorCheckModeBtn) editorCheckModeBtn.addEventListener('click', () => setSolveMode('check'));
+
+  if (cefrLevelSelect) {
+    cefrLevelSelect.addEventListener('change', () => {
+      state.cefrLevel = cefrLevelSelect.value;
+      showToast(`🎯 Hedef Dil Seviyesi: <b>${state.cefrLevel}</b>`);
+    });
+  }
+
+  if (humanTouchCheckbox) {
+    humanTouchCheckbox.addEventListener('change', () => {
+      state.humanTouch = humanTouchCheckbox.checked;
+      if (state.humanTouch) {
+        showToast('🎭 <b>Doğal Öğrenci Modu:</b> ~%95 puan hedefiyle gerçekçi insan hata payı simüle edilecek.');
+      } else {
+        showToast('🤖 <b>Kusursuz Mod:</b> Sorular %100 doğrulukla çözülecek.');
+      }
+    });
+  }
 
   // Drag & Drop Upload
   dropZone.addEventListener('click', () => pdfFileInput.click());
@@ -786,7 +897,9 @@ document.addEventListener('DOMContentLoaded', () => {
           api_key: state.apiKey === 'ENV_KEY_ACTIVE' ? '' : state.apiKey,
           detailed: !!state.isDetailedMode,
           check_mode: !!state.isCheckMode,
-          force: !!force
+          force: !!force,
+          cefr_level: state.cefrLevel || 'B1',
+          human_touch: !!state.humanTouch
         })
       });
 
@@ -967,6 +1080,315 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  if (copyPageImageBtn) {
+    copyPageImageBtn.addEventListener('click', async () => {
+      const pageNum = state.activePageNum || state.selectedPages[state.currentPageIndex];
+      if (!pageNum || !state.fileId) {
+        showToast('⚠️ Kopyalanacak aktif sayfa bulunamadı.', true);
+        return;
+      }
+
+      const origHtml = copyPageImageBtn.innerHTML;
+      copyPageImageBtn.innerHTML = '<span class="animate-spin text-emerald-400">⏳</span><span>Kopyalanıyor...</span>';
+      copyPageImageBtn.disabled = true;
+
+      try {
+        // Load original page image
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Sayfa görseli sunucudan alınamadı.'));
+          img.src = `/api/page-image/${state.fileId}/${pageNum}`;
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || 1200;
+        canvas.height = img.naturalHeight || 1600;
+        const ctx = canvas.getContext('2d');
+
+        // 1. Draw base page
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // 2. Draw annotations on canvas
+        const annotations = state.pagesData[pageNum] || [];
+        const scaleX = canvas.width / 1000;
+        const scaleY = canvas.height / 1000;
+
+        for (const item of annotations) {
+          const [ymin, xmin, ymax, xmax] = item.box_2d || [100, 100, 150, 300];
+          const x0 = xmin * scaleX;
+          const y0 = ymin * scaleY;
+          const w0 = (xmax - xmin) * scaleX;
+          const h0 = (ymax - ymin) * scaleY;
+
+          if (item.type === 'highlight') {
+            ctx.fillStyle = 'rgba(255, 235, 59, 0.40)';
+            ctx.fillRect(x0, y0, w0, h0);
+            continue;
+          }
+
+          const fontSizePt = item.font_size || 11;
+          const fontSizePx = Math.round(fontSizePt * (canvas.height / 842));
+          ctx.font = `bold ${fontSizePx}px Helvetica, Arial, sans-serif`;
+          ctx.fillStyle = '#000000';
+
+          const text = String(item.answer || '');
+          const lines = text.split('\n');
+          const lineHeight = fontSizePx * 1.25;
+
+          const align = item.align || 0;
+          let drawX = x0;
+          if (align === 1) {
+            ctx.textAlign = 'center';
+            drawX = x0 + w0 / 2;
+          } else if (align === 2) {
+            ctx.textAlign = 'right';
+            drawX = x0 + w0;
+          } else {
+            ctx.textAlign = 'left';
+            drawX = x0;
+          }
+
+          for (let li = 0; li < lines.length; li++) {
+            ctx.fillText(lines[li], drawX, y0 + fontSizePx + (li * lineHeight));
+          }
+          ctx.textAlign = 'left';
+        }
+
+        // 3. Export to PNG blob & copy to clipboard
+        canvas.toBlob(async (blob) => {
+          if (!blob) throw new Error('PNG görseli oluşturulamadı.');
+          try {
+            if (navigator.clipboard && window.ClipboardItem) {
+              await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+              ]);
+              showToast(`📸 <b>Sayfa ${pageNum}</b> panoya kopyalandı! (Ctrl+V ile yapıştırabilirsiniz)`);
+            } else {
+              throw new Error('Tarayıcı panoya kopyalamaya izin vermedi.');
+            }
+          } catch (clipErr) {
+            // Fallback: download as PNG
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Odev_Sayfa_${pageNum}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`📥 <b>Sayfa ${pageNum}</b> resim olarak indirildi.`);
+          }
+        }, 'image/png');
+      } catch (err) {
+        showToast('Resim kopyalama hatası: ' + err.message, true);
+      } finally {
+        copyPageImageBtn.innerHTML = origHtml;
+        copyPageImageBtn.disabled = false;
+      }
+    });
+  }
+
+  // Initialize Parchment Eye-Care Mode (Claude warm paper filter)
+  const isParchmentSaved = localStorage.getItem('prepmate_parchment_mode') === 'true';
+  if (isParchmentSaved && canvasViewport) {
+    canvasViewport.classList.add('parchment-mode');
+    updateParchmentBtnUI(true);
+  }
+
+  function updateParchmentBtnUI(active) {
+    if (!parchmentToggleBtn) return;
+    if (active) {
+      parchmentToggleBtn.classList.add('bg-[#cc785c]/25', 'text-[#e58f74]', 'border-[#cc785c]/40');
+      parchmentToggleBtn.classList.remove('bg-[#272522]', 'text-[#d4a373]', 'border-[#3d3a36]');
+    } else {
+      parchmentToggleBtn.classList.remove('bg-[#cc785c]/25', 'text-[#e58f74]', 'border-[#cc785c]/40');
+      parchmentToggleBtn.classList.add('bg-[#272522]', 'text-[#d4a373]', 'border-[#3d3a36]');
+    }
+  }
+
+  if (parchmentToggleBtn && canvasViewport) {
+    parchmentToggleBtn.addEventListener('click', () => {
+      const active = canvasViewport.classList.toggle('parchment-mode');
+      localStorage.setItem('prepmate_parchment_mode', active ? 'true' : 'false');
+      updateParchmentBtnUI(active);
+      showToast(active ? '🌙 <b>Göz Koruma Açık:</b> Sıcak parşömen kağıt filtresi uygulandı.' : '☀️ <b>Göz Koruma Kapalı:</b> Standart kontrast.');
+    });
+  }
+
+  // Quick Cheat Sheet Modal (Claude Style Answer Key)
+  function openCheatSheetModal() {
+    if (!cheatSheetModal || !cheatSheetList) return;
+
+    const leftIndex = state.currentPageIndex;
+    const leftPage = state.selectedPages[leftIndex];
+    const rightIndex = leftIndex + 1;
+    const rightPage = state.isTwoPageMode && rightIndex < state.selectedPages.length ? state.selectedPages[rightIndex] : null;
+
+    const pagesToDisplay = [];
+    if (leftPage) pagesToDisplay.push(leftPage);
+    if (rightPage) pagesToDisplay.push(rightPage);
+
+    if (pagesToDisplay.length === 0) {
+      showToast('Görüntülenecek açık sayfa bulunamadı.');
+      return;
+    }
+
+    if (cheatSheetPageTitle) {
+      cheatSheetPageTitle.textContent = pagesToDisplay.length > 1
+        ? `Sayfa ${pagesToDisplay.join(' ve ')} Soru & Cevap Anahtarı`
+        : `Sayfa ${pagesToDisplay[0]} Soru & Cevap Anahtarı`;
+    }
+
+    cheatSheetList.innerHTML = '';
+
+    pagesToDisplay.forEach(pg => {
+      const answers = state.pagesData[pg] || [];
+      const pgSection = document.createElement('div');
+      pgSection.className = 'space-y-2 mb-4';
+
+      if (pagesToDisplay.length > 1) {
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between text-xs font-bold text-[#d4a373] pb-1.5 border-b border-[#383530]';
+        header.innerHTML = `<span>📖 Sayfa ${pg}</span> <span class="text-[10px] text-[#a39e97] font-mono font-normal">${answers.length} cevap</span>`;
+        pgSection.appendChild(header);
+      }
+
+      if (answers.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'text-center py-4 text-xs text-[#a39e97] italic bg-[#171614]/60 rounded-xl border border-[#2d2b27]';
+        emptyDiv.textContent = `Sayfa ${pg} için henüz çözülmüş soru bulunmuyor.`;
+        pgSection.appendChild(emptyDiv);
+      } else {
+        const sorted = [...answers].sort((a, b) => {
+          const yA = (a.box_2d && a.box_2d[0]) ?? 0;
+          const yB = (b.box_2d && b.box_2d[0]) ?? 0;
+          return yA - yB;
+        });
+
+        sorted.forEach((item, idx) => {
+          const itemEl = document.createElement('div');
+          itemEl.className = 'flex items-start justify-between gap-3 bg-[#1e1c19] hover:bg-[#25221e] border border-[#383530] hover:border-[#cc785c]/40 rounded-xl p-3 transition';
+
+          const label = item.id ? `${item.id}` : `${idx + 1}`;
+          let contentHtml = `
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <span class="px-2 py-0.5 rounded-lg bg-[#cc785c]/20 text-[#e58f74] font-bold text-[11px] border border-[#cc785c]/30 font-mono">#${escapeHtml(label)}</span>
+                <span class="font-sans font-bold text-white text-xs select-all break-words">${escapeHtml(item.answer || '')}</span>
+                ${item.wrong_word ? `<span class="text-[10px] line-through text-red-400 bg-red-950/40 px-1.5 py-0.5 rounded border border-red-800/40">${escapeHtml(item.wrong_word)}</span>` : ''}
+              </div>
+          `;
+
+          if (item.explanation) {
+            contentHtml += `
+              <div class="font-sans text-[11px] text-[#a39e97] leading-relaxed mt-1 pl-2 border-l-2 border-[#cc785c]/40">
+                ${escapeHtml(item.explanation)}
+              </div>
+            `;
+          }
+
+          contentHtml += `</div>`;
+
+          contentHtml += `
+            <button type="button" class="copy-single-ans-btn shrink-0 text-[10px] bg-[#272522] hover:bg-[#cc785c] text-[#a39e97] hover:text-white px-2 py-1 rounded-lg border border-[#383530] hover:border-[#cc785c] transition flex items-center gap-1 shadow-sm" title="Bu cevabı kopyala" data-answer="${escapeHtml(item.answer || '')}">
+              <span>📋</span>
+            </button>
+          `;
+
+          itemEl.innerHTML = contentHtml;
+
+          const singleBtn = itemEl.querySelector('.copy-single-ans-btn');
+          if (singleBtn) {
+            singleBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const ans = singleBtn.getAttribute('data-answer');
+              navigator.clipboard.writeText(ans).then(() => {
+                showToast(`📋 Kopyalandı: <b>${escapeHtml(ans)}</b>`);
+              });
+            });
+          }
+
+          pgSection.appendChild(itemEl);
+        });
+      }
+
+      cheatSheetList.appendChild(pgSection);
+    });
+
+    cheatSheetModal.classList.remove('hidden');
+  }
+
+  if (cheatSheetBtn) {
+    cheatSheetBtn.addEventListener('click', openCheatSheetModal);
+  }
+
+  if (closeCheatSheetBtn) {
+    closeCheatSheetBtn.addEventListener('click', () => {
+      cheatSheetModal?.classList.add('hidden');
+    });
+  }
+
+  if (closeCheatSheetFooterBtn) {
+    closeCheatSheetFooterBtn.addEventListener('click', () => {
+      cheatSheetModal?.classList.add('hidden');
+    });
+  }
+
+  if (cheatSheetModal) {
+    cheatSheetModal.addEventListener('click', (e) => {
+      if (e.target === cheatSheetModal) {
+        cheatSheetModal.classList.add('hidden');
+      }
+    });
+  }
+
+  if (copyCheatSheetTextBtn) {
+    copyCheatSheetTextBtn.addEventListener('click', () => {
+      const leftIndex = state.currentPageIndex;
+      const leftPage = state.selectedPages[leftIndex];
+      const rightIndex = leftIndex + 1;
+      const rightPage = state.isTwoPageMode && rightIndex < state.selectedPages.length ? state.selectedPages[rightIndex] : null;
+
+      const pagesToDisplay = [];
+      if (leftPage) pagesToDisplay.push(leftPage);
+      if (rightPage) pagesToDisplay.push(rightPage);
+
+      const lines = [];
+      pagesToDisplay.forEach(pg => {
+        const answers = state.pagesData[pg] || [];
+        if (answers.length > 0) {
+          lines.push(`=== SAYFA ${pg} CEVAP ANAHTARI ===`);
+          const sorted = [...answers].sort((a, b) => {
+            const yA = (a.box_2d && a.box_2d[0]) ?? 0;
+            const yB = (b.box_2d && b.box_2d[0]) ?? 0;
+            return yA - yB;
+          });
+          sorted.forEach((item, idx) => {
+            const num = item.id ? item.id : (idx + 1);
+            let line = `${num}) ${item.answer || ''}`;
+            if (item.explanation) line += `  [Açıklama: ${item.explanation}]`;
+            lines.push(line);
+          });
+          lines.push('');
+        }
+      });
+
+      if (lines.length === 0) {
+        showToast('Kopyalanacak cevap bulunamadı.', true);
+        return;
+      }
+
+      const allText = lines.join('\n').trim();
+      navigator.clipboard.writeText(allText).then(() => {
+        showToast('📋 Tüm cevaplar panoya kopyalandı!');
+      }).catch(err => {
+        showToast('Panoya kopyalanamadı: ' + err.message, true);
+      });
+    });
+  }
+
   prevPageBtn.addEventListener('click', () => {
     const step = state.isTwoPageMode ? 2 : 1;
     state.currentPageIndex = Math.max(0, state.currentPageIndex - step);
@@ -1033,9 +1455,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       el.querySelector('.delete-btn').addEventListener('click', (e) => {
         e.stopPropagation();
+        pushUndoSnapshot(pageNum);
         el.remove();
         const list = state.pagesData[pageNum] || [];
         state.pagesData[pageNum] = list.filter(a => a !== item);
+        showToast('Vurgu silindi. (Geri almak için Ctrl + Z)');
       });
 
       el.addEventListener('mousedown', (e) => {
@@ -1067,16 +1491,34 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       const textEl = el.querySelector('.correction-text');
-      textEl.addEventListener('focus', () => checkAndShowPreviewNotice());
+      let origCorrText = item.answer || '';
+      textEl.addEventListener('focus', () => {
+        origCorrText = item.answer || '';
+        checkAndShowPreviewNotice();
+      });
       textEl.addEventListener('input', () => {
         item.answer = textEl.innerText.trim();
+      });
+      textEl.addEventListener('blur', () => {
+        const cur = textEl.innerText.trim();
+        if (cur !== origCorrText && state.pagesData[pageNum]) {
+          const snapshot = JSON.parse(JSON.stringify(state.pagesData[pageNum]));
+          const found = snapshot.find(x => String(x.id) === String(item.id));
+          if (found) found.answer = origCorrText;
+          undoStack.push({ pageNum, data: snapshot });
+          if (undoStack.length > MAX_HISTORY) undoStack.shift();
+          redoStack.length = 0;
+          updateUndoRedoUI();
+        }
       });
 
       el.querySelector('.delete-btn').addEventListener('click', (e) => {
         e.stopPropagation();
+        pushUndoSnapshot(pageNum);
         el.remove();
         const list = state.pagesData[pageNum] || [];
         state.pagesData[pageNum] = list.filter(a => a !== item);
+        showToast('Düzeltme silindi. (Geri almak için Ctrl + Z)');
       });
 
       el.addEventListener('mousedown', (e) => {
@@ -1115,16 +1557,34 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     const textEl = el.querySelector('.text-content');
-    textEl.addEventListener('focus', () => checkAndShowPreviewNotice());
+    let origAnsText = item.answer || '';
+    textEl.addEventListener('focus', () => {
+      origAnsText = item.answer || '';
+      checkAndShowPreviewNotice();
+    });
     textEl.addEventListener('input', () => {
       item.answer = textEl.innerText.trim();
+    });
+    textEl.addEventListener('blur', () => {
+      const cur = textEl.innerText.trim();
+      if (cur !== origAnsText && state.pagesData[pageNum]) {
+        const snapshot = JSON.parse(JSON.stringify(state.pagesData[pageNum]));
+        const found = snapshot.find(x => String(x.id) === String(item.id));
+        if (found) found.answer = origAnsText;
+        undoStack.push({ pageNum, data: snapshot });
+        if (undoStack.length > MAX_HISTORY) undoStack.shift();
+        redoStack.length = 0;
+        updateUndoRedoUI();
+      }
     });
 
     el.querySelector('.delete-btn').addEventListener('click', (e) => {
       e.stopPropagation();
+      pushUndoSnapshot(pageNum);
       el.remove();
       const list = state.pagesData[pageNum] || [];
       state.pagesData[pageNum] = list.filter(a => a !== item);
+      showToast('Cevap silindi. (Geri almak için Ctrl + Z)');
     });
 
     el.addEventListener('mousedown', (e) => {
@@ -1156,6 +1616,9 @@ document.addEventListener('DOMContentLoaded', () => {
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
+
+      const pageNum = parseInt(el.dataset.page, 10);
+      const preDragSnapshot = pageNum && state.pagesData[pageNum] ? JSON.parse(JSON.stringify(state.pagesData[pageNum])) : null;
 
       const rect = el.getBoundingClientRect();
       const parentRect = containerEl.getBoundingClientRect();
@@ -1197,10 +1660,21 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
       };
 
-      const onMouseUp = () => {
+      const onMouseUp = (ev) => {
         isDragging = false;
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
+
+        if (ev && preDragSnapshot && pageNum) {
+          const dx = ev.clientX - startX;
+          const dy = ev.clientY - startY;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+            undoStack.push({ pageNum, data: preDragSnapshot });
+            if (undoStack.length > MAX_HISTORY) undoStack.shift();
+            redoStack.length = 0;
+            updateUndoRedoUI();
+          }
+        }
       };
 
       window.addEventListener('mousemove', onMouseMove);
@@ -1212,6 +1686,8 @@ document.addEventListener('DOMContentLoaded', () => {
   addTextBoxBtn.addEventListener('click', () => {
     const pageNum = state.activePageNum || state.selectedPages[state.currentPageIndex];
     if (!pageNum) return;
+
+    pushUndoSnapshot(pageNum);
 
     const newItem = {
       id: Date.now(),
@@ -1235,9 +1711,10 @@ document.addEventListener('DOMContentLoaded', () => {
   fontSizeSelect.addEventListener('change', () => {
     const newSize = parseInt(fontSizeSelect.value, 10);
     if (state.activeAnnotationEl) {
+      const pageNum = parseInt(state.activeAnnotationEl.dataset.page, 10);
+      if (pageNum) pushUndoSnapshot(pageNum);
       state.activeAnnotationEl.style.fontSize = `${newSize}pt`;
       const id = state.activeAnnotationEl.dataset.id;
-      const pageNum = state.activeAnnotationEl.dataset.page;
       const list = state.pagesData[pageNum] || [];
       const target = list.find(x => String(x.id) === String(id));
       if (target) target.font_size = newSize;
@@ -1318,7 +1795,29 @@ document.addEventListener('DOMContentLoaded', () => {
         state.activeAnnotationEl = null;
       }
       apiKeyModal?.classList.add('hidden');
+      cheatSheetModal?.classList.add('hidden');
       return;
+    }
+
+    // Ctrl + Z (Undo) & Ctrl + Y / Ctrl + Shift + Z (Redo)
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'z' || e.key === 'Z') {
+        if (!isTyping) {
+          e.preventDefault();
+          if (e.shiftKey) {
+            performRedo();
+          } else {
+            performUndo();
+          }
+          return;
+        }
+      } else if (e.key === 'y' || e.key === 'Y') {
+        if (!isTyping) {
+          e.preventDefault();
+          performRedo();
+          return;
+        }
+      }
     }
 
     if (isTyping) return;
@@ -1335,6 +1834,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (deleteBtn) deleteBtn.click();
     }
   });
+
+  if (undoBtn) undoBtn.addEventListener('click', performUndo);
+  if (redoBtn) redoBtn.addEventListener('click', performRedo);
+  updateUndoRedoUI();
 
   function escapeHtml(text) {
     const div = document.createElement('div');

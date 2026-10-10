@@ -74,6 +74,8 @@ class SolvePageRequest(BaseModel):
     detailed: bool = False
     force: bool = False
     check_mode: bool = False
+    cefr_level: str = "B1" # "A1", "A2", "B1", "B2", "C1"
+    human_touch: bool = False # Natural student ~92-95% grade simulation
 
 class ExportRequest(BaseModel):
     file_id: str
@@ -269,7 +271,15 @@ def solve_page(req: SolvePageRequest):
         if req.check_mode:
             annotations = check_page_answers(str(pdf_path), req.page_num, img_bytes, keys_pool, detailed=req.detailed)
         else:
-            annotations = solve_page_hybrid(str(pdf_path), req.page_num, img_bytes, keys_pool, detailed=req.detailed)
+            annotations = solve_page_hybrid(
+                str(pdf_path), 
+                req.page_num, 
+                img_bytes, 
+                keys_pool, 
+                detailed=req.detailed,
+                cefr_level=req.cefr_level,
+                human_touch=req.human_touch
+            )
         # Save to cache
         try:
             with open(cache_file, "w", encoding="utf-8") as f:
