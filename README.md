@@ -1,7 +1,7 @@
 # 🎓 PrepMate PDF — AI Workbook & Homework Solver
 
-[![⬇️ WINDOWS PROGRAMINI İNDİR (.EXE)](https://img.shields.io/badge/⬇️_WINDOWS_İÇİN_İNDİR_(.EXE)-v1.0.0_Hazır-6366f1?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
-[![Sürüm](https://img.shields.io/badge/Sürüm-v1.0.0-10b981?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![⬇️ WINDOWS PROGRAMINI İNDİR (.EXE)](https://img.shields.io/badge/⬇️_WINDOWS_İÇİN_İNDİR_(.EXE)-v1.0.2_Hazır-6366f1?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+[![Sürüm](https://img.shields.io/badge/Sürüm-v1.0.2-10b981?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
 [![Lisans](https://img.shields.io/badge/Lisans-MIT-3b82f6?style=for-the-badge)](#)
 
 > 🚀 **HİÇBİR ŞEY BİLMEYENLER İÇİN 10 SANİYEDE BAŞLATMA:**  
@@ -17,15 +17,19 @@
 
 ## ✨ Neden PrepMate PDF?
 
-- **🎯 Akıllı Vektör Analizi:** Sayfadaki boşlukları (`____`), çizgili kompozisyon satırlarını ve soru tiplerini doğrudan PDF'in içinden piksel piksel çıkarır.
-- **⚡ Çoklu Soru Türü Desteği:**
-  - **Boşluk Doldurma** (*Fill in the blanks with correct forms*)
-  - **Kompozisyon & Yazma Görevleri** (*Self-introduction, person you admire, live stream vb.*)
-  - **Hata Düzeltme (*Edit Section*)** — 5.8pt zarif öğretmen el yazısı stiliyle, metinle çakışmayan temiz düzeltme
-  - **Seçenek & Şık Vurgulama** (*Circle / underline the correct verb*)
+- **🎯 Akıllı Vektör & Şablon Analizi:** Sayfadaki boşlukları (`____`), çizgili kompozisyon satırlarını, tabloları ve diyagramları doğrudan PDF'in vektörel yapısından piksel piksel çıkarır.
+- **⚡ Çoklu Soru & Diyagram Türü Desteği:**
+  - **Boşluk Doldurma:** (*Fill in the blanks with correct forms*)
+  - **Zihin Haritaları & Sunburst:** (*Spider diagrams / mind-maps, dairesel beyin fırtınası kolları*)
+  - **Beyin Fırtınası Liste Şablonları:** (*Brainstorming listing templates 1-10*)
+  - **Kompozisyon & Paragraf Kutuları:** (*Your Paragraph, Unit Task, açık uçlu yazma kutuları*)
+  - **Fiil-İsim Eşleştirmeleri:** (*Collocations: pack a suitcase, check weather vb.*)
+  - **Hata Düzeltme (*Edit Section*):** 5.8pt zarif öğretmen el yazısı stiliyle, metinle çakışmayan temiz düzeltme
+  - **Seçenek & Şık Vurgulama:** (*Circle / underline the correct verb*)
 - **📄 Adobe Acrobat Standartları:** Çözümler PDF'in çözünürlüğünü bozmaz; orijinal dosya üzerine saf siyah Helvetica vektör metin katmanı olarak basılır (Hocanın gözünde Adobe Acrobat ile doldurulmuş gibi görünür).
-- **🚀 6x Paralel İşleme & Yük Dengeleme:** Çoklu API anahtarı havuzu ile arkada 6 worker aynı anda çalışır; 30 sayfalık ödevi saniyeler içinde bitirir.
-- **💾 Kalıcı Disk Önbelleği (Cache):** Bir kez çözülen sayfa yerel önbelleğe alınır; sayfayı tekrar açtığınızda veya dışa aktarırken **1 milisaniyede** yüklenir.
+- **🛡️ Akıllı Kota Koruması & Otomatik Yeniden Deneme:** Google Gemini 429 hız limitlerine takılmamak için worker'lar kademeli (staggered) çalışır, geçici kota dolmalarında 2 kez otomatik yeniden dener.
+- **💾 Kesintisiz Disk Önbelleği (Export Cache):** Sayfa yenilense veya tarayıcı kapansa dahi çözülen hiçbir sayfa kaybolmaz; dışa aktarırken tüm sayfalar otomatik birleştirilir.
+- **📦 Toplu ZIP & Tekil PDF Dışa Aktarma:** İster tek dosya, ister birden fazla ödev kitabını tek tıkla ZIP arşivi olarak indirme.
 - **✏️ Canlı Web Editörü:**
   - Çözümleri ekranda anlık düzenleme, silme ve fareyle sürükleyip taşıma
   - Klavye kısayolları (`←` / `→` ile sayfa geçişi, `Delete` ile silme)
