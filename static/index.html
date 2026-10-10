@@ -261,11 +261,6 @@
             <svg class="w-3 h-3 text-[#a39e97] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </div>
 
-          <!-- Color Indicator (Dümdüz Siyah) -->
-          <div class="flex items-center space-x-1.5 text-xs text-[#a39e97] bg-[#272522] border border-[#3d3a36] px-2.5 py-1.5 rounded-xl">
-            <span class="w-2.5 h-2.5 rounded-full bg-black border border-slate-600 inline-block shadow-sm"></span>
-            <span>Siyah</span>
-          </div>
 
           <!-- Mode Toggle in Editor Bar -->
           <div class="flex items-center bg-[#171614] border border-[#383530] rounded-xl p-0.5 text-xs">
@@ -310,8 +305,8 @@
             <span>📸 Resim Kopyala</span>
           </button>
 
-          <!-- Add More Pages Button -->
-          <button id="addPagesBtn" title="Mevcut listeye yeni sayfalar ekle" class="flex items-center space-x-1.5 bg-[#272522] hover:bg-[#312e2a] text-[#ece8e1] border border-[#3d3a36] px-3 py-1.5 rounded-xl transition font-medium">
+          <!-- Add More Pages Button (Visible on Wide Displays, also accessible in Sidebar) -->
+          <button id="addPagesBtn" title="Mevcut listeye yeni sayfalar ekle" class="hidden xl:flex items-center space-x-1.5 bg-[#272522] hover:bg-[#312e2a] text-[#ece8e1] border border-[#3d3a36] px-3 py-1.5 rounded-xl transition font-medium">
             <span>➕</span>
             <span>Sayfa Ekle</span>
           </button>
@@ -353,11 +348,15 @@
         </div>
 
         <!-- Collapsible Progress Sidebar (Claude Style) -->
-        <aside id="progressSidebar" class="w-80 min-w-[20rem] bg-[#1d1b18]/95 border-l border-[#2d2b27] flex flex-col shrink-0 z-20 shadow-xl overflow-hidden">
+        <aside id="progressSidebar" class="w-80 min-w-[20rem] bg-[#1d1b18] border-l border-[#2d2b27] flex flex-col shrink-0 z-20 shadow-xl overflow-hidden">
+          <!-- Sidebar Header -->
           <div class="p-4 border-b border-[#2d2b27] flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <span class="text-base">📑</span>
-              <h3 class="font-bold text-sm text-[#fbf9f5]">Ödev İlerlemesi</h3>
+            <div>
+              <h3 class="font-bold text-sm text-[#fbf9f5] flex items-center gap-2">
+                <span>📑 Ödev İlerlemesi</span>
+                <span id="overallPercentBadge" class="text-xs px-2 py-0.5 rounded-full bg-[#cc785c]/20 text-[#e58f74] border border-[#cc785c]/35 font-bold font-mono">0%</span>
+              </h3>
+              <p id="progressStatusSubtitle" class="text-[11px] text-[#a39e97] mt-0.5">Sayfalar kontrol ediliyor...</p>
             </div>
             <div class="flex items-center space-x-1.5">
               <button id="solveAllPendingBtn" class="text-xs bg-[#cc785c]/20 hover:bg-[#cc785c]/30 text-[#e58f74] border border-[#cc785c]/35 px-2.5 py-1 rounded-lg transition font-medium" title="Henüz çözülmemiş sayfaları çöz">
@@ -366,8 +365,29 @@
               <button id="closeProgressSidebarBtn" class="p-1 rounded-lg text-[#a39e97] hover:text-white hover:bg-white/[0.08] transition text-sm">&times;</button>
             </div>
           </div>
-          <div id="progressCardsList" class="flex-1 overflow-y-auto p-3 space-y-2.5">
-            <!-- Injected by JS -->
+
+          <!-- Overall Progress Bar Container -->
+          <div class="px-4 py-3 border-b border-[#2d2b27] bg-[#171614]">
+            <div class="w-full bg-[#272522] rounded-full h-2 overflow-hidden shadow-inner">
+              <div id="overallProgressBar" class="h-2 rounded-full bg-gradient-to-r from-[#cc785c] to-[#d4a373] transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-[#a39e97] mt-2">
+              <span id="completedPagesCount" class="font-medium text-[#ece8e1]">0 tamamlandı</span>
+              <span id="totalSelectedPagesCount" class="font-mono">0 sayfa</span>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Page Cards List -->
+          <div id="progressPagesList" class="flex-1 overflow-y-auto p-3 space-y-2">
+            <!-- Dynamic items rendered by app.js -->
+          </div>
+
+          <!-- Sidebar Footer: Add More Pages Button -->
+          <div class="p-3 border-t border-[#2d2b27] bg-[#171614]">
+            <button id="addPagesSidebarBtn" class="w-full bg-[#272522] hover:bg-[#312e2a] text-[#d4a373] hover:text-white border border-[#3d3a36] rounded-xl py-2 px-3 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <span>➕</span>
+              <span>Yeni Sayfa Ekle</span>
+            </button>
           </div>
         </aside>
       </div>
