@@ -1,105 +1,131 @@
-# 🎓 PrepMate PDF — AI Workbook & Homework Solver
+<div align="center">
 
-[![⬇️ WINDOWS PROGRAMINI İNDİR (.EXE)](https://img.shields.io/badge/⬇️_WINDOWS_İÇİN_İNDİR_(.EXE)-v1.0.2_Hazır-6366f1?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
-[![Sürüm](https://img.shields.io/badge/Sürüm-v1.0.2-10b981?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
-[![Lisans](https://img.shields.io/badge/Lisans-MIT-3b82f6?style=for-the-badge)](#)
+# 🎓 PrepMate PDF
+### *AI-Powered English Workbook & Homework Solver*
 
-> 🚀 **HİÇBİR ŞEY BİLMEYENLER İÇİN 10 SANİYEDE BAŞLATMA:**  
-> 1. Yukarıdaki **[⬇️ WINDOWS İÇİN İNDİR (.EXE)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** butonuna basıp **`PrepMate-PDF.exe`** dosyasını indirin.  
-> 2. İnen dosyaya **çift tıklayın**. Program masaüstü penceresi olarak anında açılacaktır!  
-> *(Bilgisayarınızda Python olmasına, ZIP çıkarmaya veya kod çalıştırmaya gerek yoktur).*
+[![Windows .EXE](https://img.shields.io/badge/Windows_İndir_(.EXE)-v1.0.2_Hazır-6366f1?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+[![Release](https://img.shields.io/badge/Sürüm-v1.0.2-10b981?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Gemini](https://img.shields.io/badge/AI_Engine-Gemini_3.8_%26_OpenRouter-ea4335?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
+[![Lisans](https://img.shields.io/badge/Lisans-MIT-blue?style=for-the-badge)](#)
 
----
-
-Üniversite hazırlık sınıflarında ve yabancı dil okullarında hocaların verdiği 100–200 sayfalık kalın İngilizce workbook (çalışma kitabı) PDF'lerini yapay zeka ile otomatik çözen, sadece ödev verilen sayfaları seçip **Adobe Acrobat'ta elle yazılmış gibi** doğal ve kusursuz şekilde dolduran masaüstü web uygulaması.
-
----
-
-## ✨ Neden PrepMate PDF?
-
-- **🎯 Akıllı Vektör & Şablon Analizi:** Sayfadaki boşlukları (`____`), çizgili kompozisyon satırlarını, tabloları ve diyagramları doğrudan PDF'in vektörel yapısından piksel piksel çıkarır.
-- **⚡ Çoklu Soru & Diyagram Türü Desteği:**
-  - **Boşluk Doldurma:** (*Fill in the blanks with correct forms*)
-  - **Zihin Haritaları & Sunburst:** (*Spider diagrams / mind-maps, dairesel beyin fırtınası kolları*)
-  - **Beyin Fırtınası Liste Şablonları:** (*Brainstorming listing templates 1-10*)
-  - **Kompozisyon & Paragraf Kutuları:** (*Your Paragraph, Unit Task, açık uçlu yazma kutuları*)
-  - **Fiil-İsim Eşleştirmeleri:** (*Collocations: pack a suitcase, check weather vb.*)
-  - **Hata Düzeltme (*Edit Section*):** 5.8pt zarif öğretmen el yazısı stiliyle, metinle çakışmayan temiz düzeltme
-  - **Seçenek & Şık Vurgulama:** (*Circle / underline the correct verb*)
-- **📄 Adobe Acrobat Standartları:** Çözümler PDF'in çözünürlüğünü bozmaz; orijinal dosya üzerine saf siyah Helvetica vektör metin katmanı olarak basılır (Hocanın gözünde Adobe Acrobat ile doldurulmuş gibi görünür).
-- **🛡️ Akıllı Kota Koruması & Otomatik Yeniden Deneme:** Google Gemini 429 hız limitlerine takılmamak için worker'lar kademeli (staggered) çalışır, geçici kota dolmalarında 2 kez otomatik yeniden dener.
-- **💾 Kesintisiz Disk Önbelleği (Export Cache):** Sayfa yenilense veya tarayıcı kapansa dahi çözülen hiçbir sayfa kaybolmaz; dışa aktarırken tüm sayfalar otomatik birleştirilir.
-- **📦 Toplu ZIP & Tekil PDF Dışa Aktarma:** İster tek dosya, ister birden fazla ödev kitabını tek tıkla ZIP arşivi olarak indirme.
-- **✏️ Canlı Web Editörü:**
-  - Çözümleri ekranda anlık düzenleme, silme ve fareyle sürükleyip taşıma
-  - Klavye kısayolları (`←` / `→` ile sayfa geçişi, `Delete` ile silme)
-  - Tek tıkla `+ Metin Kutusu Ekle` ile sayfanın en üstüne ad, soyad ve numara yazabilme
-  - Sayfa karşılaştırma (Tek sayfa / Çift sayfa kitap görünümü)
+<p align="center">
+  <b>Üniversite hazırlık sınıfları ve yabancı dil okulları için geliştirilmiş otonom ödev çözücü.</b><br>
+  150+ sayfalık kalın workbook PDF'lerini analiz eder, soruları doğal el yazısı hissiyle çözer ve <b>Adobe Acrobat ile doldurulmuş gibi</b> orijinal vektörel kalitede çıktısını verir.
+</p>
 
 ---
 
-## 🚀 Nasıl Başlatılır?
+### ⚡ [Hemen Windows EXE İndir (Kurulumsuz, Tek Tıkla Çalışır)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
 
-### Yöntem 1: Tek Tıkla Masaüstü Programı (Önerilen — En Kolayı)
-1. **[Releases](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** sayfasından **`PrepMate-PDF.exe`** dosyasını indirin.
-2. Dosyaya çift tıklayın. Hepsi bu kadar! 
-*(Python yüklemenize, terminal açmanıza veya paket kurmanıza gerek yoktur).*
+</div>
 
 ---
 
-### Yöntem 2: Kaynak Koddan Çalıştırma (.bat ile)
-Eğer projeyi kaynak kodundan çalıştırmak veya kodları geliştirmek isterseniz:
-1. Bilgisayarınızda **Python 3.10+** kurulu olmalıdır *(Kurarken "Add python.exe to PATH" seçeneğini işaretleyin)*.
-2. Projeyi ZIP olarak indirin ve bir klasöre çıkartın.
-3. Klasör içindeki **`kurulum.bat`** dosyasına çift tıklayın (gerekli kütüphaneleri otomatik kurar).
-4. Ardından **`baslat.bat`** dosyasına çift tıklayın (tarayıcınızda otomatik açılır).
+## 🚀 10 Saniyede Başlatma (Hızlı Başlangıç)
+
+> [!TIP]
+> **Kod bilmenize, Python yüklemenize veya terminal açmanıza gerek yoktur!**
+> 1. Yukarıdaki **[Windows İndir (.EXE)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** bağlantısından **`PrepMate-PDF.exe`** dosyasını indirin.
+> 2. İndirdiğiniz dosyaya çift tıklayın. Program modern masaüstü penceresi olarak anında başlayacaktır.
+> 3. Sağ üstteki **"🔑 AI Anahtarı"** butonuna tıklayıp [Google AI Studio](https://aistudio.google.com/app/apikey)'dan aldığınız ücretsiz anahtarı yapıştırın.
 
 ---
 
-### 4. API Anahtarını Tanımlama
-İki farklı şekilde kolayca tanımlayabilirsiniz:
+## 🌟 Neden PrepMate PDF? (Geleneksel Çözücüler vs PrepMate)
 
-#### Yöntem A: Arayüzden Doğrudan (En Kolayı - Kodsuz)
-1. Uygulama açılınca sağ üst köşedeki **"🔑 AI Anahtarı Gir"** butonuna tıklayın.
-2. [Google AI Studio](https://aistudio.google.com/app/apikey)'dan tamamen ücretsiz aldığınız anahtarı kutuya yapıştırıp **"Kaydet"** deyin.
-3. > **⚡ 6x Turbo Paralel Hız:** Kutuya birden fazla hesaba ait anahtarları alt alta veya virgülle yapıştırırsanız, PrepMate PDF 6 worker havuzu oluşturur ve sayfaları 6'şar 6'şar paralel çözerek saniyeler içinde ödevi bitirir!
+| Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF v1.0.2 |
+| :--- | :---: | :---: |
+| **PDF Formatı & Kalite** | PDF'i bozar, bulanık resme çevirir | **Vektörel kalitede, orijinal çözünürlük korunur** |
+| **Hizalama Hassasiyeti** | Yanıtlar satırların dışına taşar | **Piksel düzeyinde çizgi & kutu tespiti** |
+| **Zihin Haritası & Diyagramlar** | Okuyamaz veya atlar | **Sunburst & örümcek diyagramlarını tam çözer** |
+| **Hata Düzeltme (Editing)** | Sadece kelimeyi yazar | **5.8pt zarif öğretmen el yazısıyla satır üstü düzeltme** |
+| **Çıktı Formatı** | Tüm kitabı baştan sona basar | **Yalnızca ödev olan sayfaları ayıklar veya tam kitap sunar** |
+| **API Limit Koruması** | 429 hatasıyla çöker | **Kademeli worker + Akıllı cooldown + Otomatik retry** |
+| **İnternet / Çerez Kesintisi** | Çözülen sayfalar kaybolur | **Kalıcı disk önbelleği (Cache) ile sayfalar korunur** |
 
-#### Yöntem B: Dosya ile (.env)
-Klasördeki **`.env.example`** dosyasının adını **`.env`** olarak değiştirin ve içine anahtarınızı yapıştırın:
-```env
-# Ücretsiz almak için: https://aistudio.google.com/app/apikey
-GEMINI_API_KEY=AIzaSy1..., AIzaSy2...
+---
 
-# veya OpenRouter:
-OPENROUTER_API_KEY=sk-or-v1-...
+## 🛠️ Çözüm & Soru Tipleri Yetenekleri
+
+```mermaid
+flowchart LR
+    A["📄 PDF Workbook Yükle"] --> B["🔍 Hibrit Vektörel Ayrıştırıcı"]
+    B --> C1["Boşluklar & Satırlar"]
+    B --> C2["Tablolar & Eşleştirmeler"]
+    B --> C3["Zihin Haritaları & Sunburst"]
+    B --> C4["Kompozisyon & Paragraf"]
+    C1 & C2 & C3 & C4 --> D["🧠 Gemini 3.8 / OpenRouter Motoru"]
+    D --> E["✨ Canlı Önizleme & Düzenleme"]
+    E --> F["📥 Acrobat Standartlarında Vektörel PDF / ZIP"]
 ```
 
+* **🧠 Zihin Haritası & Sunburst (Mind-Map):** Dairesel 8 kollu seyahat, kelime veya beyin fırtınası diyagramlarını merkezden dışa doğru doğru açılarla doldurur.
+* **📝 Kompozisyon & Paragraf Kutuları:** *"Your Paragraph"*, *"Unit Task"* gibi açık uçlu yazma kutularına ünitenin dilbilgisine tam uyan, akıcı ve doğal öğrenci metinleri yazar.
+* **📋 Liste Şablonları (Brainstorming Listing):** 1'den 10'a kadar numaralandırılmış beyin fırtınası satırlarına tekrara düşmeyen özgün fikir maddeleri üretir.
+* **🔗 Fiil-İsim Eşleştirmeleri (Collocations):** Tablo alıştırmalarında tam fiil-nesne kalıplarını (örn. *pack a suitcase*, *exchange currency*) eksiksiz yerleştirir.
+* **✍️ 5.8pt Hata Düzeltme (Editing Sections):** Üstü çizili veya yanlış kelimelerin hemen üzerine metinle çakışmayan temiz düzeltmeler kondurur.
+* **🎯 Şık & Fiil Vurgulama:** Doğru seçeneğin altını çizme (*underline*) veya hafif saydam fosforlu vurgulama (*snug highlight*).
+
 ---
 
-## 📖 Kullanım Adımları
+## 💻 Kullanım Kılavuzu
 
-1. **PDF'i Yükleyin:** Kitap PDF dosyanızı sürükleyip ekrana bırakın (veya arayüzdeki *"🎯 Örnek İngilizce Ödev ile Hemen Dene"* butonuna basın).
-2. **Ödev Sayfalarını Belirleyin:** Sayfa aralığı kutusuna sadece ödev olan sayfaları yazın (Örn: `5-15` veya `9, 13, 21`).
-3. **Çözdürün:** *"⚡ Sayfaları Getir ve Otomatik Çöz"* butonuna tıklayın.
-4. **Düzenleyin:** Sayfaları klavyedeki ok tuşlarıyla (`←` / `→`) gezin, gerekirse cevapları fareyle kaydırın.
-5. **Dışa Aktarın:** 
-   - **"Sadece Ödev Sayfalarını İndir"**: Yalnızca seçtiğiniz sayfaları hocaya atmalık derli toplu tek bir PDF olarak indirir.
-   - **"Tüm Kitabı İndir"**: Çözümleri orijinal kitabın içine gömer.
+1. **Kitabı Yükleyin:** PDF dosyanızı pencereye sürükleyin veya *"🎯 Örnek İngilizce Ödev ile Hemen Dene"* butonuna basın.
+2. **Ödev Sayfalarını Seçin:** Sayfa aralığı kutusuna ödev sayfalarınızı girin *(Örn: `12-18` veya `6, 9, 14, 28`)*.
+3. **Çözdürün:** *"⚡ Sayfaları Getir ve Otomatik Çöz"* butonuna tıklayın. Sayfalar paralel worker'lar ile saniyeler içinde çözülür.
+4. **Kontrol Edin & İnce Ayar Yapın:**
+   - Cevapları fareyle istediğiniz yere sürükleyin veya üzerine çift tıklayarak metni düzenleyin.
+   - Sayfanın üstüne ad, soyad ve numaranızı eklemek için **`+ Metin Kutusu Ekle`** butonunu kullanın.
+5. **Dışa Aktarın:**
+   - **📄 Sadece Ödev Sayfalarını İndir:** Hocanıza teslim etmelik derli toplu tek bir PDF üretir.
+   - **📚 Tüm Kitabı İndir:** Tüm çalışma kitabının ilgili sayfalarını doldurup tam kitap olarak verir.
+   - **🗂️ Toplu ZIP:** Birden fazla ödevi tek tıkla arşiv olarak indirir.
 
 ---
 
 ## ⌨️ Klavye Kısayolları
 
-| Kısayol | İşlev |
-| :--- | :--- |
-| `←` / `→` | Önceki / Sonraki sayfaya geçiş |
-| `Delete` / `Backspace` | Seçili metin kutusunu sil |
-| `Escape` | Seçimi kaldır / Modalı kapat |
+| Kısayol | Açıklama |
+| :---: | :--- |
+| `←` / `→` | Önceki / Sonraki sayfaya hızlı geçiş |
+| `Delete` / `Backspace` | Seçili cevap kutusunu anında sil |
+| `Escape` | Seçimi kaldır / Açık pencereleri kapat |
 
 ---
 
-## 🛡️ Gizlilik ve Güvenlik (100% Yerel Çalışma)
+## 👨‍💻 Geliştiriciler İçin (Kaynak Koddan Çalıştırma)
 
-- **Kişisel Verileriniz ve Dosyalarınız:** Yüklediğiniz PDF kitapları, ödevler ve çözümler yalnızca kendi bilgisayarınızda (localhost) işlenir; harici hiçbir sunucuya kaydedilmez.
-- **API Anahtarları:** Tanımladığınız Gemini ve OpenRouter anahtarları yalnızca kendi tarayıcınızın yerel hafızasında (`localStorage`) ve yerel diskinizde tutulur. GitHub reposuna asla sızmaz.
-- **Açık Kaynak Kod:** Projenin tüm kaynak kodu tamamen şeffaftır ve arka planda çalışan gizli hiçbir telemetri veya veri toplama kodu bulunmaz.
+Projeyi yerel ortamınızda kaynak kodundan çalıştırmak isterseniz:
+
+```bash
+# 1. Depoyu klonlayın
+git clone https://github.com/Rel0adediso/Prepmate-PDF.git
+cd Prepmate-PDF
+
+# 2. Gereksinimleri yükleyin (veya kurulum.bat dosyasını çalıştırın)
+pip install -r requirements.txt
+
+# 3. Uygulamayı başlatın (veya baslat.bat dosyasını çalıştırın)
+python desktop.py
+```
+
+Tek dosyalı EXE derlemek için:
+```bash
+derle_exe.bat
+```
+
+---
+
+## 🛡️ Gizlilik & Güvenlik Garantisi (%100 Yerel)
+
+> [!NOTE]
+> * **Sıfır Bulut Kaydı:** Yüklediğiniz PDF'ler ve oluşturulan çözümler yalnızca kendi bilgisayarınızda (`localhost`) işlenir. Harici hiçbir sunucuya kaydedilmez.
+> * **Güvenli API Anahtarı Saklama:** Girdiğiniz API anahtarları yalnızca kendi cihazınızda şifreli/yerel olarak saklanır; GitHub reposuna veya üçüncü şahıslara asla iletilmez.
+> * **Açık Kaynak Kod:** Kod tabanında hiçbir telemetri, arka kapı veya kullanıcı takip kodu bulunmaz.
+
+---
+
+<div align="center">
+  <sub>PrepMate PDF — Açık Kaynaklı Hazırlık & Workbook Asistanı • MIT Lisansı ile korunmaktadır.</sub>
+</div>
