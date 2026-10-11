@@ -3,151 +3,154 @@
 # 🎓 PrepMate PDF
 ### *AI-Powered English Workbook & Homework Solver*
 
-[![Windows .EXE](https://img.shields.io/badge/Windows_İndir_(.EXE)-v1.1.0_Hazır-cc785c?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
-[![Release](https://img.shields.io/badge/Sürüm-v1.1.0-d4a373?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](README.md)
+[![Türkçe](https://img.shields.io/badge/Dil-Türkçe-red?style=for-the-badge)](README_TR.md)
+[![Windows .EXE](https://img.shields.io/badge/Windows_Download_(.EXE)-v1.1.0_Ready-cc785c?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+[![Release](https://img.shields.io/badge/Release-v1.1.0-d4a373?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Gemini](https://img.shields.io/badge/AI_Engine-Gemini_3.8_%26_OpenRouter-ea4335?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
-[![Lisans](https://img.shields.io/badge/Lisans-MIT-blue?style=for-the-badge)](#)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#)
 
 <p align="center">
-  <b>Üniversite hazırlık sınıfları ve yabancı dil okulları için geliştirilmiş otonom ödev çözücü.</b><br>
-  150+ sayfalık kalın workbook PDF'lerini analiz eder, soruları doğal el yazısı hissiyle çözer ve <b>Adobe Acrobat ile doldurulmuş gibi</b> orijinal vektörel kalitede çıktısını verir.
+  <b>Autonomous AI workbook & homework solver engineered for college prep classes and ESL students.</b><br>
+  Analyzes 150+ page thick workbook PDFs, solves exercises with natural handwriting aesthetics, and exports <b>Acrobat-standard vector-crisp PDFs</b> as if filled manually.
 </p>
 
 ---
 
-### ⚡ [Hemen Windows EXE İndir (Kurulumsuz, Tek Tıkla Çalışır)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+### ⚡ [Download Windows EXE (Standalone, 1-Click Launch)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
 
 </div>
 
 ---
 
 > [!IMPORTANT]
-> ### 🌟 v1.1.0 Güncelleme Özeti
-> * **🎨 Ferah & Genişletilmiş Editör Kanvası:** Üst barlar kompakt hap butonlara dönüştürüldü; PDF sayfalarının görüntüleme alanı dikey ve yatayda maksimuma çıkarıldı.
-> * **📱 Sıfır Taşma & İki Satırlı İlerleme Başlığı:** Dar laptop ekranlarında dahi butonların veya başlıkların ekrandan taşmasını ve ikiye bölünmesini engelleyen akıllı hiyerarşik düzen.
-> * **↩️ Geri / İleri Alma (Ctrl+Z / Ctrl+Y):** 40 adımlı tam işlem geçmişi ile yanlış silinen veya kayan kutuları anında geri getirme.
-> * **🌙 Göz Koruma (Parchment Mode):** Gece çalışma saatlerinde sıcak parşömen filtresiyle bembeyaz PDF parlaklığını kırma.
-> * **📸 Tek Tıkla Resim Kopyalama:** Çözülmüş sayfayı anında panoya kopyalayıp WhatsApp/Discord'a yapıştırma (`Ctrl+V`).
+> ### 🌟 What's New in v1.1.0
+> * **🎨 Spacious & Extended Editor Canvas:** Top navigation transformed into compact pill buttons; maximizes vertical and horizontal viewport for viewing entire workbook pages.
+> * **📱 Zero-Overflow Responsive Progress Header:** Two-line hierarchical layout preventing buttons or headers from breaking or wrapping awkwardly on compact laptop screens.
+> * **↩️ Full Undo / Redo (`Ctrl+Z` / `Ctrl+Y`):** 40-step complete history stack to instantly recover accidentally moved or deleted solution boxes.
+> * **🌙 Eye-Friendly Parchment Mode:** Warm antique parchment paper filter for late-night homework sessions, eliminating harsh blinding white PDF glare.
+> * **📸 1-Click Clipboard Image Copy:** Instant high-res page snapshot copy to paste directly into WhatsApp, Discord, or notes (`Ctrl+V`).
+> * **🌐 Multilingual UI (EN / TR):** Instant one-click toggle between English and Turkish with persistent preferences.
 
 ---
 
-## 🚀 10 Saniyede Başlatma (Hızlı Başlangıç)
+## 🚀 Quick Start in 10 Seconds
 
 > [!TIP]
-> **Kod bilmenize, Python yüklemenize veya terminal açmanıza gerek yoktur!**
-> 1. Yukarıdaki **[Windows İndir (.EXE)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** bağlantısından **`PrepMate-PDF.exe`** dosyasını indirin.
-> 2. İndirdiğiniz dosyaya çift tıklayın. Program modern masaüstü penceresi olarak anında başlayacaktır.
-> 3. Sağ üstteki **"🔑 AI Anahtarı"** butonuna tıklayıp [Google AI Studio](https://aistudio.google.com/app/apikey)'dan aldığınız ücretsiz anahtarı yapıştırın.
+> **No coding, Python installation, or terminal commands needed!**
+> 1. Download **`PrepMate-PDF.exe`** from the **[Windows Download (.EXE)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** link above.
+> 2. Double-click the downloaded executable. PrepMate launches immediately as a sleek desktop app.
+> 3. Click **"🔑 AI Key"** in the top bar and paste your free key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 ---
 
-## 🌟 Neden PrepMate PDF? (Geleneksel Çözücüler vs PrepMate)
+## 🌟 Why PrepMate PDF? (Generic AI vs. PrepMate)
 
-| Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF v1.1.0 |
+| Feature | Generic OCR / AI Tools | 🎓 PrepMate PDF v1.1.0 |
 | :--- | :---: | :---: |
-| **Arayüz & Estetik** | Soğuk, karmaşık veya boğucu arayüz | **Sıcak Obsidyen & Terracotta editoryal tasarımı** |
-| **PDF Formatı & Kalite** | PDF'i bozar, bulanık resme çevirir | **Vektörel kalitede, orijinal çözünürlük korunur** |
-| **Hizalama Hassasiyeti** | Yanıtlar satırların dışına taşar | **Piksel düzeyinde çizgi & kutu tespiti** |
-| **Gece Çalışma (Göz Koruma)** | Beyaz PDF parlaması göz yorar | **Parchment Mode: Sıcak parşömen kağıt filtresi** |
-| **Hızlı Cevap Kağıdı** | Tek tek sayfada aramak gerekir | **Numaralı tam döküm ve tek tıkla panoya kopyalama** |
-| **Öğrenci Doğallığı (Human Touch)**| Robotik kusursuzluk (şüphe çeker) | **~%95 hedef puan, insani öğrenci hata payı simülasyonu** |
-| **Dil Seviyesi Kontrolü** | Kontrolsüz zor/kolay kelimeler | **A1 - C1 CEFR seviye seçici** |
-| **Zihin Haritası & Diyagramlar** | Okuyamaz veya atlar | **Sunburst & örümcek diyagramlarını tam çözer** |
-| **Hata Düzeltme (Editing)** | Sadece kelimeyi yazar | **5.8pt zarif öğretmen el yazısıyla satır üstü düzeltme** |
-| **Geri Al / İleri Al Desteği** | Yanlış silinirse geri gelmez | **40 adımlı tam Ctrl+Z / Ctrl+Y geçmişi** |
-| **Çıktı Formatı** | Tüm kitabı baştan sona basar | **Ödev PDF'i, Tam Kitap PDF'i veya Pano Resmi (Ctrl+V)** |
+| **Interface & Design** | Cluttered, clinical, overwhelming | **Warm Obsidian & Terracotta editorial aesthetic** |
+| **PDF Quality** | Flattened, blurry raster screenshots | **Vector-crisp original resolution preserved** |
+| **Alignment Accuracy** | Text overlaps lines and questions | **Pixel-perfect blank line & box boundary detection** |
+| **Night Study Mode** | Blinding white PDF background | **Parchment Mode: Soft eye-care warm paper tint** |
+| **Cheat Sheet Modal** | Tedious scrolling through pages | **Numbered answer sheet with 1-click clipboard copy** |
+| **Humanized Student Feel** | Robotic 100% perfection (suspicious) | **~95% realistic grade simulation with natural touch** |
+| **CEFR Level Control** | Uncontrolled vocabulary difficulty | **A1 to C1 proficiency level selector** |
+| **Mind-Maps & Diagrams** | Fails or skips circular layouts | **Full sunburst, branching & spider diagram solver** |
+| **Inline Editing / Proofreading** | Blindly writes answers | **5.8pt elegant teacher-grade cursive supralinear corrections** |
+| **Undo / Redo Support** | Irreversible accidental deletions | **40-step comprehensive `Ctrl+Z` / `Ctrl+Y` stack** |
+| **Export Flexibility** | Dumps full textbook needlessly | **Homework-Only PDF, Full Textbook PDF, or Clipboard Image** |
 
 ---
 
-## 🛠️ Çözüm & Soru Tipleri Yetenekleri
+## 🛠️ Architecture & Problem-Solving Capabilities
 
 ```mermaid
 flowchart LR
-    A["📄 PDF Workbook Yükle"] --> B["🔍 Hibrit Vektörel Ayrıştırıcı"]
-    B --> C1["Boşluklar & Satırlar"]
-    B --> C2["Tablolar & Eşleştirmeler"]
-    B --> C3["Zihin Haritaları & Sunburst"]
-    B --> C4["Kompozisyon & Paragraf"]
-    C1 & C2 & C3 & C4 --> D["🧠 Gemini 3.8 / OpenRouter Motoru"]
-    D --> E["✨ Modern Kanvas Arayüzü & Önizleme"]
-    E --> F["📥 Acrobat Standartlarında Vektörel PDF / ZIP / Resim"]
+    A["📄 Upload Workbook PDF"] --> B["🔍 Hybrid Vector Parser"]
+    B --> C1["Fill-in-the-Blanks & Lines"]
+    B --> C2["Tables & Matching"]
+    B --> C3["Mind-Maps & Sunburst"]
+    B --> C4["Essays & Open Paragraphs"]
+    C1 & C2 & C3 & C4 --> D["🧠 Gemini 3.8 / OpenRouter Engine"]
+    D --> E["✨ Modern Canvas & Live Preview"]
+    E --> F["📥 Acrobat-Grade Vector PDF / ZIP / Image"]
 ```
 
-* **🎨 Sıcak Obsidyen & Terracotta Teması:** Okuma deneyimini editoryal dergi seviyesine taşıyan serif başlıklar (`Newsreader`), yumuşak kiremit/terracotta vurgular ve gözü dinlendiren koyu obsidian zemin.
-* **🌙 Göz Koruma (Parchment Mode):** Gece laptop başında ödev yetiştirirken bembeyaz PDF parlaklığını kırıp sıcak parşömen filtresine büründüren göz koruma anahtarı.
-* **📋 Hızlı Cevap Kağıdı (Cheat Sheet):** Sayfadaki tüm soruları `#1`, `#2` şeklinde sıralı döküm halinde gösteren, tek tıkla kopyalanabilen kompakt cevap anahtarı modalı.
-* **📸 Tek Tıkla Resim Kopyalama:** Çözülmüş sayfayı yüksek çözünürlükte doğrudan panoya kopyalayıp WhatsApp Web veya Discord'a yapıştırma (`Ctrl+V`).
-* **🎭 Doğal Öğrenci Hissi (~%95 Puan):** Hocanın *"bunu yapay zeka çözmüş"* şüphesini sıfıra indiren, 1-2 küçük masum insani esneme payı bırakan akıllı simülasyon.
-* **🎯 CEFR Dil Seviyesi (A1 - C1):** Ödevin ait olduğu hazırlık kuru seviyesine göre dilbilgisini ve kelime haznesini anında ayarlama.
-* **🧠 Zihin Haritası & Sunburst (Mind-Map):** Dairesel 8 kollu seyahat, kelime veya beyin fırtınası diyagramlarını merkezden dışa doğru doğru açılarla doldurur.
-* **📝 Kompozisyon & Paragraf Kutuları:** *"Your Paragraph"*, *"Unit Task"* gibi açık uçlu yazma kutularına ünitenin dilbilgisine tam uyan, akıcı ve doğal öğrenci metinleri yazar.
-* **✍️ 5.8pt Hata Düzeltme (Editing Sections):** Üstü çizili veya yanlış kelimelerin hemen üzerine metinle çakışmayan temiz düzeltmeler kondurur.
-* **🎯 Şık & Fiil Vurgulama:** Doğru seçeneğin altını çizme (*underline*) veya hafif saydam fosforlu vurgulama (*snug highlight*).
+* **🎨 Warm Obsidian & Terracotta Aesthetic:** Editorial typography (`Newsreader` serif), subtle terracotta accents, and an eye-soothing deep obsidian background.
+* **🌙 Eye-Care Parchment Mode:** Softens bright textbook pages into warm vintage parchment during late-night study hours.
+* **📋 Rapid Cheat Sheet (Answer Key):** Clean numbered list (`#1`, `#2`, ...) of every solution on the active page for quick verification and instant copying.
+* **📸 1-Click Clipboard Image Copy:** Exports full resolved high-dpi page image directly to clipboard for pasting into WhatsApp Web or Discord.
+* **🎭 Natural Student Mode (~95% Score):** Realistic student behavior mode that avoids robotic perfection, preventing teacher AI detection.
+* **🎯 CEFR Difficulty Tuning (A1 - C1):** Calibrate vocabulary and grammatical complexity specifically to your course syllabus.
+* **🧠 Mind-Map & Sunburst Solver:** Accurately fills 8-spoke circular concept webs, radial bubble diagrams, and category branches.
+* **📝 Essay & Paragraph Sections:** Produces fluent, human-sounding student answers tailored to *"Your Paragraph"* and *"Unit Writing"* prompts.
+* **✍️ 5.8pt Supralinear Proofreading:** Overwrites typos cleanly above crossed-out words without text collisions.
+* **🎯 Smart Choice Marking:** Automatic underline or translucent highlighter marks on multiple-choice options.
 
 ---
 
-## 💻 Kullanım Kılavuzu
+## 💻 Step-by-Step Usage Guide
 
-1. **Kitabı Yükleyin:** PDF dosyanızı pencereye sürükleyin veya *"🎯 Örnek İngilizce Ödev ile Hemen Dene"* butonuna basın.
-2. **Ödev Sayfalarını & Seviyeyi Seçin:** Sayfa aralığını girin *(Örn: `12-18`)*, CEFR seviyenizi belirleyin ve isterseniz *Doğal Öğrenci Modu*nu açın.
-3. **Çözdürün:** *"⚡ Sayfaları Getir ve Otomatik Çöz"* butonuna tıklayın. Sayfalar paralel worker'lar ile saniyeler içinde çözülür.
-4. **Kontrol Edin & İnce Ayar Yapın:**
-   - Cevapları fareyle istediğiniz yere sürükleyin veya üzerine çift tıklayarak metni düzenleyin.
-   - Hata yaparsanız `Ctrl + Z` ile geri alın veya `Ctrl + Y` ile ileri alın.
-   - Gece çalışıyorsanız `🌙 Göz Koruma` modunu açarak ekranı yumuşatın.
-   - Hızlıca cevapları kontrol etmek için `📋 Cevap Kağıdı` butonunu kullanın.
-5. **Dışa Aktarın:**
-   - **📄 Sadece Ödev Sayfalarını İndir:** Hocanıza teslim etmelik derli toplu tek bir PDF üretir.
-   - **📚 Tüm Kitabı İndir:** Tüm çalışma kitabının ilgili sayfalarını doldurup tam kitap olarak verir.
-   - **📸 Resim Kopyala:** Doğrudan panoya kopyalayıp WhatsApp veya notlarınıza yapıştırın.
+1. **Load Your Workbook:** Drag & drop your PDF file or click *"🎯 Try Sample Homework"*.
+2. **Configure Pages & Level:** Enter page range *(e.g., `12-18`)*, select your CEFR proficiency level, and toggle *Natural Student Mode* if desired.
+3. **Solve Automatically:** Click *"⚡ Fetch Pages & Solve"*. Fast concurrent workers process all selected pages in seconds.
+4. **Review & Fine-Tune:**
+   - Drag answer text boxes with your mouse or double-click to edit content directly.
+   - Use `Ctrl + Z` to undo or `Ctrl + Y` to redo any edits.
+   - Enable `🌙 Parchment Mode` for relaxed viewing.
+   - Click `📋 Cheat Sheet` for a quick text answer overview.
+5. **Export Your Results:**
+   - **📄 Download Homework Only:** Compiles only the assigned solved pages into a clean, ready-to-submit PDF.
+   - **📚 Download Full Book:** Injects solutions into the full textbook while leaving untouched pages intact.
+   - **📸 Copy Page Image:** Copies high-resolution visual directly to clipboard (`Ctrl+V`).
 
 ---
 
-## ⌨️ Klavye Kısayolları
+## ⌨️ Keyboard Shortcuts
 
-| Kısayol | Açıklama |
+| Shortcut | Action |
 | :---: | :--- |
-| `Ctrl + Z` | Son işlemi geri al (Undo) |
-| `Ctrl + Y` / `Ctrl + Shift + Z` | Geri alınan işlemi ileri al (Redo) |
-| `←` / `→` | Önceki / Sonraki sayfaya hızlı geçiş |
-| `Delete` / `Backspace` | Seçili cevap kutusunu anında sil |
-| `Escape` | Seçimi kaldır / Açık pencereleri (Cevap Kağıdı, API Modalı) kapat |
+| `Ctrl + Z` | Undo last change |
+| `Ctrl + Y` / `Ctrl + Shift + Z` | Redo undone change |
+| `←` / `→` | Navigate to previous / next page |
+| `Delete` / `Backspace` | Delete selected solution box |
+| `Escape` | Deselect box / Close open modals (Cheat Sheet, API Key) |
 
 ---
 
-## 👨‍💻 Geliştiriciler İçin (Kaynak Koddan Çalıştırma)
+## 👨‍💻 For Developers (Running from Source)
 
-Projeyi yerel ortamınızda kaynak kodundan çalıştırmak isterseniz:
+To run PrepMate PDF locally in your development environment:
 
 ```bash
-# 1. Depoyu klonlayın
+# 1. Clone the repository
 git clone https://github.com/Rel0adediso/Prepmate-PDF.git
 cd Prepmate-PDF
 
-# 2. Gereksinimleri yükleyin (veya kurulum.bat dosyasını çalıştırın)
+# 2. Install dependencies (or run kurulum.bat on Windows)
 pip install -r requirements.txt
 
-# 3. Uygulamayı başlatın (veya baslat.bat dosyasını çalıştırın)
+# 3. Launch application (or run baslat.bat)
 python desktop.py
 ```
 
-Tek dosyalı EXE derlemek için:
+To build a standalone single-file Windows executable:
 ```bash
 derle_exe.bat
 ```
 
 ---
 
-## 🛡️ Gizlilik & Güvenlik Garantisi (%100 Yerel)
+## 🛡️ Privacy & Security Guarantee (100% Local-First)
 
 > [!NOTE]
-> * **Sıfır Bulut Kaydı:** Yüklediğiniz PDF'ler ve oluşturulan çözümler yalnızca kendi bilgisayarınızda (`localhost`) işlenir. Harici hiçbir sunucuya kaydedilmez.
-> * **Güvenli API Anahtarı Saklama:** Girdiğiniz API anahtarları yalnızca kendi cihazınızda şifreli/yerel olarak saklanır; GitHub reposuna veya üçüncü şahıslara asla iletilmez.
-> * **Açık Kaynak Kod:** Kod tabanında hiçbir telemetri, arka kapı veya kullanıcı takip kodu bulunmaz.
+> * **Zero Cloud Storage:** Your PDFs and generated solutions are processed locally (`localhost`). Nothing is uploaded or stored on external servers.
+> * **Encrypted API Key Storage:** Your API keys are stored locally on your device only and are never committed to git or sent to third parties.
+> * **Fully Open Source:** No telemetry, tracking, or hidden background analytics.
 
 ---
 
 <div align="center">
-  <sub>PrepMate PDF — Açık Kaynaklı Hazırlık & Workbook Asistanı • MIT Lisansı ile korunmaktadır.</sub>
+  <sub>PrepMate PDF — Open Source Prep & Workbook Companion • Released under the MIT License.</sub>
 </div>

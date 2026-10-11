@@ -90,9 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Internationalization Helper
+  const t = (k, p) => (window.i18n ? window.i18n.t(k, p) : k);
+  const langToggleBtn = document.getElementById('langToggleBtn');
+  const langToggleText = document.getElementById('langToggleText');
+
   function performUndo() {
     if (undoStack.length === 0) {
-      showToast('ℹ️ Geri alınacak işlem yok.');
+      showToast(t('toast_undo_empty'));
       return;
     }
     const lastState = undoStack.pop();
@@ -109,12 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
     state.pagesData[pageNum] = lastState.data;
     refreshVisiblePageAnnotations(pageNum);
     updateUndoRedoUI();
-    showToast(`↩️ <b>Geri Alındı</b> (Sayfa ${pageNum})`);
+    showToast(t('toast_undo_success', { page: pageNum }));
   }
 
   function performRedo() {
     if (redoStack.length === 0) {
-      showToast('ℹ️ İleri alınacak işlem yok.');
+      showToast(t('toast_redo_empty'));
       return;
     }
     const nextState = redoStack.pop();
@@ -130,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.pagesData[pageNum] = nextState.data;
     refreshVisiblePageAnnotations(pageNum);
     updateUndoRedoUI();
-    showToast(`↪️ <b>İleri Alındı</b> (Sayfa ${pageNum})`);
+    showToast(t('toast_redo_success', { page: pageNum }));
   }
 
   // Summary Report Modal Elements
@@ -307,9 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const keys = val.split(/[\r\n,;]+/).map(k => k.trim()).filter(Boolean);
       state.keyCount = keys.length || 1;
-      const lbl = keys.length > 1 ? `${keys.length} Hesap / Anahtar` : (val.startsWith('sk-or-') ? 'OpenRouter Aktif' : 'Gemini 3.8 Aktif');
+      const lbl = keys.length > 1 ? `${keys.length} Keys` : (val.startsWith('sk-or-') ? 'OpenRouter Active' : 'Gemini 3.8 Active');
       updateApiKeyUI(true, lbl);
-      showToast(keys.length > 1 ? `${keys.length} API Anahtarı kaydedildi! Kota doldukça otomatik geçiş yapılacak.` : 'API Anahtarı başarıyla kaydedildi.');
+      showToast(keys.length > 1 ? t('toast_key_saved_multi', { count: keys.length }) : t('toast_key_saved_single'));
     } else {
       state.apiKey = '';
       state.keyCount = 1;
@@ -321,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({ api_key: '' })
         });
       } catch (e) {}
-      updateApiKeyUI(false, 'AI Anahtarı Gir');
+      updateApiKeyUI(false, t('api_key_btn', 'AI Key'));
     }
     apiKeyModal.classList.add('hidden');
   });
@@ -339,10 +344,56 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({ api_key: '' })
         });
       } catch (e) {}
-      updateApiKeyUI(false, 'AI Anahtarı Gir');
-      showToast('API Anahtarı temizlendi.');
+      updateApiKeyUI(false, t('api_key_btn', 'AI Key'));
+      showToast(t('toast_key_cleared'));
       apiKeyModal.classList.add('hidden');
     });
+  }
+
+  // Language Switcher Setup
+  if (langToggleBtn) {
+    langToggleBtn.addEventListener('click', () => {
+      if (window.i18n) {
+        window.i18n.toggleLanguage();
+      }
+    });
+  }
+
+  window.addEventListener('languageChanged', (e) => {
+    const curMode = state.isCheckMode ? 'check' : (state.isDetailedMode ? 'detailed' : 'fast');
+    updateModeText(curMode);
+    updateProgressSidebarUI();
+    if (cheatSheetModal && !cheatSheetModal.classList.contains('hidden')) {
+      openCheatSheetModal();
+    }
+  });
+
+  function updateModeText(mode) {
+    if (mode === 'check') {
+      if (modeIcon) modeIcon.textContent = '🔍';
+      if (modeTitle) modeTitle.textContent = t('mode_check_title');
+      if (modeBadge) {
+        modeBadge.textContent = t('mode_check_badge');
+        modeBadge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-medium border border-emerald-500/30';
+      }
+      if (modeDesc) modeDesc.textContent = t('mode_check_desc');
+    } else if (mode === 'detailed') {
+      if (modeIcon) modeIcon.textContent = '💡';
+      if (modeTitle) modeTitle.textContent = t('mode_detailed_title');
+      if (modeBadge) {
+        modeBadge.textContent = t('mode_detailed_badge');
+        modeBadge.className = 'text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-medium border border-amber-500/30';
+      }
+      if (modeDesc) modeDesc.textContent = t('mode_detailed_desc');
+    } else {
+      if (modeIcon) modeIcon.textContent = '⚡';
+      if (modeTitle) modeTitle.textContent = t('mode_fast_title');
+      if (modeBadge) {
+        modeBadge.textContent = t('mode_fast_badge');
+        modeBadge.className = 'text-[10px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-1.5 py-0.5 rounded font-medium';
+      }
+      if (modeDesc) modeDesc.textContent = t('mode_fast_desc');
+    }
   }
 
   // Mode Selection Logic (Fast vs Detailed vs Check)
@@ -362,33 +413,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkModeBtn) checkModeBtn.className = cClass;
     if (editorCheckModeBtn) editorCheckModeBtn.className = cClass;
 
+    updateModeText(mode);
+
     if (mode === 'check') {
-      if (modeIcon) modeIcon.textContent = '🔍';
-      if (modeTitle) modeTitle.textContent = 'Ödev Kontrol Modu';
-      if (modeBadge) {
-        modeBadge.textContent = 'Puanlama & Düzeltme';
-        modeBadge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-medium border border-emerald-500/30';
-      }
-      if (modeDesc) modeDesc.textContent = 'Mevcut öğrenci cevapları kontrol edilir; doğruysa ✔, yanlışsa ✘ ve doğrusu yazılır.';
-      showToast('Ödev Kontrol Modu aktif: Cevaplarınız doğrulanacak.');
+      showToast(t('toast_mode_check'));
     } else if (mode === 'detailed') {
-      if (modeIcon) modeIcon.textContent = '💡';
-      if (modeTitle) modeTitle.textContent = 'Detaylı / Açıklamalı Mod';
-      if (modeBadge) {
-        modeBadge.textContent = 'Cevap Mantığı';
-        modeBadge.className = 'text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-medium border border-amber-500/30';
-      }
-      if (modeDesc) modeDesc.textContent = 'Cevapların yanında hoca sorarsa diye Türkçe kural/gerekçe açıklamaları eklenir.';
-      showToast('Detaylı Mod aktif: Cevap gerekçeleri ve açıklamalar eklenecek.');
+      showToast(t('toast_mode_detailed'));
     } else {
-      if (modeIcon) modeIcon.textContent = '⚡';
-      if (modeTitle) modeTitle.textContent = 'Hızlı Mod (Önerilen)';
-      if (modeBadge) {
-        modeBadge.textContent = 'Paralel Çözüm';
-        modeBadge.className = 'text-[10px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-1.5 py-0.5 rounded font-medium';
-      }
-      if (modeDesc) modeDesc.textContent = 'Doğrudan net cevaplar, maksimum hız ve paralel worker\'lar.';
-      showToast('Hızlı Mod aktif: Maksimum hız ve paralel çözüm.');
+      showToast(t('toast_mode_fast'));
     }
   }
 
@@ -402,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cefrLevelSelect) {
     cefrLevelSelect.addEventListener('change', () => {
       state.cefrLevel = cefrLevelSelect.value;
-      showToast(`🎯 Hedef Dil Seviyesi: <b>${state.cefrLevel}</b>`);
+      showToast(t('toast_cefr_set', { level: state.cefrLevel }));
     });
   }
 
@@ -410,9 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
     humanTouchCheckbox.addEventListener('change', () => {
       state.humanTouch = humanTouchCheckbox.checked;
       if (state.humanTouch) {
-        showToast('🎭 <b>Doğal Öğrenci Modu:</b> ~%95 puan hedefiyle gerçekçi insan hata payı simüle edilecek.');
+        showToast(t('toast_human_touch_on'));
       } else {
-        showToast('🤖 <b>Kusursuz Mod:</b> Sorular %100 doğrulukla çözülecek.');
+        showToast(t('toast_human_touch_off'));
       }
     });
   }
@@ -963,19 +995,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const percent = Math.round((completed / total) * 100);
     if (overallProgressBar) overallProgressBar.style.width = `${percent}%`;
     if (overallPercentBadge) overallPercentBadge.textContent = `${percent}%`;
-    if (completedPagesCount) completedPagesCount.textContent = `${completed} tamamlandı`;
-    if (totalSelectedPagesCount) totalSelectedPagesCount.textContent = `${total} sayfa`;
+    if (completedPagesCount) completedPagesCount.textContent = t('completed_count', { n: completed });
+    if (totalSelectedPagesCount) totalSelectedPagesCount.textContent = t('pages_count', { n: total });
     if (progressSummaryBadge) progressSummaryBadge.textContent = `${completed}/${total}`;
 
     if (progressStatusSubtitle) {
       if (solvingCount > 0) {
-        progressStatusSubtitle.textContent = `Yapay zeka çözüyor... (${completed}/${total})`;
+        progressStatusSubtitle.textContent = `${t('sidebar_status_solving')} (${completed}/${total})`;
       } else if (completed === total) {
-        progressStatusSubtitle.textContent = `Tüm ödev sayfaları hazır! 🎉`;
+        progressStatusSubtitle.textContent = t('sidebar_status_all_done');
       } else if (errorCount > 0) {
-        progressStatusSubtitle.textContent = `${errorCount} sayfada hata oluştu`;
+        progressStatusSubtitle.textContent = `${errorCount} ${t('page_card_error')}`;
       } else {
-        progressStatusSubtitle.textContent = `${completed}/${total} sayfa hazır`;
+        progressStatusSubtitle.textContent = `${completed}/${total} ${t('pages_count', { n: total })}`;
       }
     }
 
@@ -999,30 +1031,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (status === 'done') {
         badgeHtml = `<div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">✓</div>`;
-        statusDesc = `<span class="text-emerald-400 font-medium">${annotations.length} boşluk dolduruldu</span>`;
+        statusDesc = `<span class="text-emerald-400 font-medium">${t('page_card_solved', { n: annotations.length })}</span>`;
       } else if (status === 'solving') {
         badgeHtml = `<div class="w-7 h-7 rounded-xl bg-[#cc785c]/20 text-[#e58f74] border border-[#cc785c]/35 flex items-center justify-center shrink-0 shadow-sm"><div class="w-3.5 h-3.5 border-2 border-[#cc785c] border-t-transparent rounded-full animate-spin"></div></div>`;
-        statusDesc = `<span class="text-[#e58f74] font-medium animate-pulse">Çözülüyor...</span>`;
+        statusDesc = `<span class="text-[#e58f74] font-medium animate-pulse">${t('page_card_solving')}</span>`;
       } else if (status === 'error') {
         badgeHtml = `<div class="w-7 h-7 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center font-bold text-sm shrink-0">✕</div>`;
-        statusDesc = `<span class="text-red-400 font-medium">Hata oluştu</span>`;
+        statusDesc = `<span class="text-red-400 font-medium">${t('page_card_error')}</span>`;
       } else {
         badgeHtml = `<div class="w-7 h-7 rounded-xl bg-[#171614] text-[#a39e97] border border-[#383530] flex items-center justify-center font-bold text-xs shrink-0 font-mono">${p}</div>`;
-        statusDesc = `<span class="text-[#a39e97]">Sırada bekliyor</span>`;
+        statusDesc = `<span class="text-[#a39e97]">${t('page_card_pending')}</span>`;
       }
+
+      const activeBadge = isVisible ? `<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[#cc785c]/20 text-[#e58f74] font-semibold border border-[#cc785c]/30 font-mono">Active</span>` : '';
 
       card.innerHTML = `
         <div class="flex items-center space-x-3 overflow-hidden">
           ${badgeHtml}
           <div class="truncate">
             <div class="text-xs font-semibold text-white flex items-center gap-1.5">
-              <span>Sayfa ${p}</span>
-              ${isVisible ? '<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[#cc785c]/20 text-[#e58f74] font-semibold border border-[#cc785c]/30">Açık</span>' : ''}
+              <span>${t('page_card_page', { n: p })}</span>
+              ${activeBadge}
             </div>
             <div class="text-[11px] truncate mt-0.5">${statusDesc}</div>
           </div>
         </div>
-        <button class="resolve-card-btn opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/[0.08] text-[#a39e97] hover:text-[#d4a373] transition" title="Yeniden Çöz">
+        <button class="resolve-card-btn opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/[0.08] text-[#a39e97] hover:text-[#d4a373] transition" title="${t('btn_retry')}">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
         </button>
       `;
@@ -1088,7 +1122,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   reSolveBtn.addEventListener('click', () => {
-    if (confirm(`Sayfa ${state.activePageNum} tekrar çözülsün mü?`)) {
+    const confirmMsg = window.i18n && window.i18n.getLanguage() === 'tr'
+      ? `Sayfa ${state.activePageNum} tekrar çözülsün mü?`
+      : `Re-solve Page ${state.activePageNum} with AI?`;
+    if (confirm(confirmMsg)) {
       state.pagesData[state.activePageNum] = null;
       solveSinglePage(state.activePageNum, true);
     }
@@ -1098,12 +1135,12 @@ document.addEventListener('DOMContentLoaded', () => {
     copyPageImageBtn.addEventListener('click', async () => {
       const pageNum = state.activePageNum || state.selectedPages[state.currentPageIndex];
       if (!pageNum || !state.fileId) {
-        showToast('⚠️ Kopyalanacak aktif sayfa bulunamadı.', true);
+        showToast(window.i18n && window.i18n.getLanguage() === 'tr' ? '⚠️ Kopyalanacak aktif sayfa bulunamadı.' : '⚠️ No active page found to copy.', true);
         return;
       }
 
       const origHtml = copyPageImageBtn.innerHTML;
-      copyPageImageBtn.innerHTML = '<span class="animate-spin text-emerald-400">⏳</span><span>Kopyalanıyor...</span>';
+      copyPageImageBtn.innerHTML = `<span class="animate-spin text-emerald-400">⏳</span><span>${t('copy_image_loading')}</span>`;
       copyPageImageBtn.disabled = true;
 
       try {
@@ -1175,10 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!blob) throw new Error('PNG görseli oluşturulamadı.');
           try {
             if (navigator.clipboard && window.ClipboardItem) {
-              await navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-              ]);
-              showToast(`📸 <b>Sayfa ${pageNum}</b> panoya kopyalandı! (Ctrl+V ile yapıştırabilirsiniz)`);
+              showToast(t('toast_copy_image_success'));
             } else {
               throw new Error('Tarayıcı panoya kopyalamaya izin vermedi.');
             }
@@ -1227,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const active = canvasViewport.classList.toggle('parchment-mode');
       localStorage.setItem('prepmate_parchment_mode', active ? 'true' : 'false');
       updateParchmentBtnUI(active);
-      showToast(active ? '🌙 <b>Göz Koruma Açık:</b> Sıcak parşömen kağıt filtresi uygulandı.' : '☀️ <b>Göz Koruma Kapalı:</b> Standart kontrast.');
+      showToast(active ? (window.i18n && window.i18n.getLanguage() === 'tr' ? '🌙 <b>Göz Koruma Açık:</b> Sıcak parşömen kağıt filtresi uygulandı.' : '🌙 <b>Parchment Mode On:</b> Warm eye-care paper filter applied.') : (window.i18n && window.i18n.getLanguage() === 'tr' ? '☀️ <b>Göz Koruma Kapalı:</b> Standart kontrast.' : '☀️ <b>Parchment Mode Off:</b> Standard contrast.'));
     });
   }
 
@@ -1244,15 +1278,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (leftPage) pagesToDisplay.push(leftPage);
     if (rightPage) pagesToDisplay.push(rightPage);
 
-    if (pagesToDisplay.length === 0) {
-      showToast('Görüntülenecek açık sayfa bulunamadı.');
-      return;
-    }
+    if (pagesToDisplay.length === 0) return;
 
     if (cheatSheetPageTitle) {
       cheatSheetPageTitle.textContent = pagesToDisplay.length > 1
-        ? `Sayfa ${pagesToDisplay.join(' ve ')} Soru & Cevap Anahtarı`
-        : `Sayfa ${pagesToDisplay[0]} Soru & Cevap Anahtarı`;
+        ? `${t('page_card_page', { n: pagesToDisplay.join(' & ') })} ${t('cheat_sheet_modal_title')}`
+        : `${t('page_card_page', { n: pagesToDisplay[0] })} ${t('cheat_sheet_modal_title')}`;
     }
 
     cheatSheetList.innerHTML = '';
@@ -1265,14 +1296,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (pagesToDisplay.length > 1) {
         const header = document.createElement('div');
         header.className = 'flex items-center justify-between text-xs font-bold text-[#d4a373] pb-1.5 border-b border-[#383530]';
-        header.innerHTML = `<span>📖 Sayfa ${pg}</span> <span class="text-[10px] text-[#a39e97] font-mono font-normal">${answers.length} cevap</span>`;
+        header.innerHTML = `<span>📖 ${t('page_card_page', { n: pg })}</span> <span class="text-[10px] text-[#a39e97] font-mono font-normal">${answers.length}</span>`;
         pgSection.appendChild(header);
       }
 
       if (answers.length === 0) {
         const emptyDiv = document.createElement('div');
         emptyDiv.className = 'text-center py-4 text-xs text-[#a39e97] italic bg-[#171614]/60 rounded-xl border border-[#2d2b27]';
-        emptyDiv.textContent = `Sayfa ${pg} için henüz çözülmüş soru bulunmuyor.`;
+        emptyDiv.textContent = t('cheat_sheet_empty');
         pgSection.appendChild(emptyDiv);
       } else {
         const sorted = [...answers].sort((a, b) => {
@@ -1745,12 +1776,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = mode === 'only_homework' ? downloadHwBtn : downloadFullBtn;
     const originalText = btn ? btn.innerHTML : '';
     if (btn) {
-      btn.innerHTML = `<span class="animate-spin mr-1">⏳</span> Hazırlanıyor...`;
+      btn.innerHTML = `<span class="animate-spin mr-1">⏳</span> ${t('toast_export_preparing')}`;
       btn.disabled = true;
     }
 
     try {
-      showToast('📄 PDF hazırlanıyor, lütfen birkaç saniye bekleyin...');
+      showToast(`📄 ${t('toast_export_preparing')}`);
 
       // Clean annotations so null/undefined/empty values never cause 422 or crash server
       const cleanAnnotations = {};
@@ -1777,19 +1808,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) {
         const errorMsg = typeof data.detail === 'string'
           ? data.detail
-          : (Array.isArray(data.detail) ? data.detail.map(d => d.msg || JSON.stringify(d)).join(', ') : 'Dışa aktarma başarısız');
+          : (Array.isArray(data.detail) ? data.detail.map(d => d.msg || JSON.stringify(d)).join(', ') : 'Export failed');
         throw new Error(errorMsg);
       }
 
       if (data.download_url) {
         // Direct browser navigation to download attachment (never blocked by popup / untrusted synthetic click blockers)
         window.location.href = data.download_url;
-        showToast(`✅ PDF indiriliyor: <b>${data.filename}</b>`);
+        showToast(`✅ ${t('toast_export_success')} (<b>${data.filename}</b>)`);
       } else {
-        throw new Error('İndirme bağlantısı alınamadı.');
+        throw new Error('Download URL not found.');
       }
     } catch (err) {
-      showToast('İndirme hatası: ' + err.message, true);
+      showToast('Export error: ' + err.message, true);
     } finally {
       if (btn) {
         btn.innerHTML = originalText;
