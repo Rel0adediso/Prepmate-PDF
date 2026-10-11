@@ -351,9 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state.isCheckMode = (mode === 'check');
 
     // Reset styles
-    const fClass = (mode === 'fast') ? 'px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
-    const dClass = (mode === 'detailed') ? 'px-2.5 py-1 rounded bg-amber-600 text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
-    const cClass = (mode === 'check') ? 'px-2.5 py-1 rounded bg-emerald-600 text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-slate-400 hover:text-emerald-400 transition';
+    const fClass = (mode === 'fast') ? 'px-2.5 py-1 rounded-lg bg-[#cc785c] text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-[#a39e97] hover:text-white transition';
+    const dClass = (mode === 'detailed') ? 'px-2.5 py-1 rounded bg-[#d4a373] text-black font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-[#a39e97] hover:text-white transition';
+    const cClass = (mode === 'check') ? 'px-2.5 py-1 rounded bg-[#2a9d8f] text-white font-semibold transition shadow-sm' : 'px-2.5 py-1 rounded text-[#a39e97] hover:text-emerald-400 transition';
 
     if (fastModeBtn) fastModeBtn.className = fClass;
     if (editorFastModeBtn) editorFastModeBtn.className = fClass;
@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function syncContainerDimensions(containerEl, imgEl) {
     if (imgEl.naturalWidth && imgEl.naturalHeight) {
       const ratio = imgEl.naturalWidth / imgEl.naturalHeight;
-      const h = containerEl.clientHeight || (window.innerHeight - 120);
+      const h = containerEl.clientHeight || (window.innerHeight - 94);
       containerEl.style.width = `${Math.round(h * ratio)}px`;
     }
   }

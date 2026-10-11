@@ -39,46 +39,43 @@
 </head>
 <body class="bg-[#171614] text-[#fbf9f5] h-screen flex flex-col overflow-hidden">
 
-  <!-- Top Navigation Bar (Claude Style) -->
-  <header class="border-b border-[#2d2b27] bg-[#1d1b18]/95 backdrop-blur-md px-5 py-2.5 flex items-center justify-between shadow-lg shrink-0 z-40">
-    <div class="flex items-center space-x-3">
+  <!-- Top Navigation Bar (Claude Style - Clean & Compact) -->
+  <header class="border-b border-[#2d2b27] bg-[#1d1b18] px-4 py-2 flex items-center justify-between shrink-0 z-40">
+    <div class="flex items-center space-x-2.5">
       <!-- Anthropic Asterisk / Spark Logo -->
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#cc785c] via-[#d97757] to-[#e89274] flex items-center justify-center shadow-md shadow-[#cc785c]/25 ring-1 ring-white/10">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+      <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#cc785c] via-[#d97757] to-[#e89274] flex items-center justify-center shadow-md shadow-[#cc785c]/25 ring-1 ring-white/10">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
       </div>
-      <div>
-        <h1 class="font-serif text-lg font-medium text-[#fbf9f5] leading-tight flex items-center gap-2">
+      <div class="flex items-center gap-2">
+        <h1 class="font-serif text-base font-medium text-[#fbf9f5] leading-none">
           PrepMate <span class="text-[#d97757] font-semibold italic">PDF</span>
-          <span class="text-[10px] font-sans font-medium px-2 py-0.5 rounded-full bg-[#cc785c]/15 text-[#e58f74] border border-[#cc785c]/30">v1.0.2 Pro</span>
         </h1>
-        <p class="text-[10px] text-[#a39e97]">AI Workbook & Homework Solver</p>
+        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#cc785c]/15 text-[#e58f74] border border-[#cc785c]/30">v1.0.3</span>
       </div>
     </div>
 
     <!-- Right Controls -->
-    <div class="flex items-center space-x-3">
-      <button id="apiKeyBtn" class="flex items-center space-x-2 text-xs bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] px-3.5 py-1.5 rounded-xl transition shadow-sm text-[#ece8e1]">
+    <div class="flex items-center space-x-2">
+      <button id="apiKeyBtn" class="flex items-center space-x-1.5 text-xs bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] px-3 py-1 rounded-xl transition text-[#ece8e1]">
         <span id="apiKeyStatusDot" class="w-2 h-2 rounded-full bg-[#d4a373]"></span>
         <span id="apiKeyBtnText">AI Anahtarı</span>
       </button>
 
-      <div id="exportGroup" class="hidden flex items-center space-x-2">
+      <div id="exportGroup" class="hidden flex items-center space-x-1.5">
         <!-- Download Only Homework Pages -->
-        <button id="downloadHwBtn" class="flex items-center space-x-1.5 text-xs font-semibold glow-btn-primary px-3.5 py-1.5 rounded-xl shadow-md transition">
+        <button id="downloadHwBtn" class="flex items-center space-x-1.5 text-xs font-bold glow-btn-primary px-3 py-1 rounded-xl shadow-md transition" title="Yalnızca ödev sayfalarını doldurup Acrobat vektörel formatında indir">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          <span>Sadece Ödev Sayfalarını İndir</span>
+          <span>Ödevi İndir</span>
         </button>
 
         <!-- Download Full Book -->
-        <button id="downloadFullBtn" class="flex items-center space-x-1.5 text-xs font-semibold bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] text-[#ece8e1] px-3 py-1.5 rounded-xl transition">
-          <svg class="w-3.5 h-3.5 text-[#d4a373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          <span>Tüm Kitabı İndir</span>
+        <button id="downloadFullBtn" class="flex items-center space-x-1 text-xs font-medium bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] text-[#ece8e1] px-2.5 py-1 rounded-xl transition" title="Tüm çalışma kitabını indir">
+          <span>Kitap</span>
         </button>
 
         <!-- Download All as ZIP -->
-        <button id="downloadZipBtn" class="flex items-center space-x-1.5 text-xs font-semibold bg-[#342e26] hover:bg-[#3d372e] border border-[#52483a] text-[#e8d2b5] px-3 py-1.5 rounded-xl transition" title="Tüm çözülen ödevleri tek bir ZIP arşivi olarak indir">
-          <svg class="w-3.5 h-3.5 text-[#d4a373]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-          <span>ZIP İndir</span>
+        <button id="downloadZipBtn" class="flex items-center space-x-1 text-xs font-medium bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] text-[#d4a373] px-2.5 py-1 rounded-xl transition" title="Tüm çözülen ödevleri tek bir ZIP arşivi olarak indir">
+          <span>ZIP</span>
         </button>
       </div>
     </div>
@@ -208,117 +205,114 @@
     <!-- STEP 2: Acrobat-Style Viewer & Interactive Editor Screen -->
     <section id="editorSection" class="hidden flex-1 flex flex-col overflow-hidden h-full">
       
-      <!-- Secondary Action Bar (Claude Style) -->
-      <div class="bg-[#1b1916]/95 border-b border-[#2d2b27] backdrop-blur-xl px-5 py-2 flex items-center justify-between gap-3 shrink-0 z-30 shadow-md">
+      <!-- Secondary Action Bar (Claude Style - Clean & Compact) -->
+      <div class="bg-[#1b1916]/95 border-b border-[#2d2b27] backdrop-blur-xl px-3 py-1.5 flex items-center justify-between gap-2 shrink-0 z-30 shadow-md">
         
         <!-- Left: Page Navigator & View Mode -->
-        <div class="flex items-center space-x-2">
-          <button id="prevPageBtn" class="p-1.5 rounded-lg hover:bg-white/[0.08] text-[#a39e97] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        <div class="flex items-center space-x-1.5">
+          <button id="prevPageBtn" class="p-1 rounded-lg hover:bg-white/[0.08] text-[#a39e97] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition" title="Önceki Sayfa">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
           </button>
           
-          <div class="flex items-center space-x-1.5 text-xs font-semibold bg-[#272522] hover:bg-[#312e2a] px-3 py-1.5 rounded-xl border border-[#3d3a36] hover:border-[#cc785c]/40 shadow-inner transition">
+          <div class="flex items-center space-x-1 text-xs font-semibold bg-[#272522] hover:bg-[#312e2a] px-2.5 py-1 rounded-xl border border-[#3d3a36] hover:border-[#cc785c]/40 shadow-inner transition">
             <span class="text-[#a39e97]">Sayfa:</span>
-            <select id="pageSelectDropdown" class="bg-transparent text-white font-bold outline-none cursor-pointer appearance-none pr-1 text-xs">
+            <select id="pageSelectDropdown" class="bg-transparent text-white font-bold outline-none cursor-pointer appearance-none pr-0.5 text-xs">
               <!-- Page options injected by JS -->
             </select>
             <svg class="w-3 h-3 text-[#a39e97] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </div>
 
-          <button id="nextPageBtn" class="p-1.5 rounded-lg hover:bg-white/[0.08] text-[#a39e97] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          <button id="nextPageBtn" class="p-1 rounded-lg hover:bg-white/[0.08] text-[#a39e97] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition" title="Sonraki Sayfa">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </button>
 
           <!-- 2-Page / Single-Page Toggle Buttons -->
-          <div class="flex items-center space-x-1 bg-[#171614] border border-[#383530] rounded-xl p-0.5 text-xs ml-2">
-            <button id="twoPageViewBtn" class="px-2.5 py-1 rounded-lg bg-[#cc785c] text-white font-semibold transition flex items-center gap-1 shadow-sm">
+          <div class="flex items-center space-x-0.5 bg-[#171614] border border-[#383530] rounded-xl p-0.5 text-xs ml-1">
+            <button id="twoPageViewBtn" class="px-2 py-0.5 rounded-lg bg-[#cc785c] text-white font-semibold transition flex items-center gap-1 shadow-sm" title="İki Sayfa Görünümü">
               <span>📖 2 Sayfa</span>
             </button>
-            <button id="singlePageViewBtn" class="px-2.5 py-1 rounded-lg text-[#a39e97] hover:text-white font-medium transition flex items-center gap-1">
-              <span>📄 Tek Sayfa</span>
+            <button id="singlePageViewBtn" class="px-2 py-0.5 rounded-lg text-[#a39e97] hover:text-white font-medium transition flex items-center gap-1" title="Tek Sayfa Görünümü">
+              <span>📄 Tek</span>
             </button>
           </div>
         </div>
 
-        <!-- Center: Text Tools & Undo/Redo -->
-        <div class="flex items-center space-x-2">
+        <!-- Center: Text Tools, Modes, Undo/Redo -->
+        <div class="flex items-center space-x-1.5">
           <!-- Add Text Box Tool -->
-          <button id="addTextBoxBtn" class="flex items-center space-x-1.5 text-xs bg-[#272522] hover:bg-[#312e2a] hover:border-[#cc785c]/50 border border-[#3d3a36] px-3 py-1.5 rounded-xl text-[#ece8e1] transition font-medium">
+          <button id="addTextBoxBtn" class="flex items-center space-x-1 text-xs bg-[#272522] hover:bg-[#312e2a] hover:border-[#cc785c]/50 border border-[#3d3a36] px-2.5 py-1 rounded-xl text-[#ece8e1] transition font-medium" title="Sayfaya metin kutusu ekle">
             <span class="font-serif font-black text-[#d97757] text-sm">T</span>
-            <span>+ Metin Kutusu</span>
+            <span>+ Metin</span>
           </button>
 
           <!-- Font Size Selector -->
-          <div class="flex items-center space-x-1 text-xs bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] hover:border-[#cc785c]/40 rounded-xl px-2.5 py-1.5 transition">
-            <span class="text-[#a39e97] text-[11px]">Boyut:</span>
-            <select id="fontSizeSelect" class="bg-transparent text-white text-xs outline-none cursor-pointer font-medium appearance-none pr-1">
+          <div class="flex items-center space-x-1 text-xs bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] hover:border-[#cc785c]/40 rounded-xl px-2 py-1 transition" title="Yazı Boyutu">
+            <select id="fontSizeSelect" class="bg-transparent text-white text-xs outline-none cursor-pointer font-medium appearance-none pr-0.5">
               <option value="9">9 pt</option>
               <option value="10">10 pt</option>
-              <option value="11" selected>11 pt (Varsayılan)</option>
+              <option value="11" selected>11 pt</option>
               <option value="12">12 pt</option>
               <option value="14">14 pt</option>
             </select>
-            <svg class="w-3 h-3 text-[#a39e97] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            <svg class="w-2.5 h-2.5 text-[#a39e97] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </div>
-
 
           <!-- Mode Toggle in Editor Bar -->
           <div class="flex items-center bg-[#171614] border border-[#383530] rounded-xl p-0.5 text-xs">
-            <button id="editorFastModeBtn" class="px-2.5 py-1 rounded-lg bg-[#cc785c] text-white font-semibold transition" title="Hızlı Mod (Paralel)">⚡ Hızlı</button>
-            <button id="editorDetailedModeBtn" class="px-2.5 py-1 rounded-lg text-[#a39e97] hover:text-white transition" title="Detaylı Mod (Açıklamalı)">💡 Detaylı</button>
-            <button id="editorCheckModeBtn" class="px-2.5 py-1 rounded-lg text-[#a39e97] hover:text-emerald-400 transition" title="Ödev Kontrol Modu">🔍 Kontrol</button>
+            <button id="editorFastModeBtn" class="px-2 py-0.5 rounded-lg bg-[#cc785c] text-white font-semibold transition" title="Hızlı Mod (Paralel)">⚡ Hızlı</button>
+            <button id="editorDetailedModeBtn" class="px-2 py-0.5 rounded-lg text-[#a39e97] hover:text-white transition" title="Detaylı Mod (Açıklamalı)">💡 Detay</button>
+            <button id="editorCheckModeBtn" class="px-2 py-0.5 rounded-lg text-[#a39e97] hover:text-emerald-400 transition" title="Ödev Kontrol Modu">🔍 Kontrol</button>
           </div>
 
           <!-- Re-solve Button -->
-          <button id="reSolveBtn" title="Bu sayfayı yapay zekayla tekrar çöz" class="p-1.5 text-xs text-[#a39e97] hover:text-[#d4a373] hover:bg-white/[0.08] rounded-xl transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <button id="reSolveBtn" title="Bu sayfayı yapay zekayla tekrar çöz" class="p-1 text-xs text-[#a39e97] hover:text-[#d4a373] hover:bg-white/[0.08] rounded-xl transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
           </button>
 
           <!-- Undo / Redo Buttons -->
           <div class="flex items-center space-x-0.5 bg-[#171614] border border-[#383530] rounded-xl p-0.5 text-xs">
-            <button id="undoBtn" title="Geri Al (Ctrl + Z)" class="p-1.5 text-[#a39e97] hover:text-white hover:bg-white/[0.08] rounded-lg transition">
+            <button id="undoBtn" title="Geri Al (Ctrl + Z)" class="p-1 text-[#a39e97] hover:text-white hover:bg-white/[0.08] rounded-lg transition">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2M3 10l6-6m-6 6l6 6"></path></svg>
             </button>
-            <button id="redoBtn" title="İleri Al (Ctrl + Y veya Ctrl + Shift + Z)" class="p-1.5 text-[#a39e97] hover:text-white hover:bg-white/[0.08] rounded-lg transition">
+            <button id="redoBtn" title="İleri Al (Ctrl + Y)" class="p-1 text-[#a39e97] hover:text-white hover:bg-white/[0.08] rounded-lg transition">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a5 5 0 00-5 5v2m15-7l-6-6m6 6l-6 6"></path></svg>
             </button>
           </div>
         </div>
 
         <!-- Right: Actions & Tools -->
-        <div class="flex items-center space-x-2 text-xs">
+        <div class="flex items-center space-x-1.5 text-xs">
           <!-- Parchment Eye-Care Toggle -->
-          <button id="parchmentToggleBtn" title="Göz Koruma: Sayfalara sıcak parşömen filtresi uygula" class="flex items-center space-x-1.5 bg-[#272522] hover:bg-[#312e2a] text-[#d4a373] border border-[#3d3a36] px-2.5 py-1.5 rounded-xl transition font-medium">
+          <button id="parchmentToggleBtn" title="Göz Koruma: Sayfalara sıcak parşömen filtresi uygula" class="p-1.5 bg-[#272522] hover:bg-[#312e2a] text-[#d4a373] border border-[#3d3a36] rounded-xl transition font-medium">
             <span>🌙</span>
-            <span class="hidden sm:inline">Göz Koruma</span>
           </button>
 
           <!-- Quick Cheat Sheet Button -->
-          <button id="cheatSheetBtn" title="Bu sayfadaki tüm soruların numaralı cevap dökümünü aç" class="flex items-center space-x-1.5 bg-[#cc785c]/15 hover:bg-[#cc785c]/25 text-[#e58f74] border border-[#cc785c]/35 px-3 py-1.5 rounded-xl transition font-medium shadow-sm">
+          <button id="cheatSheetBtn" title="Bu sayfadaki tüm soruların numaralı cevap dökümünü aç" class="flex items-center space-x-1 bg-[#cc785c]/15 hover:bg-[#cc785c]/25 text-[#e58f74] border border-[#cc785c]/35 px-2.5 py-1 rounded-xl transition font-medium shadow-sm">
             <span>📋</span>
-            <span>Cevap Kağıdı</span>
+            <span>Cevaplar</span>
           </button>
 
           <!-- Copy Page as Image Button -->
-          <button id="copyPageImageBtn" title="Aktif sayfayı çözümleriyle birlikte resim olarak panoya kopyala (Ctrl+V ile yapıştır)" class="flex items-center space-x-1.5 bg-[#2a9d8f]/15 hover:bg-[#2a9d8f]/25 text-[#52b788] border border-[#2a9d8f]/35 px-3 py-1.5 rounded-xl transition font-medium shadow-sm">
+          <button id="copyPageImageBtn" title="Aktif sayfayı çözümleriyle birlikte resim olarak panoya kopyala (Ctrl+V ile yapıştır)" class="flex items-center space-x-1 bg-[#2a9d8f]/15 hover:bg-[#2a9d8f]/25 text-[#52b788] border border-[#2a9d8f]/35 px-2.5 py-1 rounded-xl transition font-medium shadow-sm">
             <svg class="w-3.5 h-3.5 text-[#52b788]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-            <span>📸 Resim Kopyala</span>
+            <span>Kopyala</span>
           </button>
 
           <!-- Add More Pages Button (Visible on Wide Displays, also accessible in Sidebar) -->
-          <button id="addPagesBtn" title="Mevcut listeye yeni sayfalar ekle" class="hidden xl:flex items-center space-x-1.5 bg-[#272522] hover:bg-[#312e2a] text-[#ece8e1] border border-[#3d3a36] px-3 py-1.5 rounded-xl transition font-medium">
+          <button id="addPagesBtn" title="Mevcut listeye yeni sayfalar ekle" class="hidden 2xl:flex items-center space-x-1 bg-[#272522] hover:bg-[#312e2a] text-[#ece8e1] border border-[#3d3a36] px-2.5 py-1 rounded-xl transition font-medium">
             <span>➕</span>
-            <span>Sayfa Ekle</span>
+            <span>Ekle</span>
           </button>
 
           <!-- Toggle Progress Sidebar Button -->
-          <button id="toggleProgressSidebarBtn" class="flex items-center space-x-1.5 bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] px-3 py-1.5 rounded-xl text-[#ece8e1] transition font-medium">
-            <span class="text-sm">📑</span>
+          <button id="toggleProgressSidebarBtn" title="Ödev İlerlemesi" class="flex items-center space-x-1.5 bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] px-2.5 py-1 rounded-xl text-[#ece8e1] transition font-medium">
+            <span>📑</span>
             <span>İlerleme</span>
             <span id="progressSummaryBadge" class="px-1.5 py-0.5 rounded-full bg-[#cc785c]/20 text-[#e58f74] font-mono text-[10px] font-bold border border-[#cc785c]/30">0/0</span>
           </button>
 
-          <button id="backToUploadBtn" class="text-[#a39e97] hover:text-white px-2 py-1 rounded transition">Geri Dön</button>
+          <button id="backToUploadBtn" class="text-[#a39e97] hover:text-white px-2 py-1 rounded-lg transition" title="Geri Dön">✕ Çık</button>
         </div>
       </div>
 
@@ -348,7 +342,7 @@
         </div>
 
         <!-- Collapsible Progress Sidebar (Claude Style) -->
-        <aside id="progressSidebar" class="w-80 min-w-[20rem] bg-[#1d1b18] border-l border-[#2d2b27] flex flex-col shrink-0 z-20 shadow-xl overflow-hidden">
+        <aside id="progressSidebar" class="w-72 min-w-[17rem] bg-[#1d1b18] border-l border-[#2d2b27] flex flex-col shrink-0 z-20 shadow-xl overflow-hidden">
           <!-- Sidebar Header -->
           <div class="p-4 border-b border-[#2d2b27] flex items-center justify-between">
             <div>
