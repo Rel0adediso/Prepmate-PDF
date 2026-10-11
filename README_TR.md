@@ -7,10 +7,11 @@
   <a href="README.md">English</a> &nbsp;|&nbsp; <b>Türkçe</b>
 </p>
 
-[![Release](https://img.shields.io/badge/sürüm-v1.1.0-cc785c?style=flat-square)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
-[![Python](https://img.shields.io/badge/python-3.10+-3776ab?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![AI Motoru](https://img.shields.io/badge/ai-Gemini%203.8-ea4335?style=flat-square&logo=google&logoColor=white)](https://aistudio.google.com)
-[![Lisans](https://img.shields.io/badge/lisans-MIT-333333?style=flat-square)](#)
+[![Sürüm](https://img.shields.io/github/v/release/Rel0adediso/Prepmate-PDF?style=flat-square&color=cc785c&labelColor=292b26&label=s%C3%BCr%C3%BCm)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+[![İndirmeler](https://img.shields.io/github/downloads/Rel0adediso/Prepmate-PDF/total?style=flat-square&color=d4a373&labelColor=292b26&label=%C4%B0ndirmeler)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![Python](https://img.shields.io/badge/python-3.10+-cc785c?style=flat-square&labelColor=292b26&logo=python&logoColor=white)](https://python.org)
+[![AI Motoru](https://img.shields.io/badge/AI-Gemini%203.8%20%26%20OpenRouter-d4a373?style=flat-square&labelColor=292b26&logo=google&logoColor=white)](https://aistudio.google.com)
+[![Lisans](https://img.shields.io/badge/lisans-MIT-cc785c?style=flat-square&labelColor=292b26)](#)
 
 <p align="center">
   Üniversite hazırlık sınıfları ve yabancı dil okulları için geliştirilmiş otonom ödev çözücü.<br/>
@@ -18,8 +19,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest">
-    <img src="https://img.shields.io/badge/⚡_Windows_EXE_İndir_(Kurulumsuz)-v1.1.0-cc785c?style=for-the-badge&logo=windows&logoColor=white" alt="Windows EXE İndir" />
+  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe">
+    <img src="https://img.shields.io/github/v/release/Rel0adediso/Prepmate-PDF?style=for-the-badge&logo=windows&logoColor=white&label=Windows%20EXE%20%C4%B0ndir&color=cc785c&labelColor=292b26" alt="Windows EXE İndir" />
   </a>
 </p>
 
@@ -27,15 +28,10 @@
 
 ---
 
-> [!NOTE]
-> **🌟 v1.1.0 Yenilikleri:** Ferah Editör Kanvası • Sıfır Taşma & İki Satırlı Başlık • 40 Adımlı Geri/İleri Alma (`Ctrl+Z`/`Ctrl+Y`) • Göz Koruma (Parchment Mode) • Tek Tıkla Pano Resmi Kopyalama • Çoklu Dil Desteği (TR / EN).
-
----
-
 ## 🚀 10 Saniyede Başlatma (Hızlı Başlangıç)
 
 > **Kod bilmenize, Python yüklemenize veya terminal açmanıza gerek yoktur!**
-> 1. Yukarıdaki **[Windows EXE İndir](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** butonundan programı indirin.
+> 1. Doğrudan **[Tek Tıkla Windows EXE İndir](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe)** bağlantısından güncel sürümü indirin.
 > 2. Çift tıklayarak programı modern masaüstü penceresi olarak başlatın.
 > 3. Sağ üstteki **"🔑 AI Anahtarı"** butonuna tıklayıp [Google AI Studio](https://aistudio.google.com/app/apikey)'dan aldığınız ücretsiz anahtarı yapıştırın.
 
@@ -43,7 +39,7 @@
 
 ## 🌟 Neden PrepMate PDF?
 
-| Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF v1.1.0 |
+| Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF |
 | :--- | :---: | :---: |
 | **Arayüz & Estetik** | Soğuk, karmaşık veya boğucu arayüz | **Sıcak Obsidyen & Terracotta editoryal tasarımı** |
 | **PDF Formatı & Kalite** | PDF'i bozar, bulanık resme çevirir | **Vektörel kalitede, orijinal çözünürlük korunur** |

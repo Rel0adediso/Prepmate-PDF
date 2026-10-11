@@ -7,10 +7,11 @@
   <b>English</b> &nbsp;|&nbsp; <a href="README_TR.md">Türkçe</a>
 </p>
 
-[![Release](https://img.shields.io/badge/release-v1.1.0-cc785c?style=flat-square)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
-[![Python](https://img.shields.io/badge/python-3.10+-3776ab?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![AI Engine](https://img.shields.io/badge/ai-Gemini%203.8-ea4335?style=flat-square&logo=google&logoColor=white)](https://aistudio.google.com)
-[![License](https://img.shields.io/badge/license-MIT-333333?style=flat-square)](#)
+[![Release](https://img.shields.io/github/v/release/Rel0adediso/Prepmate-PDF?style=flat-square&color=cc785c&labelColor=292b26)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Rel0adediso/Prepmate-PDF/total?style=flat-square&color=d4a373&labelColor=292b26)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![Python](https://img.shields.io/badge/python-3.10+-cc785c?style=flat-square&labelColor=292b26&logo=python&logoColor=white)](https://python.org)
+[![AI Engine](https://img.shields.io/badge/AI-Gemini%203.8%20%26%20OpenRouter-d4a373?style=flat-square&labelColor=292b26&logo=google&logoColor=white)](https://aistudio.google.com)
+[![License](https://img.shields.io/badge/license-MIT-cc785c?style=flat-square&labelColor=292b26)](#)
 
 <p align="center">
   Autonomous AI workbook & homework solver engineered for college prep classes and ESL students.<br/>
@@ -18,8 +19,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest">
-    <img src="https://img.shields.io/badge/⚡_Download_Windows_App_(.EXE)-v1.1.0-cc785c?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows App (.EXE)" />
+  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe">
+    <img src="https://img.shields.io/github/v/release/Rel0adediso/Prepmate-PDF?style=for-the-badge&logo=windows&logoColor=white&label=Download%20Windows%20App%20(.EXE)&color=cc785c&labelColor=292b26" alt="Download Windows App (.EXE)" />
   </a>
 </p>
 
@@ -27,15 +28,10 @@
 
 ---
 
-> [!NOTE]
-> **🌟 What's New in v1.1.0:** Spacious Editor Canvas • Zero-Overflow Header • 40-step Undo/Redo (`Ctrl+Z`/`Ctrl+Y`) • Eye-care Parchment Mode • 1-Click Clipboard Image Copy • Multilingual UI (EN / TR).
-
----
-
 ## 🚀 Quick Start in 10 Seconds
 
 > **No coding, Python installation, or terminal commands needed!**
-> 1. Download **`PrepMate-PDF.exe`** from the **[Windows Download (.EXE)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** button above.
+> 1. Download **`PrepMate-PDF.exe`** directly from the **[1-Click Download Link](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe)**.
 > 2. Double-click the executable to launch the desktop app.
 > 3. Click **"🔑 AI Key"** in the top bar and paste your free key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
@@ -43,7 +39,7 @@
 
 ## 🌟 Why PrepMate PDF?
 
-| Feature | Generic OCR / AI Tools | 🎓 PrepMate PDF v1.1.0 |
+| Feature | Generic OCR / AI Tools | 🎓 PrepMate PDF |
 | :--- | :---: | :---: |
 | **Interface & Design** | Cluttered, clinical, overwhelming | **Warm Obsidian & Terracotta editorial aesthetic** |
 | **PDF Quality** | Flattened, blurry screenshots | **Vector-crisp original resolution preserved** |
@@ -76,7 +72,7 @@ flowchart LR
 * **🎨 Warm Obsidian & Terracotta Aesthetic:** Editorial typography (`Newsreader` serif), warm accents, and an eye-soothing dark canvas.
 * **🌙 Eye-Care Parchment Mode:** Softens harsh white textbook glare into warm vintage parchment during late-night study hours.
 * **📋 Rapid Cheat Sheet (Answer Key):** Clean numbered list (`#1`, `#2`, ...) of every solution on the active page for instant copying.
-* **📸 1-Click Clipboard Image Copy:** Exports full resolved high-dpi page image directly to clipboard for pasting into WhatsApp Web or Discord.
+* **📸 1-Click Clipboard Image Copy:** Exports full resolved high-dpi page image directly to clipboard for pasting into WhatsApp Web or Discord (`Ctrl+V`).
 * **🎭 Natural Student Mode (~95% Score):** Realistic student behavior mode that avoids robotic perfection, preventing teacher AI detection.
 * **🎯 CEFR Difficulty Tuning (A1 - C1):** Calibrate vocabulary and grammatical complexity specifically to your course syllabus.
 * **🧠 Mind-Map & Sunburst Solver:** Accurately fills radial bubble diagrams, concept maps, and category trees.
