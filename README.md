@@ -3,8 +3,8 @@
 # 🎓 PrepMate PDF
 ### *AI-Powered English Workbook & Homework Solver*
 
-[![Windows .EXE](https://img.shields.io/badge/Windows_İndir_(.EXE)-v1.0.3_Hazır-cc785c?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
-[![Release](https://img.shields.io/badge/Sürüm-v1.0.3-d4a373?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![Windows .EXE](https://img.shields.io/badge/Windows_İndir_(.EXE)-v1.1.0_Hazır-cc785c?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+[![Release](https://img.shields.io/badge/Sürüm-v1.1.0-d4a373?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Gemini](https://img.shields.io/badge/AI_Engine-Gemini_3.8_%26_OpenRouter-ea4335?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
 [![Lisans](https://img.shields.io/badge/Lisans-MIT-blue?style=for-the-badge)](#)
@@ -22,6 +22,16 @@
 
 ---
 
+> [!IMPORTANT]
+> ### 🌟 v1.1.0 Güncelleme Özeti
+> * **🎨 Ferah & Genişletilmiş Editör Kanvası:** Üst barlar kompakt hap butonlara dönüştürüldü; PDF sayfalarının görüntüleme alanı dikey ve yatayda maksimuma çıkarıldı.
+> * **📱 Sıfır Taşma & İki Satırlı İlerleme Başlığı:** Dar laptop ekranlarında dahi butonların veya başlıkların ekrandan taşmasını ve ikiye bölünmesini engelleyen akıllı hiyerarşik düzen.
+> * **↩️ Geri / İleri Alma (Ctrl+Z / Ctrl+Y):** 40 adımlı tam işlem geçmişi ile yanlış silinen veya kayan kutuları anında geri getirme.
+> * **🌙 Göz Koruma (Parchment Mode):** Gece çalışma saatlerinde sıcak parşömen filtresiyle bembeyaz PDF parlaklığını kırma.
+> * **📸 Tek Tıkla Resim Kopyalama:** Çözülmüş sayfayı anında panoya kopyalayıp WhatsApp/Discord'a yapıştırma (`Ctrl+V`).
+
+---
+
 ## 🚀 10 Saniyede Başlatma (Hızlı Başlangıç)
 
 > [!TIP]
@@ -34,7 +44,7 @@
 
 ## 🌟 Neden PrepMate PDF? (Geleneksel Çözücüler vs PrepMate)
 
-| Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF v1.0.3 |
+| Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF v1.1.0 |
 | :--- | :---: | :---: |
 | **Arayüz & Estetik** | Soğuk, karmaşık veya boğucu arayüz | **Anthropic / Claude Sıcak Obsidian & Terracotta tasarımı** |
 | **PDF Formatı & Kalite** | PDF'i bozar, bulanık resme çevirir | **Vektörel kalitede, orijinal çözünürlük korunur** |
