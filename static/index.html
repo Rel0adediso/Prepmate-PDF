@@ -342,30 +342,34 @@
         </div>
 
         <!-- Collapsible Progress Sidebar (Claude Style) -->
-        <aside id="progressSidebar" class="w-72 min-w-[17rem] bg-[#1d1b18] border-l border-[#2d2b27] flex flex-col shrink-0 z-20 shadow-xl overflow-hidden">
+        <aside id="progressSidebar" class="w-80 min-w-[19rem] bg-[#1d1b18] border-l border-[#2d2b27] flex flex-col shrink-0 z-20 shadow-xl overflow-hidden">
           <!-- Sidebar Header -->
-          <div class="p-4 border-b border-[#2d2b27] flex items-center justify-between">
-            <div>
-              <h3 class="font-bold text-sm text-[#fbf9f5] flex items-center gap-2">
-                <span>📑 Ödev İlerlemesi</span>
-                <span id="overallPercentBadge" class="text-xs px-2 py-0.5 rounded-full bg-[#cc785c]/20 text-[#e58f74] border border-[#cc785c]/35 font-bold font-mono">0%</span>
-              </h3>
-              <p id="progressStatusSubtitle" class="text-[11px] text-[#a39e97] mt-0.5">Sayfalar kontrol ediliyor...</p>
+          <div class="p-3.5 border-b border-[#2d2b27] bg-[#1d1b18]">
+            <!-- Row 1: Title, Progress Badge, and Close Button -->
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-base select-none">📑</span>
+                <h3 class="font-bold text-sm text-[#fbf9f5] whitespace-nowrap">Ödev İlerlemesi</h3>
+                <span id="overallPercentBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-[#cc785c]/20 text-[#e58f74] border border-[#cc785c]/35 font-bold font-mono">0%</span>
+              </div>
+              <button id="closeProgressSidebarBtn" class="p-1 rounded-lg text-[#a39e97] hover:text-white hover:bg-white/[0.08] transition text-base leading-none" title="Paneli Kapat">&times;</button>
             </div>
-            <div class="flex items-center space-x-1.5">
-              <button id="solveAllPendingBtn" class="text-xs bg-[#cc785c]/20 hover:bg-[#cc785c]/30 text-[#e58f74] border border-[#cc785c]/35 px-2.5 py-1 rounded-lg transition font-medium" title="Henüz çözülmemiş sayfaları çöz">
-                ⚡ Kalanı Çöz
+
+            <!-- Row 2: Status Subtitle & Solve All Pending Action Button -->
+            <div class="flex items-center justify-between gap-2">
+              <p id="progressStatusSubtitle" class="text-[11px] text-[#a39e97] truncate flex-1" title="Ödev durumu">Sayfalar kontrol ediliyor...</p>
+              <button id="solveAllPendingBtn" class="shrink-0 text-xs bg-[#cc785c]/15 hover:bg-[#cc785c]/25 text-[#e58f74] border border-[#cc785c]/35 px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1 shadow-sm whitespace-nowrap" title="Henüz çözülmemiş sayfaları çöz">
+                <span>⚡ Kalanı Çöz</span>
               </button>
-              <button id="closeProgressSidebarBtn" class="p-1 rounded-lg text-[#a39e97] hover:text-white hover:bg-white/[0.08] transition text-sm">&times;</button>
             </div>
           </div>
 
           <!-- Overall Progress Bar Container -->
-          <div class="px-4 py-3 border-b border-[#2d2b27] bg-[#171614]">
+          <div class="px-3.5 py-2.5 border-b border-[#2d2b27] bg-[#171614]">
             <div class="w-full bg-[#272522] rounded-full h-2 overflow-hidden shadow-inner">
               <div id="overallProgressBar" class="h-2 rounded-full bg-gradient-to-r from-[#cc785c] to-[#d4a373] transition-all duration-300" style="width: 0%"></div>
             </div>
-            <div class="flex justify-between items-center text-[11px] text-[#a39e97] mt-2">
+            <div class="flex justify-between items-center text-[11px] text-[#a39e97] mt-1.5">
               <span id="completedPagesCount" class="font-medium text-[#ece8e1]">0 tamamlandı</span>
               <span id="totalSelectedPagesCount" class="font-mono">0 sayfa</span>
             </div>
