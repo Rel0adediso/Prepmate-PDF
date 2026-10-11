@@ -1,50 +1,47 @@
 <div align="center">
 
 # 🎓 PrepMate PDF
-### *AI-Powered English Workbook & Homework Solver*
-
-[![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](README.md)
-[![Türkçe](https://img.shields.io/badge/Dil-Türkçe-red?style=for-the-badge)](README_TR.md)
-[![Windows .EXE](https://img.shields.io/badge/Windows_İndir_(.EXE)-v1.1.0_Hazır-cc785c?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
-[![Release](https://img.shields.io/badge/Sürüm-v1.1.0-d4a373?style=for-the-badge&logo=github)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Gemini](https://img.shields.io/badge/AI_Engine-Gemini_3.8_%26_OpenRouter-ea4335?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
-[![Lisans](https://img.shields.io/badge/Lisans-MIT-blue?style=for-the-badge)](#)
+### *Yapay Zeka Destekli İngilizce Workbook & Ödev Çözücü*
 
 <p align="center">
-  <b>Üniversite hazırlık sınıfları ve yabancı dil okulları için geliştirilmiş otonom ödev çözücü.</b><br>
-  150+ sayfalık kalın workbook PDF'lerini analiz eder, soruları doğal el yazısı hissiyle çözer ve <b>Adobe Acrobat ile doldurulmuş gibi</b> orijinal vektörel kalitede çıktısını verir.
+  <a href="README.md">English</a> &nbsp;|&nbsp; <b>Türkçe</b>
 </p>
 
----
+[![Release](https://img.shields.io/badge/sürüm-v1.1.0-cc785c?style=flat-square)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![Python](https://img.shields.io/badge/python-3.10+-3776ab?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![AI Motoru](https://img.shields.io/badge/ai-Gemini%203.8-ea4335?style=flat-square&logo=google&logoColor=white)](https://aistudio.google.com)
+[![Lisans](https://img.shields.io/badge/lisans-MIT-333333?style=flat-square)](#)
 
-### ⚡ [Hemen Windows EXE İndir (Kurulumsuz, Tek Tıkla Çalışır)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
+<p align="center">
+  Üniversite hazırlık sınıfları ve yabancı dil okulları için geliştirilmiş otonom ödev çözücü.<br/>
+  Soruları doğal öğrenci el yazısıyla çözer ve <b>Adobe Acrobat vektörel kalitesinde</b> çıktı verir.
+</p>
+
+<p align="center">
+  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest">
+    <img src="https://img.shields.io/badge/⚡_Windows_EXE_İndir_(Kurulumsuz)-v1.1.0-cc785c?style=for-the-badge&logo=windows&logoColor=white" alt="Windows EXE İndir" />
+  </a>
+</p>
 
 </div>
 
 ---
 
-> [!IMPORTANT]
-> ### 🌟 v1.1.0 Güncelleme Özeti
-> * **🎨 Ferah & Genişletilmiş Editör Kanvası:** Üst barlar kompakt hap butonlara dönüştürüldü; PDF sayfalarının görüntüleme alanı dikey ve yatayda maksimuma çıkarıldı.
-> * **📱 Sıfır Taşma & İki Satırlı İlerleme Başlığı:** Dar laptop ekranlarında dahi butonların veya başlıkların ekrandan taşmasını ve ikiye bölünmesini engelleyen akıllı hiyerarşik düzen.
-> * **↩️ Geri / İleri Alma (Ctrl+Z / Ctrl+Y):** 40 adımlı tam işlem geçmişi ile yanlış silinen veya kayan kutuları anında geri getirme.
-> * **🌙 Göz Koruma (Parchment Mode):** Gece çalışma saatlerinde sıcak parşömen filtresiyle bembeyaz PDF parlaklığını kırma.
-> * **📸 Tek Tıkla Resim Kopyalama:** Çözülmüş sayfayı anında panoya kopyalayıp WhatsApp/Discord'a yapıştırma (`Ctrl+V`).
+> [!NOTE]
+> **🌟 v1.1.0 Yenilikleri:** Ferah Editör Kanvası • Sıfır Taşma & İki Satırlı Başlık • 40 Adımlı Geri/İleri Alma (`Ctrl+Z`/`Ctrl+Y`) • Göz Koruma (Parchment Mode) • Tek Tıkla Pano Resmi Kopyalama • Çoklu Dil Desteği (TR / EN).
 
 ---
 
 ## 🚀 10 Saniyede Başlatma (Hızlı Başlangıç)
 
-> [!TIP]
 > **Kod bilmenize, Python yüklemenize veya terminal açmanıza gerek yoktur!**
-> 1. Yukarıdaki **[Windows İndir (.EXE)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** bağlantısından **`PrepMate-PDF.exe`** dosyasını indirin.
-> 2. İndirdiğiniz dosyaya çift tıklayın. Program modern masaüstü penceresi olarak anında başlayacaktır.
+> 1. Yukarıdaki **[Windows EXE İndir](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)** butonundan programı indirin.
+> 2. Çift tıklayarak programı modern masaüstü penceresi olarak başlatın.
 > 3. Sağ üstteki **"🔑 AI Anahtarı"** butonuna tıklayıp [Google AI Studio](https://aistudio.google.com/app/apikey)'dan aldığınız ücretsiz anahtarı yapıştırın.
 
 ---
 
-## 🌟 Neden PrepMate PDF? (Geleneksel Çözücüler vs PrepMate)
+## 🌟 Neden PrepMate PDF?
 
 | Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF v1.1.0 |
 | :--- | :---: | :---: |
@@ -62,7 +59,7 @@
 
 ---
 
-## 🛠️ Çözüm & Soru Tipleri Yetenekleri
+## 🛠️ Mimari & Çözüm Yetenekleri
 
 ```mermaid
 flowchart LR
@@ -72,20 +69,18 @@ flowchart LR
     B --> C3["Zihin Haritaları & Sunburst"]
     B --> C4["Kompozisyon & Paragraf"]
     C1 & C2 & C3 & C4 --> D["🧠 Gemini 3.8 / OpenRouter Motoru"]
-    D --> E["✨ Modern Kanvas Arayüzü & Önizleme"]
-    E --> F["📥 Acrobat Standartlarında Vektörel PDF / ZIP / Resim"]
+    D --> E["✨ Modern Kanvas Önizlemesi"]
+    E --> F["📥 Vektörel PDF / ZIP / Resim"]
 ```
 
-* **🎨 Sıcak Obsidyen & Terracotta Teması:** Okuma deneyimini editoryal dergi seviyesine taşıyan serif başlıklar (`Newsreader`), yumuşak kiremit/terracotta vurgular ve gözü dinlendiren koyu obsidian zemin.
+* **🎨 Sıcak Obsidyen & Terracotta Teması:** Okuma deneyimini editoryal dergi seviyesine taşıyan serif başlıklar (`Newsreader`), yumuşak kiremit vurgular ve gözü dinlendiren koyu obsidian zemin.
 * **🌙 Göz Koruma (Parchment Mode):** Gece laptop başında ödev yetiştirirken bembeyaz PDF parlaklığını kırıp sıcak parşömen filtresine büründüren göz koruma anahtarı.
-* **📋 Hızlı Cevap Kağıdı (Cheat Sheet):** Sayfadaki tüm soruları `#1`, `#2` şeklinde sıralı döküm halinde gösteren, tek tıkla kopyalanabilen kompakt cevap anahtarı modalı.
+* **📋 Hızlı Cevap Kağıdı (Cheat Sheet):** Sayfadaki tüm soruları `#1`, `#2` şeklinde sıralı döküm halinde gösteren, tek tıkla kopyalanabilen kompakt cevap anahtarı.
 * **📸 Tek Tıkla Resim Kopyalama:** Çözülmüş sayfayı yüksek çözünürlükte doğrudan panoya kopyalayıp WhatsApp Web veya Discord'a yapıştırma (`Ctrl+V`).
 * **🎭 Doğal Öğrenci Hissi (~%95 Puan):** Hocanın *"bunu yapay zeka çözmüş"* şüphesini sıfıra indiren, 1-2 küçük masum insani esneme payı bırakan akıllı simülasyon.
 * **🎯 CEFR Dil Seviyesi (A1 - C1):** Ödevin ait olduğu hazırlık kuru seviyesine göre dilbilgisini ve kelime haznesini anında ayarlama.
-* **🧠 Zihin Haritası & Sunburst (Mind-Map):** Dairesel 8 kollu seyahat, kelime veya beyin fırtınası diyagramlarını merkezden dışa doğru doğru açılarla doldurur.
-* **📝 Kompozisyon & Paragraf Kutuları:** *"Your Paragraph"*, *"Unit Task"* gibi açık uçlu yazma kutularına ünitenin dilbilgisine tam uyan, akıcı ve doğal öğrenci metinleri yazar.
-* **✍️ 5.8pt Hata Düzeltme (Editing Sections):** Üstü çizili veya yanlış kelimelerin hemen üzerine metinle çakışmayan temiz düzeltmeler kondurur.
-* **🎯 Şık & Fiil Vurgulama:** Doğru seçeneğin altını çizme (*underline*) veya hafif saydam fosforlu vurgulama (*snug highlight*).
+* **🧠 Zihin Haritası & Sunburst (Mind-Map):** Dairesel kavram haritalarını, dairesel sunburst ve örümcek diyagramlarını merkezden dışa doğru doğru açılarla doldurur.
+* **✍️ 5.8pt Hata Düzeltme (Editing):** Üstü çizili veya yanlış kelimelerin hemen üzerine metinle çakışmayan temiz düzeltmeler kondurur.
 
 ---
 
@@ -98,7 +93,7 @@ flowchart LR
    - Cevapları fareyle istediğiniz yere sürükleyin veya üzerine çift tıklayarak metni düzenleyin.
    - Hata yaparsanız `Ctrl + Z` ile geri alın veya `Ctrl + Y` ile ileri alın.
    - Gece çalışıyorsanız `🌙 Göz Koruma` modunu açarak ekranı yumuşatın.
-   - Hızlıca cevapları kontrol etmek için `📋 Cevap Kağıdı` butonunu kullanın.
+   - Hızlıca cevapları kontrol etmek için `📋 Cevaplar` butonunu kullanın.
 5. **Dışa Aktarın:**
    - **📄 Sadece Ödev Sayfalarını İndir:** Hocanıza teslim etmelik derli toplu tek bir PDF üretir.
    - **📚 Tüm Kitabı İndir:** Tüm çalışma kitabının ilgili sayfalarını doldurup tam kitap olarak verir.
@@ -119,8 +114,6 @@ flowchart LR
 ---
 
 ## 👨‍💻 Geliştiriciler İçin (Kaynak Koddan Çalıştırma)
-
-Projeyi yerel ortamınızda kaynak kodundan çalıştırmak isterseniz:
 
 ```bash
 # 1. Depoyu klonlayın
@@ -143,10 +136,9 @@ derle_exe.bat
 
 ## 🛡️ Gizlilik & Güvenlik Garantisi (%100 Yerel)
 
-> [!NOTE]
-> * **Sıfır Bulut Kaydı:** Yüklediğiniz PDF'ler ve oluşturulan çözümler yalnızca kendi bilgisayarınızda (`localhost`) işlenir. Harici hiçbir sunucuya kaydedilmez.
-> * **Güvenli API Anahtarı Saklama:** Girdiğiniz API anahtarları yalnızca kendi cihazınızda şifreli/yerel olarak saklanır; GitHub reposuna veya üçüncü şahıslara asla iletilmez.
-> * **Açık Kaynak Kod:** Kod tabanında hiçbir telemetri, arka kapı veya kullanıcı takip kodu bulunmaz.
+* **Sıfır Bulut Kaydı:** Yüklediğiniz PDF'ler ve oluşturulan çözümler yalnızca kendi bilgisayarınızda (`localhost`) işlenir. Harici hiçbir sunucuya kaydedilmez.
+* **Güvenli API Anahtarı Saklama:** Girdiğiniz API anahtarları yalnızca kendi cihazınızda şifreli/yerel olarak saklanır; GitHub reposuna veya üçüncü şahıslara asla iletilmez.
+* **Açık Kaynak Kod:** Kod tabanında hiçbir telemetri, arka kapı veya kullanıcı takip kodu bulunmaz.
 
 ---
 
