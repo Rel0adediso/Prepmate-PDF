@@ -46,7 +46,7 @@
 
 | Özellik | Sıradan OCR / AI Araçları | 🎓 PrepMate PDF v1.1.0 |
 | :--- | :---: | :---: |
-| **Arayüz & Estetik** | Soğuk, karmaşık veya boğucu arayüz | **Anthropic / Claude Sıcak Obsidian & Terracotta tasarımı** |
+| **Arayüz & Estetik** | Soğuk, karmaşık veya boğucu arayüz | **Sıcak Obsidyen & Terracotta editoryal tasarımı** |
 | **PDF Formatı & Kalite** | PDF'i bozar, bulanık resme çevirir | **Vektörel kalitede, orijinal çözünürlük korunur** |
 | **Hizalama Hassasiyeti** | Yanıtlar satırların dışına taşar | **Piksel düzeyinde çizgi & kutu tespiti** |
 | **Gece Çalışma (Göz Koruma)** | Beyaz PDF parlaması göz yorar | **Parchment Mode: Sıcak parşömen kağıt filtresi** |
@@ -70,11 +70,11 @@ flowchart LR
     B --> C3["Zihin Haritaları & Sunburst"]
     B --> C4["Kompozisyon & Paragraf"]
     C1 & C2 & C3 & C4 --> D["🧠 Gemini 3.8 / OpenRouter Motoru"]
-    D --> E["✨ Claude Arayüzü & Önizleme"]
+    D --> E["✨ Modern Kanvas Arayüzü & Önizleme"]
     E --> F["📥 Acrobat Standartlarında Vektörel PDF / ZIP / Resim"]
 ```
 
-* **🎨 Claude / Anthropic Warm Obsidian Teması:** Okuma deneyimini editoryal dergi seviyesine taşıyan editoryal serif başlıklar (`Newsreader`), yumuşak kiremit/terracotta vurgular ve gözü dinlendiren koyu obsidian zemin.
+* **🎨 Sıcak Obsidyen & Terracotta Teması:** Okuma deneyimini editoryal dergi seviyesine taşıyan serif başlıklar (`Newsreader`), yumuşak kiremit/terracotta vurgular ve gözü dinlendiren koyu obsidian zemin.
 * **🌙 Göz Koruma (Parchment Mode):** Gece laptop başında ödev yetiştirirken bembeyaz PDF parlaklığını kırıp sıcak parşömen filtresine büründüren göz koruma anahtarı.
 * **📋 Hızlı Cevap Kağıdı (Cheat Sheet):** Sayfadaki tüm soruları `#1`, `#2` şeklinde sıralı döküm halinde gösteren, tek tıkla kopyalanabilen kompakt cevap anahtarı modalı.
 * **📸 Tek Tıkla Resim Kopyalama:** Çözülmüş sayfayı yüksek çözünürlükte doğrudan panoya kopyalayıp WhatsApp Web veya Discord'a yapıştırma (`Ctrl+V`).
