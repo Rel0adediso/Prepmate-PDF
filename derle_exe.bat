@@ -16,19 +16,7 @@ if %errorlevel% neq 0 (
     set PYCMD=python
 )
 
-%PYCMD% -m PyInstaller --noconfirm --onefile --windowed --name "PrepMate-PDF" ^
-    --add-data "static;static" ^
-    --add-data "assets;assets" ^
-    --add-data "ornek_ingilizce_odev.pdf;." ^
-    --hidden-import uvicorn.logging ^
-    --hidden-import uvicorn.loops ^
-    --hidden-import uvicorn.loops.auto ^
-    --hidden-import uvicorn.protocols ^
-    --hidden-import uvicorn.protocols.http ^
-    --hidden-import uvicorn.protocols.http.auto ^
-    --hidden-import uvicorn.lifespan ^
-    --hidden-import uvicorn.lifespan.on ^
-    desktop.py
+%PYCMD% -m PyInstaller --noconfirm --clean PrepMate-PDF.spec
 
 if %errorlevel% neq 0 (
     color 0C
