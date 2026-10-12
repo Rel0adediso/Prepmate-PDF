@@ -133,7 +133,7 @@ def export_annotated_pdf(
                     continue
 
                 text = str(item.get("answer", "")).strip()
-                if not text:
+                if not text or text.lower() in ["ok", "ok.", "n/a", "none"]:
                     continue
                 
                 font_size = float(item.get("font_size", 11))

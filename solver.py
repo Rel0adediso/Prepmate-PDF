@@ -115,6 +115,156 @@ def deduplicate_overlapping_annotations(annotations: list[dict]) -> list[dict]:
     return unique_items
 
 
+def extract_table_exercise_blanks(page) -> list[dict]:
+    """
+    Extracts blanks ONLY from authentic fill-in exercise tables (e.g. Q&A tables, matching tables).
+    Strictly skips:
+    - Pure grammar explanations, summary tables, reference charts (e.g. Affirmative/Negative, Spelling rules, Irregular verbs)
+    - Note boxes, warning callouts ('Note That', 'Common mistakes')
+    - Header/title banners
+    Uses the EXACT cell coordinates from PyMuPDF, NEVER approximate column division!
+    """
+    tabs = page.find_tables()
+    table_blanks = []
+    w_page = page.rect.width
+    h_page = page.rect.height
+    
+    EXPLANATION_KEYWORDS = [
+        "affirmative", "negative", "pronunciation", "spelling", "verb ending", 
+        "rule", "pattern", "base (v1)", "past (v2)", "time expressions", "use", 
+        "examples", "singular", "plural", "short answer", "note that", "mistakes",
+        "grammar focus", "we don't use", "we usually use", "final sound"
+    ]
+    
+    for t in tabs.tables:
+        # 1. Skip tiny tables, single-row banner headers, or icon boxes
+        if len(t.cells) <= 3 or t.row_count <= 1 or (t.bbox[3] - t.bbox[1]) < 30:
+            continue
+            
+        t_rect = pymupdf.Rect(t.bbox)
+        t_full_text = page.get_text("text", clip=t_rect).lower()
+
+        # Check text immediately above table (up to 45 pt above)
+        above_rect = pymupdf.Rect(t_rect.x0 - 20, max(0, t_rect.y0 - 45), t_rect.x1 + 20, t_rect.y0)
+        above_text = page.get_text("text", clip=above_rect).lower()
+        combined_ctx = (above_text + " " + t_full_text).strip()
+
+        # Skip Multiple Choice options formatted as tables
+        if len(re.findall(r'\b[a-d]\.\s+', t_full_text)) >= 2:
+            continue
+
+        # Skip callouts, note boxes, fact boxes, discussion prompts
+        CALLOUT_KEYWORDS = [
+            "interesting fact", "fun fact", "did you know", "note that", "common mistakes",
+            "common past simple mistakes", "case 1", "case 2", "warm-up", "discussion",
+            "in pairs", "watch the video", "tip:", "quote:", "application:", "rule states that",
+            "we don't use", "we usually use"
+        ]
+        if any(k in combined_ctx for k in CALLOUT_KEYWORDS):
+            continue
+
+        # Skip pure grammar charts & reference summaries
+        has_expl_kw = sum(1 for kw in EXPLANATION_KEYWORDS if kw in t_full_text)
+        if has_expl_kw >= 1 and not any(k in combined_ctx for k in ["complete the table", "write the missing"]):
+            continue
+        if "information questions with did" in combined_ctx or "form of past simple" in combined_ctx:
+            continue
+
+        # MUST have an explicit exercise instruction to complete / fill / answer the table
+        has_table_instr = any(k in combined_ctx for k in [
+            "complete the table", "fill in the table", "write the missing", 
+            "look at the gaps", "answer the questions", "complete the chart",
+            "write the questions", "fill the table", "fill in the gaps and complete"
+        ])
+        if not has_table_instr:
+            continue
+            
+        # 3. Group cells by row (y-coordinate)
+        cells = [pymupdf.Rect(c) for c in t.cells if (c[2] - c[0]) > 20 and (c[3] - c[1]) > 10]
+        if not cells:
+            continue
+            
+        # Cluster cells by vertical overlap
+        rows = []
+        cells.sort(key=lambda c: (c.y0, c.x0))
+        for c in cells:
+            matched_row = None
+            for r in rows:
+                v_ovlp = max(0.0, min(c.y1, r[0].y1) - max(c.y0, r[0].y0))
+                if v_ovlp > 0.5 * min(c.height, r[0].height):
+                    matched_row = r
+                    break
+            if matched_row is not None:
+                matched_row.append(c)
+            else:
+                rows.append([c])
+                
+        # Sort cells in each row by x0
+        for r in rows:
+            r.sort(key=lambda c: c.x0)
+            
+        # If table has a short header row (e.g. Question / Answer), identify if row 0 is header
+        first_row_words = [page.get_text("text", clip=c).strip().lower() for c in rows[0]]
+        first_row_text = " ".join(first_row_words)
+        is_header_row = (
+            len(first_row_text) <= 35 and
+            any(w in ["question", "answer", "subject", "verb", "item", "pattern"] for w in first_row_words)
+        )
+        start_row_idx = 1 if is_header_row else 0
+        
+        for r_idx in range(start_row_idx, len(rows)):
+            row_cells = rows[r_idx]
+            if len(row_cells) < 2:
+                continue
+                
+            content_cells = [c for c in row_cells if c.width >= 35]
+            if len(content_cells) < 2:
+                continue
+                
+            cell_texts = [page.get_text("text", clip=c).strip() for c in content_cells]
+            
+            for c_i, (c_rect, c_txt) in enumerate(zip(content_cells, cell_texts)):
+                is_blank = False
+                prefix_num = ""
+                
+                if not c_txt:
+                    is_blank = True
+                elif c_txt.strip().rstrip(".").isdigit(): # e.g. "2." or "3"
+                    is_blank = True
+                    prefix_num = c_txt.strip()
+                    
+                if is_blank:
+                    other_txts = [t for j, t in enumerate(cell_texts) if j != c_i and t and not t.strip().rstrip(".").isdigit()]
+                    if not other_txts:
+                        continue
+                    prompt_ctx = " | ".join(other_txts).replace("\n", " ")
+                    
+                    x0 = c_rect.x0
+                    x1 = c_rect.x1
+                    y0 = c_rect.y0
+                    y1 = c_rect.y1
+                    
+                    if prefix_num:
+                        x0 = min(x1 - 30, x0 + 18.0)
+                        
+                    ymin = int((y0 / h_page) * 1000)
+                    xmin = int(((x0 + 4) / w_page) * 1000)
+                    ymax = int((y1 / h_page) * 1000)
+                    xmax = int(((x1 - 4) / w_page) * 1000)
+                    
+                    table_blanks.append({
+                        "context": f"[Table Exercise Row {r_idx+1}: {prompt_ctx}]",
+                        "box_2d": [ymin, xmin, ymax, xmax],
+                        "font_size": 10,
+                        "y0": y0,
+                        "x0": x0,
+                        "width": (x1 - x0) - 8,
+                        "is_table_cell": True
+                    })
+                    
+    return table_blanks
+
+
 def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
     """
     Analyzes the PDF page and cleanly separates:
@@ -183,7 +333,8 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
             "x0": x0, "y0": y0, "x1": x1, "y1": y1, "width_pt": width_pt,
             "text": text,
             "extra_before": extra_before,
-            "extra_after": extra_after
+            "extra_after": extra_after,
+            "raw_token": raw_text
         })
 
     # Filter out table header dots and merge adjacent or line-wrapped underscores
@@ -194,6 +345,20 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
         if i in skip_indices:
             continue
         
+        # Check if this token is part of an already filled example (e.g. '_____What did he drink________?')
+        same_line_words = [sw for sw in words if abs(sw[1] - u["y0"]) < 5]
+        same_line_words.sort(key=lambda sw: sw[0])
+        same_line_text = " ".join(sw[4] for sw in same_line_words)
+        if any(ex in same_line_text for ex in ["What did he drink", "The first one is done as an example"]):
+            if "What did he drink" in same_line_text and ("_____What" in same_line_text or "drink________" in same_line_text):
+                continue
+
+        # Check if this underscore is part of a multiple-choice question stem (e.g. '1. The ______ model' with a. b. options below)
+        below_words = [sw for sw in words if 6 <= (sw[1] - u["y1"]) <= 45]
+        below_text = " ".join(sw[4] for sw in below_words)
+        if bool(re.search(r'\b[a-b]\.\s*', below_text)):
+            continue
+
         # Check if it is a table header placeholder (e.g. 'Verb be', 'Question word', 'Short Answer')
         same_line = [sw for sw in words if abs(sw[1] - u["y0"]) < 6]
         line_str = " ".join(sw[4] for sw in same_line)
@@ -215,14 +380,13 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
                     u["text"] = u["text"] + " " + next_u["text"]
                     skip_indices.add(i + 1)
                     
-        # Merge line-wrapped underscore continuation (e.g. 'She __________ \n _______ (talk)')
-        # Strictly applies to short blanks (< 200 pt), NEVER ruled lines
+        # Check if this underscore is line 1 stub of a 2-line question:
+        # e.g. Line 1 has '2. (in the morning/go/he/where) _________'
+        # and Line 2 has '______________________________________?'
         if i + 1 < len(raw_unders) and (i + 1) not in skip_indices:
             next_u = raw_unders[i+1]
-            w_idx = words.index(u["w"])
-            next_idx = words.index(next_u["w"])
-            if next_idx == w_idx + 1 and 10 <= (next_u["y0"] - u["y0"]) <= 25 and u["width_pt"] < 200 and next_u["width_pt"] < 200:
-                # Discard the stub at line end, keep the line-starting one where the verb bracket is
+            if 10 <= (next_u["y0"] - u["y0"]) <= 25 and ('?' in next_u.get("raw_token", "") or '?' in next_u.get("extra_after", "")):
+                # Skip the line 1 stub, keep line 2 where the question mark is!
                 skip_indices.add(i)
                 continue
 
@@ -236,7 +400,6 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
         w = u["w"]
         
         # Check if this underscore/blank or line ALREADY has text sitting directly on it
-        # (e.g. an already solved/exported PDF, or a pre-filled textbook example).
         overlapping_words_found = []
         for sw in words:
             if sw == w or '__' in sw[4] or '..' in sw[4]:
@@ -269,8 +432,11 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
         if not before and len(after) > 25 and set(text).issubset({'.'}):
             continue
 
-        # True empty ruled lines: before is empty, after is empty, width >= 170 pt, len(text) >= 20
-        if not before and not after and width_pt >= 170 and len(text) >= 20:
+        # If after ends with '?' or raw_token ends with '?', it is a QUESTION BLANK, NEVER writing line!
+        is_question_blank = after.endswith("?") or '?' in u.get("raw_token", "") or '?' in u.get("extra_after", "")
+
+        # True empty ruled lines: before is empty, after is empty, width >= 170 pt, len(text) >= 20, AND NOT ending with ?
+        if not before and not after and width_pt >= 170 and len(text) >= 20 and not is_question_blank:
             ymin = int((y0 / h_page) * 1000)
             xmin = int((x0 / w_page) * 1000)
             ymax = int((y1 / h_page) * 1000)
@@ -286,12 +452,10 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
             
         # Context enrichment for exercise blanks:
         context_prefix = ""
-        # If line starts with Q: or A: or question number, look at line(s) directly above
         above_words = [sw for sw in words if 10 <= (y0 - sw[1]) <= 32]
         above_words.sort(key=lambda sw: (sw[1], sw[0]))
         if above_words:
             prompt_line = ' '.join(sw[4] for sw in above_words).strip()
-            # If above line was Q:, check line above that
             if prompt_line.startswith("Q:") or "___" in prompt_line:
                 higher_words = [sw for sw in words if 28 <= (y0 - sw[1]) <= 55]
                 higher_words.sort(key=lambda sw: (sw[1], sw[0]))
@@ -299,9 +463,9 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
                     prompt_line = ' '.join(sw[4] for sw in higher_words).strip()
             context_prefix = prompt_line + " -> "
 
-        # Crystal-clear tagging for Yes/No Q&A lines (e.g. '____? Yes, ____')
-        if after.startswith("?") or "?" in text:
-            ctx = f"{context_prefix}[FORM YES/NO QUESTION]: {before} [BLANK]?"
+        # Crystal-clear tagging for questions vs short answers vs normal blanks
+        if is_question_blank:
+            ctx = f"{context_prefix}[FORM QUESTION]: {before} [BLANK] {after}".strip()
         elif before.startswith("Yes,") or before.startswith("No,") or "Yes," in before or "No," in before:
             ctx = f"{context_prefix}[SHORT ANSWER]: {before} [BLANK] {after}".strip()
         else:
@@ -324,56 +488,10 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
             "width": width_pt
         })
         
-    # 3. Extract empty cells in vector tables (e.g. matching tables, fill-in tables)
+    # 3. Extract empty cells in authentic vector exercise tables
     try:
-        tabs = page.find_tables()
-        for t in tabs.tables:
-            df = t.extract()
-            if not df or len(df) < 2:
-                continue
-                
-            col_count = t.col_count
-            empty_cols = []
-            for c_idx in range(col_count):
-                empty_count = sum(1 for row in df if not row[c_idx] or not row[c_idx].strip())
-                if empty_count >= 2:
-                    empty_cols.append(c_idx)
-                    
-            if not empty_cols:
-                continue
-                
-            w_table = t.bbox[2] - t.bbox[0]
-            for r_idx, row in enumerate(df):
-                r_bbox = t.rows[r_idx].bbox
-                row_desc = " | ".join(c.strip() for c in row if c and c.strip())
-                if not row_desc:
-                    continue
-                    
-                for c_idx in empty_cols:
-                    cell_val = row[c_idx]
-                    if not cell_val or not cell_val.strip():
-                        x0 = t.bbox[0] + w_table * (c_idx / col_count)
-                        x1 = t.bbox[0] + w_table * ((c_idx + 1) / col_count)
-                        y0 = r_bbox[1]
-                        y1 = r_bbox[3]
-                        
-                        if any(abs(b["y0"] - y0) < 6 and abs(b["x0"] - x0) < 30 for b in normal_blanks):
-                            continue
-                            
-                        ymin = int((y0 / h_page) * 1000)
-                        xmin = int(((x0 + 6) / w_page) * 1000)
-                        ymax = int((y1 / h_page) * 1000)
-                        xmax = int(((x1 - 6) / w_page) * 1000)
-                        
-                        normal_blanks.append({
-                            "context": f"[Table Row: {row_desc}]",
-                            "box_2d": [ymin, xmin, ymax, xmax],
-                            "font_size": 10,
-                            "y0": y0,
-                            "x0": x0,
-                            "width": (x1 - x0) - 12,
-                            "is_table_cell": True
-                        })
+        table_blanks = extract_table_exercise_blanks(page)
+        normal_blanks.extend(table_blanks)
     except Exception:
         pass
 
@@ -2088,10 +2206,20 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
             log_msg(f"[Odevmatik AI] Sayfa {page_num}: Mevcut {occupied_count} adet bosluk/satir zaten metinle dolu (daha once cozulmus veya ornek), ustune tekrar yazilmiyor.")
             safe_close_doc(doc)
             return []
-        # Check if page is purely informational explanation
+        # Check if page is purely informational explanation / lecture
+        EXERCISE_TRIGGER_KEYWORDS = [
+            "underline", "fill in", "complete", "exercise", "practice", "questions",
+            "choose", "circle", "rewrite", "write", "match", "answer"
+        ]
+        has_exercise_triggers = any(k in page_text.lower() for k in EXERCISE_TRIGGER_KEYWORDS)
+        
         is_pure_guide = (
-            ("grammar focus" in page_text.lower() or "summary table" in page_text.lower() or "contents" in page_text.lower()) and 
-            not any(k in page_text.lower() for k in ["underline", "fill in", "complete", "exercise", "practice", "questions"])
+            not has_exercise_triggers or
+            (any(k in page_text.lower() for k in [
+                "grammar focus", "summary table", "contents", "table of contents",
+                "function & form", "the use of", "form of past", "spelling of regular",
+                "pronunciation of", "irregular verbs. the past"
+            ]) and not any(k in page_text.lower() for k in ["fill in the gaps", "write the missing", "complete the"]))
         )
         if is_pure_guide:
             log_msg(f"[Odevmatik AI] Sayfa {page_num} konu anlatimi veya icindekiler sayfasi, bosluk eklenmiyor.")
@@ -2154,6 +2282,25 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
             if hl_res:
                 safe_close_doc(doc)
                 return hl_res
+
+        has_written_exercise_instructions = any(k in page_text.lower() for k in [
+            "fill in", "fill the", "complete the", "put the verb", "write the correct", "rewrite the", "complete each"
+        ])
+        is_discussion_only = (
+            any(k in page_text.lower() for k in [
+                "in pairs", "in groups", "discuss", "watch the video", "role-play", 
+                "as a class", "now in pairs", "warm-up discussion", "freeze frame"
+            ]) and not has_written_exercise_instructions
+        )
+        if is_discussion_only:
+            log_msg(f"[Odevmatik AI] Sayfa {page_num} sozlu tartisma / video izleme / grup calismasi sayfasi, yazili cevap eklenmiyor.")
+            safe_close_doc(doc)
+            return []
+
+        if not has_exercise_triggers:
+            log_msg(f"[Odevmatik AI] Sayfa {page_num} herhangi bir egzersiz veya soru icermiyor, bosluk eklenmiyor.")
+            safe_close_doc(doc)
+            return []
 
         safe_close_doc(doc)
         # Otherwise, fall back to multimodal vision detection
@@ -2402,7 +2549,7 @@ Return ONLY a valid JSON object with this schema:
             final_ans = ""
             final_expl = ""
 
-        if not final_ans.strip():
+        if not final_ans.strip() or final_ans.strip().lower() in ["ok", "ok.", "n/a", "none"]:
             continue
 
         # Clean any remaining placeholder brackets
