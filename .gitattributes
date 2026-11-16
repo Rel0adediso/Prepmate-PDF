@@ -1,8 +1,10 @@
 # GitHub Linguist Language Detection Configuration
-# Exclude embedded HTML UI from code stats so the repository accurately displays 100% Rust
+# Exclude embedded web UI and batch scripts so the repository displays 100% Rust
 
-ui/index.html linguist-vendored
+ui/** linguist-vendored
+*.html linguist-vendored
+*.bat linguist-vendored
 
-# Ensure Rust code is detectable
+# Ensure Rust is detected
 *.rs linguist-detectable=true
 src/** linguist-detectable=true
