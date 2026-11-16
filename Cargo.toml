@@ -1,7 +1,8 @@
 [package]
-name = "prepmate-core"
+name = "prepmate"
 version = "2.0.0-alpha.1"
 edition = "2021"
+description = "Autonomous AI Study Studio & Editorial Book Reader in Pure Native Rust"
 
 [dependencies]
 tao = "0.31"

@@ -1,24 +1,17 @@
-# Environment Variables (CRITICAL - NEVER COMMIT REAL KEYS)
+# Environment Variables
 .env
 .env.local
 
-# Python Cache
-__pycache__/
-*.py[cod]
-*$py.class
-*.pyd
+# Rust Build Artifacts
+target/
+**/target/
 
-# Virtual Environments
-venv/
-.venv/
-env/
-
-# User Data, Uploads and Output PDFs
-uploads/*
-!uploads/.gitkeep
-outputs/*
-!outputs/.gitkeep
-scratch/
+# Binaries & Runtime Data
+dist/
+build/
+*.dll
+*.exe
+*.WebView2/
 
 # OS and IDE Files
 .DS_Store
@@ -26,19 +19,3 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
-
-# PyInstaller Build Artifacts
-build/
-dist/
-*.spec
-
-# Rust Build Artifacts
-target/
-**/target/
-prepmate-core/target/
-
-# Binaries & Runtime Data
-*.dll
-*.exe
-*.WebView2/
-

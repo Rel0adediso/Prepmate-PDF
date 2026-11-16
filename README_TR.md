@@ -1,31 +1,27 @@
 <div align="center">
 
-# 🎓 PrepMate
-### *Otonom Yapay Zeka Çalışma Stüdyosu (PrepMate 2.0) & PDF Ödev Çözücü*
+# 🎓 PrepMate 2.0
+### *Yeni Nesil Otonom Yapay Zeka Çalışma Stüdyosu & Editoryal Kitap Okuyucu*
 
 <p align="center">
   <a href="README.md">English</a> &nbsp;|&nbsp; <b>Türkçe</b>
 </p>
 
 [![Sürüm](https://img.shields.io/github/v/release/Rel0adediso/Prepmate-PDF?style=flat-square&color=cc785c&labelColor=292b26&label=s%C3%BCr%C3%BCm)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
-[![Rust](https://img.shields.io/badge/Rust-2021%20Edition-cc785c?style=flat-square&labelColor=292b26&logo=rust&logoColor=white)](https://www.rust-lang.org/)
-[![Boyut](https://img.shields.io/badge/PrepMate%202.0-2.40%20MB-d4a373?style=flat-square&labelColor=292b26)](#)
-[![Python](https://img.shields.io/badge/python-3.10+-cc785c?style=flat-square&labelColor=292b26&logo=python&logoColor=white)](https://python.org)
-[![AI Motoru](https://img.shields.io/badge/AI-Gemini%203.8%20%26%20OpenRouter-d4a373?style=flat-square&labelColor=292b26&logo=google&logoColor=white)](https://aistudio.google.com)
+[![Rust](https://img.shields.io/badge/dil-Rust%20100%25-orange?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Dosya Boyutu](https://img.shields.io/badge/dosya%20boyutu-2.40%20MB-cc785c?style=flat-square&labelColor=292b26)](#)
+[![Sıfır Bağımlılık](https://img.shields.io/badge/ba%C4%9F%C4%B1ml%C4%B1l%C4%B1k-S%C4%B1f%C4%B1r%20Python%20%2F%20S%C4%B1f%C4%B1r%20Node-success?style=flat-square&labelColor=292b26)](#)
+[![AI Motoru](https://img.shields.io/badge/AI-Gemini%203.8%20%26%20OpenRouter-d4a373?style=flat-square&logo=google&logoColor=white)](https://aistudio.google.com)
 [![Lisans](https://img.shields.io/badge/lisans-MIT-cc785c?style=flat-square&labelColor=292b26)](#)
 
 <p align="center">
-  Yeni nesil kişisel çalışma stüdyosu ve otonom yapay zeka ödev çözücü.<br/>
-  <b>PrepMate 2.0</b>: <b>2.4 MB saf Rust yerel masaüstü uygulaması</b>, Kvieta odak motoru, Brain Map takımyıldızı, çift sayfalı kitap açılımı ve <b>Adobe Acrobat vektörel kalitesinde</b> çözümler.
+  Derinlemesine ders çalışma, kitap okuma ve problem çözme için geliştirilmiş <b>saf Rust</b> masaüstü stüdyosu.<br/>
+  <b>Kvieta Süper Odak Motoru</b>, <b>Brain Map Takımyıldızı</b>, <b>Araştırma İstasyonu</b> ve <b>çift sayfalı editoryal kitap açılımı</b>.
 </p>
 
 <p align="center">
-  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/tag/v2.0.0-alpha.1">
-    <img src="https://img.shields.io/badge/PrepMate%202.0%20Alpha%201%20%C4%B0ndir%20(Saf%20Rust%202.4MB)-Windows%20EXE-cc785c?style=for-the-badge&logo=windows&logoColor=white&labelColor=292b26" alt="PrepMate 2.0 Alpha 1 İndir (.EXE)" />
-  </a>
-  &nbsp;&nbsp;
-  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe">
-    <img src="https://img.shields.io/badge/Klasik%20%C3%96dev%20%C3%87%C3%B6z%C3%BCc%C3%BC-Windows%20EXE-d4a373?style=for-the-badge&logo=windows&logoColor=white&labelColor=292b26" alt="Klasik Çözücü İndir (.EXE)" />
+  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/download/v2.0.0-alpha.1/PrepMate-2.0-Alpha-1.exe">
+    <img src="https://img.shields.io/badge/PrepMate%202.0%20Alpha%201%20%C4%B0ndir%20(Windows%20EXE)-2.40%20MB-cc785c?style=for-the-badge&logo=windows&logoColor=white&labelColor=292b26" alt="Windows EXE İndir" />
   </a>
 </p>
 
@@ -33,29 +29,35 @@
 
 ---
 
-## ⚡ Hangi Sürümü Seçmelisiniz?
+## ⚡ Neden PrepMate 2.0 (Saf Rust Native)?
 
-| Sürüm | Mimari | Dosya Boyutu | Açılış Hızı | Öne Çıkan Güçlü Yönler |
-| :--- | :--- | :---: | :---: | :--- |
-| **PrepMate 2.0** *(Önerilen)* | **Saf Rust (`wry` + `tao`)** | **2.40 MB** | **<30 ms** | Kvieta Süper Odak Motoru, Brain Map konu hakimiyet grafiği, Günlük Ritim Kalkanları, Araştırma İstasyonu, Bionic Reading, 3D Hafıza Kartları, çift sayfalı kitap okuyucu, sıfır bağımlılık. |
-| **PrepMate Klasik** | Python 3.10+ & FastAPI | ~60 MB | ~2 sn | Derin vektörel PDF ayrıştırma, tam sayfa doğal el yazısı basımı, CEFR seviye ayarı, Acrobat vektörel derleme. |
+| Özellik | Sıradan Web / Electron Uygulamaları | 🦀 PrepMate 2.0 Native |
+| :--- | :---: | :---: |
+| **İndirme & RAM Boyutu** | 200 MB - 600 MB (ağır Chromium) | **2.40 MB ultra kompakt bağımsız dosya** |
+| **Açılış Hızı** | 2 - 5 saniye bekleme | **<30 milisaniye (anında GPU çizimi)** |
+| **Çalışma Bağımlılıkları**| Python, Node.js, Electron, Uvicorn | **Sıfır harici bağımlılık (saf yerel Rust)** |
+| **Odaklanma Felsefesi** | Dikkat dağıtan oyunlaştırmalar | **Kvieta sakin ve niyet odaklı mimari** |
+| **Müfredat Takibi** | Sıkıcı doğrusal çizgiler | **Brain Map dinamik SVG takımyıldızı** |
+| **Okuma Deneyimi** | Göz yoran beyaz tek sayfa | **Çift sayfalı editoryal kitap masası & kağıt tonları** |
+| **Akademik Araştırma** | Sürekli sekme değiştirme | **Kayar Araştırma İstasyonu (Tureng, Desmos vb.)** |
+| **Okuma Hızı** | Standart metin akışı | **Bionic Reading desteği (2 kat hızlı kavrama)** |
+| **Hata Analizi** | Unutulan yanlış sorular | **Otomatik senkronize Hata Defteri & 3D kartlar** |
 
 ---
 
-## 🌟 PrepMate 2.0 — Çığır Açan Yenilikler
+## 🌟 Öne Çıkan Süper Güçler
 
 ### 🎯 1. Kvieta Süper Odak Motoru (Super Focus Engine)
-**Kvieta** projesinin (`Rel0adediso/Kvieta-app`) sakin ve cezalandırıcı olmayan mimarisinden esinlenildi:
-- **Odak Niyeti Belirleme (`FocusIntention`):** Çalışmaya başlamadan önce hedefini yaz (*ör. "Kalkülüs Syf 12-15 integral alıştırmaları"*).
-- **68px Hafif HUD (`SessionSurface`):** Sayfa üstünde dikkat dağıtmayan niyet bandı, sayaç ve yumuşak ilerleme çubuğu.
+Açık kaynaklı **Kvieta** (`Rel0adediso/Kvieta-app`) projesinin sakin ve cezalandırıcı olmayan mimarisinden esinlenildi:
+- **Odak Niyeti Belirleme (`FocusIntention`):** Çalışmaya başlamadan önce hedefini kaydet (*ör. "Kalkülüs Syf 12-15 integral alıştırmaları"*), 15/25/45 dk süre seçenekleri.
+- **68px Hafif HUD (`SessionSurface`):** Sayfa üstünde dikkat dağıtmayan ince niyet şeridi, geri sayım sayacı ve yumuşak ilerleme çubuğu.
 - **Nazik Kapanış Uyarıları:** 5 dakika ve 1 dakika kala sakinleştirici, toparlanma bildirimleri.
-- **Oturum Kapanış Özeti:** Tamamlanan niyetler, okunan sayfa sayısı ve günlük ritim kütüğü.
+- **Oturum Kapanış Özeti:** Süre bittiğinde niyet değerlendirmesi, okunan sayfa kaydı ve günlük ritim kütüğü.
 
 ### 🧠 2. Brain Map (Konu Hakimiyeti Takımyıldızı)
-- **İnteraktif SVG Takımyıldızı:** Yüklenen ders müfredatından dinamik konu düğümleri.
-- **Hakimiyet Seviyeleri:** 🟢 Güçlü (>%75), 🟡 Tekrar Gerekli (%50-74), 🔴 Kritik Zayıf Nokta (<%50).
-- **Hata Defteri Entegrasyonu:** Her konudaki çözülmemiş yanlışların anlık takibi.
-- **⚡ Zayıf Noktayı Pekiştir:** Tek tıkla 2 cümlelik pratik özet kural ve tuzaklı pekiştirme sorusu sunan Co-Worker antrenmanı.
+- **İnteraktif SVG Takımyıldızı:** Yüklenen ders belgesine göre dinamik 6-8 konu düğümü, %75+ yeşil (güçlü), %50-74 sarı (tekrar gerekli), <%50 kırmızı (kritik zayıf nokta).
+- **Hata Defteri Senkronizasyonu:** Çözülmemiş hataların konuya göre haritada anlık takibi.
+- **⚡ Zayıf Noktayı Pekiştir:** Zayıf konuya tıklandığında Co-Worker'ın anında 2 cümlelik pratik özet kural ve tuzaklı pekiştirme sorusu sunması.
 
 ### 📅 3. Günlük Çalışma Planı & Ritim Kalkanları
 - Günlük görevler: Sayfa okuma, odak seansı tamamlama, yanlışları pekiştirme.
@@ -82,28 +84,28 @@
 
 ---
 
-## 🛠️ Mimari Genel Bakış
+## 🛠️ Mimari
 
 ```mermaid
 flowchart TD
-    subgraph Core["🦀 PrepMate 2.0 (Saf Rust Native)"]
-        A["📖 Çift Sayfalı Kitap Motoru"]
+    subgraph RustCore["🦀 PrepMate 2.0 (Saf Rust Çekirdeği)"]
+        A["📖 Çift Sayfalı Kitap Motoru (Tao + Wry)"]
         B["🎯 Kvieta Süper Odak Motoru"]
-        C["🧠 Brain Map Takımyıldızı"]
+        C["🧠 Brain Map Takımyıldızı Grafiği"]
         D["📅 Günlük Ritim Kalkanları"]
         E["🌐 Araştırma İstasyonu"]
-        F["🚀 Çalışma Hızlandırıcıları (Bionic / Flashcards / TTS)"]
+        F["🚀 Hızlandırıcılar (Bionic / Flashcards / TTS)"]
     end
     subgraph AI["🤖 Akıllı Co-Worker"]
-        G["Gemini 3.8 / OpenRouter Akışı"]
+        G["Gemini 3.8 / OpenRouter Native TLS"]
         H["Hata Defteri & Pekiştirme Testleri"]
     end
-    subgraph Export["📤 Çıktı Merkezi"]
-        I["Vektörel Acrobat PDF"]
-        J["Markdown Notlar / Cevap Kağıdı"]
+    subgraph Output["📤 Çıktı Merkezi"]
+        I["Markdown Notlar / Cevap Kağıdı"]
+        J["Acrobat Kalitesinde Çözümler"]
     end
-    Core <--> AI
-    Core --> Export
+    RustCore <--> AI
+    RustCore --> Output
 ```
 
 ---
@@ -121,112 +123,45 @@ flowchart TD
 
 ---
 
-## 👨‍💻 Geliştiriciler İçin (Kaynaktan Çalıştırma)
+## 🚀 10 Saniyede Başlatma (Hızlı Başlangıç)
 
-### 🦀 PrepMate 2.0'ı Derleme (Saf Rust Native)
-```bash
-# Gereksinim: Rust araç zinciri (stable-x86_64-pc-windows-gnu veya msvc)
-cd prepmate-core
+> **Kod bilmenize, Python yüklemenize veya terminal açmanıza gerek yoktur!**
+> 1. Doğrudan **[`PrepMate-2.0-Alpha-1.exe`](https://github.com/Rel0adediso/Prepmate-PDF/releases/download/v2.0.0-alpha.1/PrepMate-2.0-Alpha-1.exe)** dosyasını indirin.
+> 2. Çift tıklayarak ultra hızlı masaüstü stüdyosunu başlatın.
+> 3. Sağ üstteki **"⚙️ Ayarlar"** butonuna tıklayıp [Google AI Studio](https://aistudio.google.com/app/apikey)'dan aldığınız ücretsiz anahtarı yapıştırın.
 
-# Geliştirme modunda çalıştır
-cargo run
+---
 
-# Ultra kompakt sürüm derle (2.4 MB)
-cargo build --release
-```
+## 👨‍💻 Geliştiriciler İçin (Kaynaktan Derleme)
 
-### 🐍 PrepMate Klasik'i Çalıştırma (Python / FastAPI)
 ```bash
 # 1. Repoyu klonla
 git clone https://github.com/Rel0adediso/Prepmate-PDF.git
 cd Prepmate-PDF
 
-# 2. Bağımlılıkları kur (veya kurulum.bat çalıştır)
-pip install -r requirements.txt
+# 2. Geliştirme modunda çalıştır
+cargo run
 
-# 3. Uygulamayı başlat (veya baslat.bat çalıştır)
-python desktop.py
-```
-flowchart LR
-    A["📄 PDF Workbook Yükle"] --> B["🔍 Hibrit Vektörel Ayrıştırıcı"]
-    B --> C1["Boşluklar & Satırlar"]
-    B --> C2["Tablolar & Eşleştirmeler"]
-    B --> C3["Zihin Haritaları & Sunburst"]
-    B --> C4["Kompozisyon & Paragraf"]
-    C1 & C2 & C3 & C4 --> D["🧠 Gemini 3.8 / OpenRouter Motoru"]
-    D --> E["✨ Modern Kanvas Önizlemesi"]
-    E --> F["📥 Vektörel PDF / ZIP / Resim"]
+# 3. Ultra kompakt sürüm derle (2.40 MB)
+cargo build --release
 ```
 
-* **🎨 Sıcak Obsidyen & Terracotta Teması:** Okuma deneyimini editoryal dergi seviyesine taşıyan serif başlıklar (`Newsreader`), yumuşak kiremit vurgular ve gözü dinlendiren koyu obsidian zemin.
-* **🌙 Göz Koruma (Parchment Mode):** Gece laptop başında ödev yetiştirirken bembeyaz PDF parlaklığını kırıp sıcak parşömen filtresine büründüren göz koruma anahtarı.
-* **📋 Hızlı Cevap Kağıdı (Cheat Sheet):** Sayfadaki tüm soruları `#1`, `#2` şeklinde sıralı döküm halinde gösteren, tek tıkla kopyalanabilen kompakt cevap anahtarı.
-* **📸 Tek Tıkla Resim Kopyalama:** Çözülmüş sayfayı yüksek çözünürlükte doğrudan panoya kopyalayıp WhatsApp Web veya Discord'a yapıştırma (`Ctrl+V`).
-* **🎭 Doğal Öğrenci Hissi (~%95 Puan):** Hocanın *"bunu yapay zeka çözmüş"* şüphesini sıfıra indiren, 1-2 küçük masum insani esneme payı bırakan akıllı simülasyon.
-* **🎯 CEFR Dil Seviyesi (A1 - C1):** Ödevin ait olduğu hazırlık kuru seviyesine göre dilbilgisini ve kelime haznesini anında ayarlama.
-* **🧠 Zihin Haritası & Sunburst (Mind-Map):** Dairesel kavram haritalarını, dairesel sunburst ve örümcek diyagramlarını merkezden dışa doğru doğru açılarla doldurur.
-* **✍️ 5.8pt Hata Düzeltme (Editing):** Üstü çizili veya yanlış kelimelerin hemen üzerine metinle çakışmayan temiz düzeltmeler kondurur.
-
----
-
-## 💻 Kullanım Kılavuzu
-
-1. **Kitabı Yükleyin:** PDF dosyanızı pencereye sürükleyin veya *"🎯 Örnek İngilizce Ödev ile Hemen Dene"* butonuna basın.
-2. **Ödev Sayfalarını & Seviyeyi Seçin:** Sayfa aralığını girin *(Örn: `12-18`)*, CEFR seviyenizi belirleyin ve isterseniz *Doğal Öğrenci Modu*nu açın.
-3. **Çözdürün:** *"⚡ Sayfaları Getir ve Otomatik Çöz"* butonuna tıklayın. Sayfalar paralel worker'lar ile saniyeler içinde çözülür.
-4. **Kontrol Edin & İnce Ayar Yapın:**
-   - Cevapları fareyle istediğiniz yere sürükleyin veya üzerine çift tıklayarak metni düzenleyin.
-   - Hata yaparsanız `Ctrl + Z` ile geri alın veya `Ctrl + Y` ile ileri alın.
-   - Gece çalışıyorsanız `🌙 Göz Koruma` modunu açarak ekranı yumuşatın.
-   - Hızlıca cevapları kontrol etmek için `📋 Cevaplar` butonunu kullanın.
-5. **Dışa Aktarın:**
-   - **📄 Sadece Ödev Sayfalarını İndir:** Hocanıza teslim etmelik derli toplu tek bir PDF üretir.
-   - **📚 Tüm Kitabı İndir:** Tüm çalışma kitabının ilgili sayfalarını doldurup tam kitap olarak verir.
-   - **📸 Resim Kopyala:** Doğrudan panoya kopyalayıp WhatsApp veya notlarınıza yapıştırın.
-
----
-
-## ⌨️ Klavye Kısayolları
-
-| Kısayol | Açıklama |
-| :---: | :--- |
-| `Ctrl + Z` | Son işlemi geri al (Undo) |
-| `Ctrl + Y` / `Ctrl + Shift + Z` | Geri alınan işlemi ileri al (Redo) |
-| `←` / `→` | Önceki / Sonraki sayfaya hızlı geçiş |
-| `Delete` / `Backspace` | Seçili cevap kutusunu anında sil |
-| `Escape` | Seçimi kaldır / Açık pencereleri (Cevap Kağıdı, API Modalı) kapat |
-
----
-
-## 👨‍💻 Geliştiriciler İçin (Kaynak Koddan Çalıştırma)
-
-```bash
-# 1. Depoyu klonlayın
-git clone https://github.com/Rel0adediso/Prepmate-PDF.git
-cd Prepmate-PDF
-
-# 2. Gereksinimleri yükleyin (veya kurulum.bat dosyasını çalıştırın)
-pip install -r requirements.txt
-
-# 3. Uygulamayı başlatın (veya baslat.bat dosyasını çalıştırın)
-python desktop.py
-```
-
-Tek dosyalı EXE derlemek için:
-```bash
-derle_exe.bat
-```
+Windows için hazır toplu komut dosyaları:
+- `baslat.bat` — uygulamayı release modunda çalıştırır.
+- `derle.bat` — optimize edilmiş `.exe` dosyasını derler.
 
 ---
 
 ## 🛡️ Gizlilik & Güvenlik Garantisi (%100 Yerel)
 
-* **Sıfır Bulut Kaydı:** Yüklediğiniz PDF'ler ve oluşturulan çözümler yalnızca kendi bilgisayarınızda (`localhost`) işlenir. Harici hiçbir sunucuya kaydedilmez.
-* **Güvenli API Anahtarı Saklama:** Girdiğiniz API anahtarları yalnızca kendi cihazınızda şifreli/yerel olarak saklanır; GitHub reposuna veya üçüncü şahıslara asla iletilmez.
-* **Açık Kaynak Kod:** Kod tabanında hiçbir telemetri, arka kapı veya kullanıcı takip kodu bulunmaz.
+* **Sıfır Bulut Depolama:** PDF'leriniz ve notlarınız yalnızca kendi bilgisayarınızda kalır.
+* **Şifreli Yerel Saklama:** API anahtarlarınız cihazınızda tutulur; Google AI Studio TLS bağlantısı dışında hiçbir yere aktarılmaz.
+* **Tamamen Açık Kaynak:** Arka planda telemetri veya analitik izleme bulunmaz.
 
 ---
 
+> 📌 *Eski Python 1.x sürümünü mü arıyorsunuz? Kalıcı olarak [`legacy-python-v1`](https://github.com/Rel0adediso/Prepmate-PDF/tree/legacy-python-v1) dalında (branch) korunmaktadır.*
+
 <div align="center">
-  <sub>PrepMate PDF — Açık Kaynaklı Hazırlık & Workbook Asistanı • MIT Lisansı ile korunmaktadır.</sub>
+  <sub>PrepMate 2.0 — Açık Kaynaklı Çalışma Stüdyosu • MIT Lisansı</sub>
 </div>

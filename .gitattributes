@@ -1,16 +1,8 @@
 # GitHub Linguist Language Detection Configuration
-# Exclude embedded frontend bundles and assets from language statistics so that Rust and Python are accurately highlighted
+# Exclude embedded HTML UI from code stats so the repository accurately displays 100% Rust
 
-prepmate-core/ui/index.html linguist-vendored
-static/index.html linguist-vendored
-static/style.css linguist-vendored
-static/app.js linguist-vendored
-static/coworker.js linguist-vendored
-static/i18n.js linguist-vendored
-assets/** linguist-vendored
-ornek_ingilizce_odev.pdf linguist-vendored
+ui/index.html linguist-vendored
 
-# Explicitly ensure Rust and Python are detectable
+# Ensure Rust code is detectable
 *.rs linguist-detectable=true
-prepmate-core/src/** linguist-detectable=true
-*.py linguist-detectable=true
+src/** linguist-detectable=true
