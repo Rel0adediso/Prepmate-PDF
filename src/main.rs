@@ -791,6 +791,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 let _ = proxy.send_event(UserEvent::ShowToast("⚠️ Lütfen test etmek için önce bir API anahtarı girin.".to_string()));
                                 return;
                             }
+                            if !api_key.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-') {
+                                let _ = proxy.send_event(UserEvent::ShowToast("⚠️ Geçersiz API anahtarı formatı.".to_string()));
+                                return;
+                            }
                             let client = reqwest::Client::new();
                             let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}", api_key);
                             let body = serde_json::json!({
@@ -1015,10 +1019,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                     "open_external_url" => {
-                        if let Some(url) = msg.text {
-                            let _ = std::process::Command::new("rundll32")
-                                .args(["url.dll,FileProtocolHandler", &url])
-                                .spawn();
+                        if let Some(raw_url) = msg.text {
+                            let clean_url = raw_url.trim();
+                            if (clean_url.starts_with("https://") || clean_url.starts_with("http://"))
+                                && !clean_url.contains('"')
+                                && !clean_url.contains('\'')
+                                && !clean_url.contains('`')
+                                && !clean_url.contains(' ')
+                                && !clean_url.contains('\n')
+                                && !clean_url.contains('\r')
+                                && !clean_url.contains('\\')
+                            {
+                                let _ = std::process::Command::new("rundll32")
+                                    .args(["url.dll,FileProtocolHandler", clean_url])
+                                    .spawn();
+                            }
                         }
                     }
                     "start_focus_session" => {
@@ -1172,6 +1187,9 @@ async fn handle_chat_action(state: &Arc<tokio::sync::Mutex<AppState>>, prompt: &
     let key = key_raw.trim();
     if key.is_empty() {
         return format!("🤖 **Bilgi:** Gemini API anahtarınız henüz girilmedi.\nSağ üstteki **⚙️ Ayarlar** simgesine tıklayarak ücretsiz Google AI Studio API anahtarınızı kaydedebilirsiniz.\n\n*Çalışma Modu İpucu:* Takıldığınız soruların kuralını veya çözüm adımlarını sormaya devam edebilirsiniz.");
+    }
+    if !key.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-') {
+        return "⚠️ Kaydedilen API anahtarı formatı geçersiz görünüyor. Lütfen Ayarlar panelinden kontrol edin.".to_string();
     }
 
     let client = reqwest::Client::new();

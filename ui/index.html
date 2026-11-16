@@ -2465,6 +2465,17 @@
       postToRust('chat_message', { text });
     }
 
+    function sanitizeAiMarkdown(rawHtml) {
+      if (!rawHtml) return '';
+      return String(rawHtml)
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+        .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+        .replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
+        .replace(/\son\w+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi, '')
+        .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
+    }
+
     window.onRustChatReply = function(reply) {
       lastAiReply = reply;
       const container = document.getElementById('chatMessages');
@@ -2476,7 +2487,7 @@
       agentDiv.innerHTML = `
         <div class="w-6 h-6 rounded-lg bg-[#cc785c] flex items-center justify-center text-white text-xs shrink-0 font-bold">🤖</div>
         <div class="bg-[#1f1e1a] border border-[#2d2b26] rounded-2xl rounded-tl-none p-3 text-xs text-[#fbf9f5] leading-relaxed max-w-[90%] shadow-sm">
-          <div>${typeof marked !== 'undefined' ? marked.parse(reply) : reply}</div>
+          <div>${typeof marked !== 'undefined' ? sanitizeAiMarkdown(marked.parse(reply)) : escapeHtml(reply)}</div>
           <div class="mt-2.5 pt-2 border-t border-[#2a2824] flex items-center justify-end gap-2">
             <button onclick="speakText(lastAiReply)" class="text-[11px] text-[#9a9489] hover:text-[#d4a373] bg-[#141413] hover:bg-[#262420] border border-[#2d2b26] px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer" title="Cevabı Sesli Dinle">
               <span>🔊</span> <span>Dinle</span>
@@ -3030,6 +3041,9 @@
     }
 
     function loadBrowserUrl(url) {
+      if (!url || (!url.startsWith('https://') && !url.startsWith('http://'))) {
+        url = 'https://duckduckgo.com';
+      }
       currentBrowserUrl = url;
       const input = document.getElementById('browserUrlInput');
       const frame = document.getElementById('studyBrowserFrame');
