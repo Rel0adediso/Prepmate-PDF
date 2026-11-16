@@ -1,162 +1,77 @@
 # 📋 Changelog
 
-## [v2.0.0-alpha.8] - 2026-11-11 (Kvieta Süper Odak & Brain Map & Güvenlik/Stabilite Yamaları)
+## [v2.0.0-alpha.1] - 2026-11-16 (PrepMate 2.0 Alpha 1 — Resmi Lansman & Saf Rust Stüdyosu)
 
-### 🎯 Kvieta Altyapısından Esinlenen Süper Odak & Konu Hakimiyeti
-1. **🎯 Kvieta Süper Odak Motoru (Super Focus Engine):**
-   - **Odak Niyeti Belirleme:** Seans öncesi hedef belirleme (`FocusIntention`), 15/25/45 dk süre seçenekleri.
-   - **68px Hafif HUD:** Sayfa üstünde dikkat dağıtmayan ince niyet şeridi, geri sayım sayacı ve yumuşak ilerleme çubuğu.
-   - **Nazik Kapanış Uyarıları:** 5 dakika ve 1 dakika kala sakinleştirici, toparlayıcı bildirimler.
-   - **Oturum Kapanış Özeti:** Süre dolduğunda niyet kontrolü, okunan sayfa kaydı ve günlük ritim kütüğü.
-2. **🧠 Brain Map (Konu Hakimiyet Haritası):**
-   - **İnteraktif Takımyıldızı Grafiği (SVG):** Belge bölümlerine göre dinamik 6-8 konu düğümü, %75+ yeşil, %50-74 sarı, <%50 kırmızı seviye renklendirmesi.
-   - **Hata Defteri Senkronizasyonu:** Çözülmemiş hataların konuya göre haritada anlık takibi.
-   - **⚡ Zayıf Noktayı Pekiştir:** Zayıf konuya tıklandığında Co-Worker'ın anında 2 cümlelik özet ve tuzaklı pekiştirme sorusu sunması.
-3. **📅 Günlük Çalışma Planı & Ritim Kalkanları:**
-   - Sayfa okuma, odak seansı ve hata pekiştirme görevlerinin otomatik tamamlanması.
-   - Ritim Kalkanları (`🛡️ 2 Kalkan`) ile yoğun günlerde serinin korunması.
-4. **🛡️ Derin Güvenlik & Mantık Hata Yamaları:**
-   - Bionic reading kesme işareti (`&#039;`) dilimleme rendering hatası düzeltildi.
-   - İçindekiler (TOC) dropdown'ında XSS/HTML Injection açığı kapatıldı.
-   - Not kopyalama butonundaki çok satırlı tırnak JS SyntaxError'ı giderildi.
-   - Tüm kaynaklar silindiğinde sayfaların ekranda donuk kalması (ghost text) düzeltildi.
-   - Günlük seri (streak) hesaplamasındaki çoklu gün atlama mantık hatası çözüldü.
-   - Not dışa aktarımında masaüstü hedefleme ile dosya kaybolma/yetki sorunları giderildi.
-   - Sayfa çıkarma hatalarında 1:1 indeks sapmasını önleyen placeholder eklendi.
-   - Cambridge/Tureng gibi kısıtlı siteler için yerel OS tarayıcı açma köprüsü (`open_external_url`) eklendi.
+### 🌟 Devrimsel Yeni Nesil Çalışma Stüdyosu & Saf Rust Mimarisi
+PrepMate, devasa Electron veya Python paketlerini geride bırakarak **saf Rust (`wry` + `tao`)** mimarisiyle baştan inşa edildi. **Yalnızca 2.4 MB** boyutunda, <30 ms anında açılan ve doğrudan işletim sistemi GPU'suyla çalışan ultra hızlı bir yerel çalışma stüdyosuna dönüştü.
 
 ---
 
-## [v2.0.0-alpha.7] - 2026-11-07 (Araştırma İstasyonu & Çalışma Hızlandırıcıları)
+### 🎯 1. Kvieta Süper Odak Motoru (Super Focus Engine)
+Açık kaynaklı **Kvieta** projesinin sakin, cezalandırıcı olmayan ve niyet odaklı mimarisi entegre edildi:
+- **Odak Niyeti Belirleme (`FocusIntention`):** Seans başlamadan önce hedefini kaydetme (*ör. "Kalkülüs Syf 12-15 integral alıştırmaları"*), 15/25/45 dk süre seçenekleri.
+- **68px Hafif HUD (`SessionSurface`):** Çalışma sırasında sayfa üstünde dikkat dağıtmayan ince niyet şeridi, geri sayım sayacı ve yumuşak ilerleme çubuğu.
+- **Nazik Kapanış Uyarıları (`GentleWarningPanel`):**
+  - **5 dakika kala:** *"5 Dakika Kaldı 🌿 — Harika gidiyorsun. Toparlanma vakti, son soruları toparlayabilirsin."*
+  - **1 dakika kala:** *"1 Dakika Kaldı ⏳ — Son bir dakika. Seansını tamamlamaya hazırlan."*
+- **Oturum Kapanış Özeti (`FocusClosureModal`):** Süre bittiğinde niyet değerlendirmesi, okunan sayfa kaydı ve günlük ritim kütüğü.
 
-### 🌐 Araştırma İstasyonu & Akademik Hızlı Bağlantılar
+---
+
+### 🧠 2. Brain Map (Konu Hakimiyeti Takımyıldızı)
+- **İnteraktif SVG Takımyıldızı:** Yüklenen ders belgesine göre dinamik 6-8 konu düğümü, %75+ yeşil (güçlü), %50-74 sarı (tekrar gerekli), <%50 kırmızı (kritik zayıf nokta).
+- **Hata Defteri Senkronizasyonu:** Çözülmemiş hataların konuya göre haritada anlık takibi.
+- **⚡ Zayıf Noktayı Pekiştir:** Zayıf konuya tıklandığında Co-Worker'ın anında 2 cümlelik pratik özet kural ve tuzaklı pekiştirme sorusu sunması.
+
+---
+
+### 📅 3. Günlük Çalışma Planı & Ritim Kalkanları
+- **Üst Bar Göstergesi:** `📅 1/3 Görev • 🔥 Günlük Seri` dinamik rozeti.
+- **Otomatik İlerleyen Görevler:** Sayfa okuma, Kvieta odak seansı tamamlama ve yanlış soru pekiştirme görevlerinin arka planda otomatik tiklenmesi.
+- **Ritim Kalkanları (`🛡️ 2 Kalkan`):** Öğrencinin yoğun olduğu günlerde seriyi kırmayan akıllı kalkan koruması.
+
+---
+
+### 🌐 4. Araştırma İstasyonu (Study Browser)
 - **Kayar Yan Panel:** Çalışma masasından ayrılmadan Tureng, Cambridge Dictionary, Desmos, Wikipedia ve DuckDuckGo ile anında akademik araştırma.
-- **Seçilen Metinden Tek Tıkla Arama:** Kitapta seçilen herhangi bir ifadeden araştırma paneline aktarım.
-
-### 🚀 Çalışma Hızlandırıcıları (Accelerators)
-- **🔤 Bionic Reading:** Kelimelerin ilk %45'lik harflerini vurgulayarak göz atlamasını ve odak hızını 2 kat artıran okuma modu.
-- **🃏 3D Hafıza Kartları (Flashcards):** Gerçek 3D kart döndürme animasyonu (`preserve-3d`) ve Hata Defteri'ndeki yanlışlardan otomatik kart türetme.
-- **🔊 Sesli Okuma (TTS):** Metin ve çözümleri doğal Türkçe ve İngilizce telaffuzla okuyan Web Speech entegrasyonu.
-- **🎯 Sınav Geri Sayım HUD:** Karşılama ekranında hedeflenen sınav tarihine kalan gün ve sayfa sayacı.
+- **Seçilen Metinden Tek Tıkla Arama:** Kitapta seçilen herhangi bir ifadeden araştırma paneline doğrudan arama aktarımı.
+- **🪟 Dış Tarayıcı Köprüsü:** Güvenlik/CORS kısıtlı siteler için Windows varsayılan tarayıcısına (`open_external_url`) tek tıkla geçiş.
 
 ---
 
-## [v2.0.0-alpha.6] - 2026-11-07 (Apple Books & Arc & Raycast Yeni Nesil Arayüz Devrimi)
-
-### 🌟 11 Yeni Nesil Görsel ve Etkileşimsel Özellik
-1. **📖 İki Sayfalı Gerçek Kitap Açılımı (Özellik 6):** Masada gerçek bir kitap gibi 2 sayfa yan yana (`Book Spread`), ortada dikiş katlanma gölgesi (`spine crease`) ve pürüzsüz sayfa geçişleri.
-2. **🌙 Karanlık Mod Akıllı Kağıt Tonlaması (Özellik 7):** Gece çalışırken beyaz PDF'lerin gözü kör etmesini engelleyen Koyu Kömür (`#1c1b18`), Sıcak Sepya (`#25201a`) ve Orijinal Beyaz kağıt modları.
-3. **✨ Neon Soru Blok Vurgusu (Özellik 2):** Fareyle sorunun üzerine gelindiğinde parlayan Terracotta neon çerçeve (`glow ripple`) ve tek tıkla doğrudan o soruyu odak moduna alıp çözdürme.
-4. **📌 Akıllı Kenar Notu İğneleri (Özellik 3):** Notion ve Medium tarzı; sayfa kenarlarına takıldığın sorular için iliştirilen şık cam not iğneleri ve dilbilgisi ipuçları.
-5. **⚡ Raycast Tarzı `Ctrl+K` Komut Paleti (Özellik 4):** Klavyeden tek tuşla açılan yarı saydam Omnibar; fare kullanmadan üniteye gitme, test başlatma ve hata defterini açma.
-6. **🧘 Zen & Odaklanma Modu (Özellik 5):** `Ctrl+D` veya `F11` ile tüm panelleri ve menüleri gizleyip ekranı %100 kitaba ayıran minimalist çalışma modu.
-7. **🎯 İnteraktif Soru-Cevap HUD Kartları (Özellik 8):** Duolingo ve Kahoot enerjisinde, ekranda beliren şık A/B/C/D seçenekli canlı buton kartları ve anında zümrüt/kırmızı görsel geri bildirim.
-8. **🎧 Çalışma Masası Ambiyans Sesi (Özellik 9):** Web Audio API tabanlı, harici internet/dosya gerektirmeyen gerçekçi yağmur ve kütüphane odaklanma sesleri.
-9. **🌌 Görsel Konu Hakimiyeti Ağı (Özellik 11):** Sıkıcı progress bar'lar yerine parlayan interaktif beceri takımyıldızı grafiği (*Grammar ➔ Tenses ➔ Present Perfect*).
-10. **🪄 Seç & Açıkla Yüzen Menü (Özellik 13):** Kitapta herhangi bir metin seçildiğinde farenin tam üstünde beliren `[⚡ Çöz] [💡 İpucu] [🇹🇷 Çevir] [📌 Not Al]` baloncuğu.
-11. **📑 Çoklu Sekmeli Kitap Masası (Özellik 14):** Arc Browser tarzı; üst barda dersler ve kitaplar arasında anında geçiş sağlayan yüzdelik ilerleme rozetli pinli sekmeler.
+### 🚀 5. Çalışma Hızlandırıcıları (Accelerators)
+- **🔤 Bionic Reading:** Kelimelerin ilk %45'lik harflerini kalınlaştırarak (`<b>re</b>ading`) okuma ve kavrama hızını 2 kat artıran okuma modu.
+- **🃏 3D Hafıza Kartları (Flashcards):** Gerçek 3D döndürme animasyonuna sahip (`preserve-3d`) soru-cevap kartları; Hata Defteri'ndeki yanlışlardan otomatik kart türetme.
+- **🔊 Sesli Okuma (TTS):** Metin ve çözümleri doğal Türkçe ve İngilizce telaffuzla seslendiren Web Speech motoru.
+- **🎯 Sınav Geri Sayım HUD:** Karşılama ekranında hedeflenen sınav tarihine kalan gün ve toplam hedef sayfa sayacı.
 
 ---
 
-## [v2.0.0-alpha.5] - 2026-11-07 (Tauri v2 / Wry Modern Native Devrimi)
-
-### 🌟 Gerçek Modern Web Arayüzü + Saf Rust Hibrit Mimarisi
-- 🚀 **Tauri v2 / Wry Dönüşümü:** Egui'nin pikselli ve kutu gibi acil mod arayüzü tamamen kaldırıldı; arkasında saf Rust (`tao` + `wry`) çalışan modern webview motoruna geçildi.
-- 🎨 **Kusursuz Claude & Kavita Görselliği:**
-  - Tailwind CSS ile pürüzsüz koyu tema (`#141413` Obsidian & `#cc785c` Terracotta).
-  - Google Newsreader serif başlıklar ve Plus Jakarta Sans modern tipografi.
-  - Canlı cam paneller (`glassmorphism`), SVG simgeler, pürüzsüz animasyonlar ve responsive %100 yükseklik.
-- 🚫 **Sıfır Python & Sıfır Port 8000:** Python yok, Uvicorn yok, arka planda açık kalan zombi işlemler yok. Tüm webview ve Rust iletişimi doğrudan bellek içi IPC kanalları (`window.ipc.postMessage`) üzerinden asenkron çalışır.
-- 💎 **Tüm 6 Kritik Özellik Korundu & Modernleşti:**
-  - 📚 **TOC Ünite Atlama:** Modern HTML açılır çekmece menüsü.
-  - ⚡ **Hızlı Aksiyon Araç Çubuğu:** Şık SVG ikonlu aksiyon düğmeleri (Sayfayı Çöz, Sokratik İpucu, Çevir, Quiz, Notlara Kaydet).
-  - 📕 **Hata Defterim:** Kart tasarımlı hata havuzu ve tek tıkla telafi quizi.
-  - ⏱️ **Pomodoro & Sınav Simülatörü:** Üst barda canlı interaktif geri sayım sayacı widget'ı.
-  - 📊 **Konu Hakimiyeti Radarı:** Renkli gradient dolgulu ilerleme çubukları (%85, %45, %35) ve zayıf nokta antrenman düğmesi.
-  - 📤 **Hızlı İhraç Merkezi:** Modern modal penceresiyle panoya kopyalama ve Markdown/JSON çıktıları.
+### 📖 6. Çift Sayfalı Editoryal Kitap Masası
+- **Gerçek Kitap Açılımı (`Book Spread`):** Yan yana 2 sayfa açılımı ve ortada dikiş katlanma gölgesi (`spine crease`).
+- **Akıllı Kağıt Tonlaması:** Gece gözü yormayan Koyu Kömür (`#1c1b18`), Sıcak Sepya (`#25201a`) ve Orijinal Beyaz kağıt modları.
+- **⚡ Raycast Komut Paleti (`Ctrl+K`):** Klavyeden tek tuşla üniteye gitme, test başlatma ve hata defterini açma.
+- **📌 Kenar Notu İğneleri:** Notion tarzı sayfa kenarlarına iliştirilen şık not iğneleri.
+- **🧘 Zen Modu (`Ctrl+D` / `F11`):** Ekranı %100 kitaba ayıran minimalist odak görünümü.
+- **🎧 Ambiyans Odak Sesleri:** Web Audio API ile çalışan gerçekçi yağmur ve kütüphane sesleri.
 
 ---
 
-## [v2.0.0-alpha.4] - 2026-11-07 (Kavita & Claude Hibrit Estetiği + 6 Seçilmiş Özel Yetenek)
-
-### 🎨 Kavita & Claude Hibrit Görsel Devrimi
-- 🪟 **Siyah Boşluk Tuzağı Çözüldü (100% Full-Height Canvas):** Egui'nin scrollarea küçültme davranışı (`auto_shrink`) kapatıldı; kitap okuyucu tuvali, sol raf ve sağ panel dikeyde tam ekran dolduracak şekilde uyarlandı.
-- 🔤 **Windows Native Segoe UI Tipografisi:** Sistemdeki `Segoe UI` ve `Segoe UI Bold` fontları taranarak arayüze entegre edildi. Retro pikselli font tamamen kaldırıldı; kristal netliğinde tipografi sağlandı.
-- 📖 **Kavita Kitap Okuyucu Tuvali:** Sıcak koyu kömür kağıt dokusu (`#1b1a18`), 14px yuvarlatılmış köşeler, okunabilir hiyerarşik başlıklar ve sayfa altı yüzdelik ilerleme çubuğu (`Sayfa 1 / 2 • %50`).
-- 🏺 **Claude Anthropic Renk Paleti:** Obsidian arka plan (`#141413`), Terracotta turuncu aksanlar (`#cc785c`), kumtaşı başlıklar (`#d4a373`) ve zümrüt başarı rozetleri.
-
-### 🚀 6 Seçilmiş Yeni Nesil Özellik
-1. 📚 **Özellik 5: Ünite & İçindekiler Hızlı Atlama Çekmecesi (TOC):**
-   - Okuyucu üst araç çubuğunda açılır `📖 Ünite Atlama (TOC)` menüsü.
-   - Kitaptaki üniteleri, konuları ve sayfa numaralarını listeleyip tek tıkla doğrudan ilgili sayfaya atlatır.
-2. ⚡ **Özellik 6: Seç & Açıkla Hızlı Aksiyon Araç Çubuğu (Quick Action Bar):**
-   - Okuyucu tuvalinin üstünde hazır aksiyon düğmeleri:
-     - `🔍 Sayfayı Çöz` (Doğrudan Ödev Çözücüye aktarıp çözümü başlatır)
-     - `💡 Sokratik İpucu` (Doğrudan yanıt vermeden yönlendirici ipuçları verir)
-     - `🇹🇷 Türkçe Çevir & Açıkla` (Sayfa metni ve egzersizlerinin Türkçe çevirisi ve gramer özeti)
-     - `🎯 Sayfadan Mini Quiz` (Sayfadaki konudan anında 3 soruluk pratik test üretir)
-     - `📌 Notlara Kaydet` (Sayfayı tek tıkla o dersin Studio Notlarına alıntı olarak ekler)
-3. 📕 **Özellik 7: Hata Defteri & Yanlış Havuzu (Mistake Journal):**
-   - Ödev Kontrolcüde yanlış çıkan sorular gerekçeleriyle birlikte otomatik olarak bu havuza toplanır.
-   - Soru, senin verdiğin yanlış cevap, doğrusu ve Türkçe analiz kartlar halinde listelenir.
-   - `🎯 Hatalarımdan Quiz Yap` butonu ile Co-Worker sadece zayıf olunan sorulardan özel telafi testi hazırlar.
-4. ⏱️ **Özellik 8: Sınav Simülatörü & Pomodoro Geri Sayımı (Interactive Timer):**
-   - Üst bilgi çubuğunda canlı geri sayım sayacı (`⏱️ 25:00`).
-   - Başlat / Duraklat (`▶` / `⏸`), Sıfırla (`🔄`), 25 dk (Pomodoro), 45 dk (Ders), 15 dk (Hızlı Test) modları.
-   - Süre bittiğinde otomatik durum uyarısı.
-5. 📊 **Özellik 10: Zayıf Nokta & Konu Hakimiyeti Radarı (Mastery Radar):**
-   - Sol rafta her ders projesine özel konu hakimiyeti çubukları (Progress Bar: %90, %55, %40).
-   - Kritik eksikler kırmızı ve sarı rozetlerle uyarılır.
-   - `⚡ Zayıf Noktaları Çalıştır` düğmesiyle doğrudan eksik konuya odaklı antrenman başlatılır.
-6. 📤 **Özellik 15: Hızlı İhraç Merkezi (Export Hub):**
-   - Üst çubukta `📤 Dışa Aktar` penceresi:
-     - 📋 Tek tıkla Cevap Anahtarını Panoya Kopyalama (WhatsApp / Discord paylaşımı için)
-     - 📄 Ödev Çözümlerini Markdown (`Ders_Cozumu.md`) olarak kaydetme
-     - 📕 Hata Defterini Markdown (`Hata_Defterim.md`) olarak kaydetme
-     - 💾 Ders Projesini `.json` olarak yedekleme
+### 🤖 7. Akıllı Co-Worker & Çözücü Mimarisi
+- **Co-Worker Study Partner:** Doküman grounding desteği, SSE canlı akış yanıtları, Sokratik ipucu modu ve tek tıkla mini quiz üretimi.
+- **📕 Hata Defteri:** Yanlış yapılan soruların çözümleri ve Türkçe gerekçeleriyle otomatik havuza toplanması.
+- **CEFR Dil Seviyesi Seçimi:** `A1` - `C1` aralığında ayarlanabilir kelime ve gramer zorluğu.
 
 ---
 
-## [v2.0.0-alpha.3] - 2026-11-06 (Gemini Notebook & v1 Ödev Çözücü / Kontrolcü Mimarisi)
-
-### 🎯 v1 Klasik Özelliklerin Saf Rust'a Entegrasyonu
-- ⚡ **Ödev Çözücü Studio (Homework Solver):** v1'deki tüm soru ve alıştırmaları otomatik çözme motoru doğrudan Saf Rust içine entegre edildi.
-  - CEFR Dil Seviyesi seçimi: `A1`, `A2`, `B1`, `B2`, `C1`.
-  - Detaylı / Açıklamalı Çözüm modu (kuralı adım adım anlatan).
-  - Doğal Öğrenci Hissi (Human Touch - ~%95 başarı, doğal el yazısı hissi).
-  - Tek tıkla tüm sayfa egzersizlerini çözüp düzenli Cevap Anahtarı (Answer Key) çıkarma.
-- 🔍 **Ödev Kontrol Et & Puanla Motoru (Homework Checker & Grader):** Öğrencinin yazdığı kendi cevaplarını değerlendirme, tek tek doğru (`✅`) ve yanlış (`❌`) tespiti yapma.
-  - Sınav Not Karnesi: `🎯 Puan: 85/100 (4 Doğru, 1 Yanlış)`.
-  - Hatalı sorularda doğru cevabı ve Türkçe gerekçesini gösterme.
-  - Öğretmen Tavsiyesi ve Geliştirme Notu üretme.
-  - Hızlı test için tek tıkla `📝 Örnek Cevap Doldur` butonu.
-- 📌 **Ders Notlarına Aktarma:** Üretilen cevap anahtarları ve karne raporları tek tıkla o dersin Studio Not Defterine kaydedilebilir.
-- 📚 **Çoklu Ders Notebook'ları:** İngilizce, Kalkülüs, Fizik vb. her derse özel bağımsız proje açabilme, kaynak rafı ve grounding desteği.
-- 🪶 **5.04 MB Ultra Hafif Binary:** Hem `PrepMate-2.0-Alpha-2.exe` hem `PrepMate-2.0-Alpha-3.exe` güncellendi; <30ms açılış, 0 webview, 0 python bağımlılığı.
-
----
-
-## [v2.0.0-alpha.2] - 2026-11-06 (Pure Rust Native Rebirth)
-
-### 🦀 Saf Rust & 0-Webview Dönüşümü
-- ⚡ **Boyut 83.6 MB'tan 4.7 MB'a Düştü:** Python yorumlayıcısı, yüzlerce DLL ve PyInstaller ZIP paketleyicisi tamamen çöpe atıldı; tek bir 4.7 MB'lık saf Windows binary'si elde edildi (%94.3 küçülme).
-- 🚀 **0.03 Saniyede Açılış (Instant Launch):** Tıkladığın salise doğrudan GPU tarafından çizilen native pencere ekrana geliyor. Bekleme, donma, ZIP açma yok.
-- 🚫 **Sıfır Webview & Sıfır Port 8000:** Edge WebView2 motoru, Chromium, web sunucusu ve tarayıcı önbellek çakışmaları tamamen kaldırıldı. Arayüz doğrudan ekran kartı (`eframe / egui`) ile 144 FPS hızında çiziliyor.
-- 🤖 **Doğrudan Rust Asenkron Gemini İstemcisi:** `tokio` ve `reqwest` ile doğrudan TLS üzerinden Google Gemini API'ye bağlanıp en düşük gecikmeyle sohbet akışı sağlandı.
-- 🔥 **Rust Native Study Heatmap:** Sayfa zorluk ve soru istatistikleri `serde_json` ile yerel olarak işleniyor.
-- 📁 **Native Windows Dosya Seçici:** `rfd` kütüphanesiyle doğrudan Windows yerel dosya penceresi entegre edildi.
-
----
-
-## [v2.0.0-alpha.1] - 2026-11-06
-
-### 🇹🇷 Yenilikler & Altyapı Modernizasyonu
-- 🤖 **Co-Worker Study Partner Agent:** PDF'leri hafızasında tutan, sağ panelden açılan, SSE token-stream ile canlı sohbet eden AI çalışma arkadaşı entegre edildi.
-- ⚡ **Rust Destekli Hızlandırma (orjson):** Bounding box, sayfa koordinatları ve önbellek I/O işlemleri standart kütüphaneden 10-20 kat daha hızlı çalışan Rust tabanlı `orjson` motoruna taşındı.
-- 🔄 **Asenkron ve Bloklamayan Mimari:** Ağır PDF render (`render_page_image`) ve çözüm işlemleri `anyio.to_thread.run_sync` ile arka iş parçacıklarına alındı; FastAPI event-loop'unun kitlenmesi ve arayüz donmaları tamamen engellendi.
-- 🛡️ **Güvenlik Yamaları (Path Traversal Fix):** `/api/download` ve `/api/download-zip` uç noktalarında rastgele dizin erişimi açığı `is_relative_to` doğrulamasıyla kapatıldı; `file_id` formatı sanitize edildi.
-- 📄 **C/C++ Native PDF-to-Markdown (pymupdf4llm):** Sayfalar saliseler içinde hafif ve hatasız `README.md` formatına dönüştürülerek LLM token tüketimi ve yanıt gecikmesi düşürüldü.
-- 🔥 **Çalışma Isı Haritası (Study Heatmap):** Hangi sayfalarda daha çok soru sorulduğunu ve vakit geçirildiğini gösteren aktivite takip motoru eklendi.
+### 🛡️ 8. Güvenlik, Mantık & Stabilite Yamaları
+- Bionic reading kesme işareti (`&#039;`) dilimleme rendering hatası giderildi.
+- İçindekiler (TOC) dropdown'ında XSS/HTML Injection açığı kapatıldı.
+- Not kopyalama butonundaki çok satırlı tırnak JS SyntaxError'ı giderildi.
+- Tüm kaynaklar silindiğinde sayfaların ekranda donuk kalması (ghost text) düzeltildi.
+- Günlük seri (streak) hesaplamasındaki çoklu gün atlama mantık hatası çözüldü.
+- Not dışa aktarımında masaüstü hedefleme ile dosya kaybolma/yetki sorunları giderildi.
+- Sayfa çıkarma hatalarında 1:1 indeks sapmasını önleyen placeholder eklendi.
 
 ---
 

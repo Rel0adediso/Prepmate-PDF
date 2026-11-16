@@ -20,8 +20,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-2.0.exe">
-    <img src="https://img.shields.io/badge/PrepMate%202.0%20%C4%B0ndir%20(Saf%20Rust%202.4MB)-Windows%20EXE-cc785c?style=for-the-badge&logo=windows&logoColor=white&labelColor=292b26" alt="PrepMate 2.0 İndir (.EXE)" />
+  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/tag/v2.0.0-alpha.1">
+    <img src="https://img.shields.io/badge/PrepMate%202.0%20Alpha%201%20%C4%B0ndir%20(Saf%20Rust%202.4MB)-Windows%20EXE-cc785c?style=for-the-badge&logo=windows&logoColor=white&labelColor=292b26" alt="PrepMate 2.0 Alpha 1 İndir (.EXE)" />
   </a>
   &nbsp;&nbsp;
   <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe">

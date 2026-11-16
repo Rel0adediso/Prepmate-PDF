@@ -373,7 +373,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let event_loop = EventLoopBuilder::<UserEvent>::with_user_event().build();
     let window = WindowBuilder::new()
-        .with_title("PrepMate 2.0 Alpha-8 — Modern Native Studio")
+        .with_title("PrepMate 2.0 Alpha 1 — Modern Native Studio")
         .with_inner_size(tao::dpi::LogicalSize::new(1440.0, 920.0))
         .build(&event_loop)?;
 

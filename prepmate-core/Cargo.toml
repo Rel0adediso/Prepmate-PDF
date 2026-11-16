@@ -1,6 +1,6 @@
 [package]
 name = "prepmate-core"
-version = "2.0.0-alpha.8"
+version = "2.0.0-alpha.1"
 edition = "2021"
 
 [dependencies]
