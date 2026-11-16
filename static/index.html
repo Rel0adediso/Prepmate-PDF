@@ -6,6 +6,8 @@
   <title>PrepMate PDF — AI Workbook & Homework Solver</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked.js for AI Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -48,9 +50,9 @@
       </div>
       <div class="flex items-center gap-2">
         <h1 class="font-serif text-base font-medium text-[#fbf9f5] leading-none">
-          PrepMate <span class="text-[#d97757] font-semibold italic">PDF</span>
+          PrepMate <span class="text-[#d97757] font-semibold italic">2.0</span>
         </h1>
-        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#cc785c]/15 text-[#e58f74] border border-[#cc785c]/30">v1.1.2</span>
+        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#cc785c]/25 text-[#e58f74] border border-[#cc785c]/50 font-bold">v2.0 Alpha 1</span>
       </div>
     </div>
 
@@ -98,11 +100,13 @@
         <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-[#d4a373]/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="text-center mb-6 relative z-10">
-          <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#cc785c]/10 border border-[#cc785c]/25 text-[#e58f74] text-xs font-medium mb-3 tracking-wide">
-            <span data-i18n="hero_badge">✨ 6x Parallel Solving • Auto-Formatting</span>
+          <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#cc785c]/15 border border-[#cc785c]/35 text-[#e58f74] text-xs font-bold mb-3 tracking-wide shadow-sm">
+            <span>✨ PrepMate 2.0: AI Co-Worker & Study Partner Aktif</span>
           </div>
-          <h2 class="text-3xl font-serif font-medium text-[#fbf9f5] mb-2 tracking-tight" data-i18n="hero_title">Upload Workbook PDF</h2>
-          <p class="text-[#a39e97] text-sm" data-i18n="hero_desc">Select your assigned course book or worksheet; pages are filled in seconds.</p>
+          <h2 class="text-3xl font-serif font-medium text-[#fbf9f5] mb-2 tracking-tight">Ders Kitabı & Ödev PDF'i Yükle</h2>
+          <p class="text-[#a39e97] text-xs max-w-md mx-auto leading-relaxed">
+            Kitabını yükle; AI Co-Worker ile yan yana ders çalış, takıldığın soruları sor veya ödevini saniyeler içinde çözdür.
+          </p>
         </div>
 
         <!-- Drag & Drop Zone -->
@@ -311,6 +315,13 @@
             <span data-i18n="add_pages_btn">Add</span>
           </button>
 
+          <!-- Toggle Co-Worker Agent Button -->
+          <button id="toggleCoworkerBtn" title="AI Çalışma Arkadaşı (Co-Worker Agent)" class="flex items-center space-x-1.5 bg-[#cc785c]/15 hover:bg-[#cc785c]/25 border border-[#cc785c]/40 px-2.5 py-1 rounded-xl text-[#e58f74] transition font-medium shadow-sm">
+            <span>🤖</span>
+            <span class="font-bold">Co-Worker</span>
+            <span id="coworkerPageBadge" class="px-1.5 py-0.5 rounded-full bg-[#cc785c]/30 text-white font-mono text-[10px] font-bold">P1</span>
+          </button>
+
           <!-- Toggle Progress Sidebar Button -->
           <button id="toggleProgressSidebarBtn" data-i18n-title="progress_btn_title" title="Homework Progress" class="flex items-center space-x-1.5 bg-[#272522] hover:bg-[#312e2a] border border-[#3d3a36] px-2.5 py-1 rounded-xl text-[#ece8e1] transition font-medium">
             <span>📑</span>
@@ -392,6 +403,83 @@
               <span>➕</span>
               <span data-i18n="sidebar_add_pages">Add New Pages</span>
             </button>
+          </div>
+        </aside>
+
+        <!-- Collapsible Co-Worker Agent Sidebar -->
+        <aside id="coworkerSidebar" class="hidden w-96 min-w-[22rem] bg-[#1d1b18] border-l border-[#2d2b27] flex flex-col shrink-0 z-20 shadow-2xl overflow-hidden">
+          <!-- Co-Worker Header -->
+          <div class="p-3.5 border-b border-[#2d2b27] bg-[#1d1b18] flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🤖</span>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h3 class="font-bold text-sm text-[#fbf9f5]">PrepMate Co-Worker</h3>
+                  <span id="coworkerHeatBadge" class="px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">🟢 Sakin</span>
+                </div>
+                <p class="text-[11px] text-[#a39e97]"><span id="coworkerHeaderPageNum">Sayfa 1</span> • Hafızada Canlı</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button id="clearCoworkerChatBtn" title="Sohbeti Temizle" class="p-1.5 rounded-lg text-[#a39e97] hover:text-white hover:bg-white/[0.08] transition text-xs">🗑️</button>
+              <button id="closeCoworkerBtn" class="p-1 rounded-lg text-[#a39e97] hover:text-white hover:bg-white/[0.08] transition text-base leading-none" title="Paneli Kapat">&times;</button>
+            </div>
+          </div>
+
+          <!-- Mode Selector Strip -->
+          <div class="p-2 border-b border-[#2d2b27] bg-[#171614] flex items-center gap-1.5 overflow-x-auto text-[11px]">
+            <button class="coworker-mode-pill px-2.5 py-1 rounded-lg border border-[#cc785c] bg-[#cc785c] text-white font-bold transition whitespace-nowrap" data-mode="co_worker">
+              🤝 Partner
+            </button>
+            <button class="coworker-mode-pill px-2.5 py-1 rounded-lg border border-[#383530] bg-[#24221f] text-[#a39e97] hover:text-white transition whitespace-nowrap" data-mode="socratic">
+              💡 Sokratik
+            </button>
+            <button class="coworker-mode-pill px-2.5 py-1 rounded-lg border border-[#383530] bg-[#24221f] text-[#a39e97] hover:text-white transition whitespace-nowrap" data-mode="quiz">
+              🎯 Mini Quiz
+            </button>
+            <button class="coworker-mode-pill px-2.5 py-1 rounded-lg border border-[#383530] bg-[#24221f] text-[#a39e97] hover:text-white transition whitespace-nowrap" data-mode="feynman">
+              🔄 Feynman
+            </button>
+          </div>
+
+          <!-- Chat Messages Area -->
+          <div id="coworkerMessages" class="flex-1 p-3.5 overflow-y-auto space-y-3 font-sans text-xs">
+            <!-- Initial Welcome Message -->
+            <div class="flex gap-2.5 justify-start">
+              <div class="w-6 h-6 rounded-lg bg-[#cc785c]/25 border border-[#cc785c]/40 text-[#e58f74] flex items-center justify-center text-xs shrink-0 select-none mt-1">
+                🤖
+              </div>
+              <div class="max-w-[85%] bg-[#24221f] text-[#ece8e1] border border-[#383530] px-3.5 py-2.5 rounded-2xl rounded-tl-none text-xs leading-relaxed shadow-sm">
+                Selam Yağız! 👋 Açık olan sayfanın tüm içeriğini okudum. 
+                İster buradaki soruları birlikte çözelim, ister bana konuyu sor ya da mini test hazırlayayım. Ne ile başlayalım?
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Chips -->
+          <div class="p-2 border-t border-[#2d2b27] bg-[#171614] flex items-center gap-1.5 overflow-x-auto text-[10px]">
+            <button class="coworker-quick-chip px-2 py-0.5 rounded-full bg-[#24221f] hover:bg-[#312e2a] border border-[#3d3a36] text-[#d4a373] transition whitespace-nowrap" data-prompt="Bu sayfadaki konuyu ve ana kuralları kısaca özetler misin?">
+              📖 Sayfayı Özetle
+            </button>
+            <button class="coworker-quick-chip px-2 py-0.5 rounded-full bg-[#24221f] hover:bg-[#312e2a] border border-[#3d3a36] text-[#d4a373] transition whitespace-nowrap" data-prompt="Bu sayfadaki en zor soru hangisi? Adım adım mantığını anlatır mısın?">
+              🔍 En Zor Soru
+            </button>
+            <button class="coworker-quick-chip px-2 py-0.5 rounded-full bg-[#24221f] hover:bg-[#312e2a] border border-[#3d3a36] text-[#d4a373] transition whitespace-nowrap" data-prompt="Açık olan konudan bana 3 soruluk pratik test hazırlar mısın?">
+              🎯 3 Soruluk Quiz
+            </button>
+          </div>
+
+          <!-- Input Footer -->
+          <div class="p-2.5 border-t border-[#2d2b27] bg-[#1d1b18]">
+            <div id="coworkerTypingIndicator" class="hidden text-[10px] text-[#cc785c] mb-1 animate-pulse flex items-center gap-1">
+              <span>●</span> Co-Worker düşünüyor ve yazıyor...
+            </div>
+            <div class="flex items-center gap-1.5">
+              <textarea id="coworkerInput" rows="1" placeholder="Sayfayla ilgili bir soru sor... (Enter)" class="flex-1 bg-[#171614] border border-[#383530] focus:border-[#cc785c] focus:ring-1 focus:ring-[#cc785c] rounded-xl px-3 py-2 text-xs text-white placeholder-[#78736d] focus:outline-none resize-none transition max-h-24"></textarea>
+              <button id="coworkerSendBtn" class="bg-[#cc785c] hover:bg-[#d97757] text-white p-2 rounded-xl transition shadow flex items-center justify-center shrink-0" title="Gönder">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+              </button>
+            </div>
           </div>
         </aside>
       </div>
@@ -557,8 +645,9 @@
     <span id="toastMessage" class="font-medium">Notification</span>
   </div>
 
-  <!-- Load i18n before app logic -->
-  <script src="i18n.js"></script>
-  <script src="app.js"></script>
+  <!-- Load i18n before app logic with cache-busting -->
+  <script src="i18n.js?v=2.0.1"></script>
+  <script src="app.js?v=2.0.1"></script>
+  <script src="coworker.js?v=2.0.1"></script>
 </body>
 </html>

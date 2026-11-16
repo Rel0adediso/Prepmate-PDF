@@ -31,3 +31,14 @@ Thumbs.db
 build/
 dist/
 *.spec
+
+# Rust Build Artifacts
+target/
+**/target/
+prepmate-core/target/
+
+# Binaries & Runtime Data
+*.dll
+*.exe
+*.WebView2/
+

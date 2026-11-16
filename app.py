@@ -20,14 +20,19 @@ if sys.platform == "win32":
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
-from fastapi.responses import FileResponse, Response, JSONResponse
+from fastapi.responses import FileResponse, Response, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Any, Optional
+from typing import Any, Optional, List, Dict
 from pydantic import BaseModel
+import anyio
+import orjson
+import aiofiles
 
 from pdf_utils import get_pdf_info, render_page_image, export_annotated_pdf
 from solver import solve_page_hybrid, parse_page_range, check_page_answers
+from extractor import extract_pdf_to_markdown, extract_page_markdown, get_markdown_summary
+from agent_service import stream_chat_response, record_heatmap_event, get_heatmap_data
 
 # Load environment variables (.env if exists)
 load_dotenv()
@@ -52,19 +57,43 @@ STATIC_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(title="PrepMate PDF - AI Workbook Solver")
 
+# Secure Local CORS: Strictly whitelist local origins (prevent external web pages from accessing local API)
+LOCAL_CORS_REGEX = r"^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origin_regex=LOCAL_CORS_REGEX,
+    allow_origins=["null"], # Support local Webview/file origin
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def add_no_cache_headers(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/api"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    elif request.url.path == "/" or any(request.url.path.endswith(ext) for ext in [".html", ".js", ".css"]):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
+    import traceback
+    traceback.print_exc()
+    
+    # Sanitize error detail to prevent leaking internal Windows paths or user identities
+    err_str = str(exc)
+    home_str = str(Path.home())
+    if home_str in err_str:
+        err_str = err_str.replace(home_str, "~")
+        
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Sunucu hatası: {str(exc)}"}
+        content={"detail": f"İşlem sırasında sunucu hatası: {err_str[:250]}"}
     )
 
 class SolvePageRequest(BaseModel):
@@ -85,6 +114,18 @@ class ExportRequest(BaseModel):
 
 class ZipExportRequest(BaseModel):
     files: list[ExportRequest]
+
+class ChatStreamRequest(BaseModel):
+    file_id: str
+    page_num: int = 1
+    messages: List[Dict[str, str]] = []
+    mode: str = "co_worker"  # "co_worker", "socratic", "quiz", "feynman"
+    api_key: str = ""
+
+class HeatmapRecordRequest(BaseModel):
+    file_id: str
+    page_num: int
+    event_type: str = "view"  # "view", "time", "question"
 
 # Permanent user config file (survives app restarts and portable exe runs)
 USER_CONFIG_DIR = Path.home() / ".prepmate_pdf"
@@ -140,22 +181,41 @@ def extract_keys_pool(user_input: str) -> list[str]:
                 keys.append(k)
     return keys
 
+def mask_key_preview(k: str) -> str:
+    k = k.strip()
+    if not k:
+        return ""
+    if len(k) <= 8:
+        return "****"
+    return f"{k[:4]}...{k[-4:]}"
+
 @app.get("/api/config")
 def get_config():
     keys = extract_keys_pool("")
     count = len(keys)
     saved_raw = load_saved_user_keys()
-    if count == 0:
-        return {"has_env_key": False, "key_count": 0, "key_type": "", "saved_key": ""}
+    has_saved = bool(saved_raw)
     
-    first = keys[0]
+    # Mask key so sensitive plaintext API secrets are never transmitted across HTTP
+    masked_key = "\n".join([mask_key_preview(k) for k in saved_raw.splitlines() if k.strip()]) if saved_raw else ""
+    
+    if count == 0:
+        return {
+            "has_env_key": False, 
+            "has_saved_key": False,
+            "key_count": 0, 
+            "key_type": "", 
+            "saved_key": ""
+        }
+    
     is_or = any(k.startswith("sk-or-") or k.startswith("sk-") for k in keys)
     label = f"{count} Anahtar Aktif" if count > 1 else ("OpenRouter" if is_or else "Gemini 3.8")
     return {
         "has_env_key": True,
+        "has_saved_key": has_saved,
         "key_count": count,
         "key_type": label,
-        "saved_key": saved_raw if saved_raw else ""
+        "saved_key": masked_key
     }
 
 @app.post("/api/save-key")
@@ -172,32 +232,59 @@ def save_key_endpoint(req: SaveKeyRequest):
         "key_type": label if count > 0 else ""
     }
 
+MAX_UPLOAD_BYTES = 120 * 1024 * 1024  # 120 MB maximum per upload
+
 @app.post("/api/upload")
 async def upload_pdf(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Lütfen geçerli bir PDF dosyası yükleyin.")
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Lütfen geçerli bir PDF dosyası (.pdf) yükleyin.")
     
     file_id = uuid.uuid4().hex[:12]
     save_path = UPLOADS_DIR / f"{file_id}.pdf"
     
-    content = await file.read()
-    with open(save_path, "wb") as f:
-        f.write(content)
+    total_bytes = 0
+    is_first_chunk = True
+
+    try:
+        # Non-blocking streaming file write using aiofiles with security checks
+        async with aiofiles.open(save_path, "wb") as f:
+            while chunk := await file.read(1024 * 64):
+                if is_first_chunk:
+                    # Validate PDF Magic Bytes (%PDF-)
+                    if not chunk.startswith(b"%PDF-"):
+                        raise HTTPException(
+                            status_code=400, 
+                            detail="Yüklenen dosya geçerli bir PDF formatında değil (geçersiz başlık/imza)."
+                        )
+                    is_first_chunk = False
+
+                total_bytes += len(chunk)
+                if total_bytes > MAX_UPLOAD_BYTES:
+                    raise HTTPException(
+                        status_code=413, 
+                        detail=f"Dosya boyutu çok büyük! Maksimum izin verilen sınır {MAX_UPLOAD_BYTES // (1024*1024)} MB."
+                    )
+                await f.write(chunk)
+    except Exception as upload_err:
+        save_path.unlink(missing_ok=True)
+        if isinstance(upload_err, HTTPException):
+            raise upload_err
+        raise HTTPException(status_code=500, detail=f"Dosya kaydedilemedi: {str(upload_err)}")
         
     try:
-        info = get_pdf_info(str(save_path))
+        info = await anyio.to_thread.run_sync(get_pdf_info, str(save_path))
     except Exception as e:
         save_path.unlink(missing_ok=True)
-        raise HTTPException(status_code=400, detail=f"PDF okunamadı: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"PDF okunamadı veya bozuk: {str(e)}")
         
     return {
         "file_id": file_id,
-        "filename": file.filename,
+        "filename": Path(file.filename).name,
         "total_pages": info["total_pages"]
     }
 
 @app.post("/api/load-sample")
-def load_sample():
+async def load_sample():
     sample_path = BUNDLE_DIR / "ornek_ingilizce_odev.pdf"
     if not sample_path.exists():
         sample_path = BASE_DIR / "ornek_ingilizce_odev.pdf"
@@ -207,10 +294,10 @@ def load_sample():
     file_id = "sample_prep"
     save_path = UPLOADS_DIR / f"{file_id}.pdf"
     import shutil
-    shutil.copy(sample_path, save_path)
+    await anyio.to_thread.run_sync(shutil.copy, sample_path, save_path)
     
     try:
-        info = get_pdf_info(str(save_path))
+        info = await anyio.to_thread.run_sync(get_pdf_info, str(save_path))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Örnek PDF okunamadı: {str(e)}")
         
@@ -221,31 +308,38 @@ def load_sample():
     }
 
 @app.get("/api/page-image/{file_id}/{page_num}")
-def get_page_image(file_id: str, page_num: int):
+async def get_page_image(file_id: str, page_num: int):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", file_id):
+        raise HTTPException(status_code=400, detail="Geçersiz dosya kimliği.")
     pdf_path = UPLOADS_DIR / f"{file_id}.pdf"
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="PDF bulunamadı.")
         
     try:
-        img_bytes = render_page_image(str(pdf_path), page_num, dpi=130, img_format="jpeg")
+        # High-performance non-blocking thread execution for C-based PDF rendering
+        img_bytes = await anyio.to_thread.run_sync(
+            render_page_image, str(pdf_path), page_num, 130, "jpeg"
+        )
         return Response(content=img_bytes, media_type="image/jpeg")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Sayfa görseli oluşturulamadı: {str(e)}")
 
 @app.post("/api/solve-page")
-def solve_page(req: SolvePageRequest):
+async def solve_page(req: SolvePageRequest):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", req.file_id):
+        raise HTTPException(status_code=400, detail="Geçersiz dosya kimliği.")
     pdf_path = UPLOADS_DIR / f"{req.file_id}.pdf"
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="PDF bulunamadı.")
         
-    # 1. Instant Cache Check (Sub-millisecond fast-path)
+    # 1. Instant Cache Check via Rust-powered orjson (Sub-millisecond fast-path)
     det_suffix = "_det" if req.detailed else ""
     chk_suffix = "_chk" if req.check_mode else ""
     cache_file = CACHE_DIR / f"{req.file_id}_{req.page_num}{det_suffix}{chk_suffix}.json"
     if not req.force and cache_file.exists():
         try:
-            with open(cache_file, "r", encoding="utf-8") as f:
-                cached_data = json.load(f)
+            with open(cache_file, "rb") as f:
+                cached_data = orjson.loads(f.read())
             return {
                 "success": True,
                 "page_num": req.page_num,
@@ -263,27 +357,32 @@ def solve_page(req: SolvePageRequest):
         )
         
     try:
-        img_bytes = render_page_image(str(pdf_path), req.page_num, dpi=130, img_format="jpeg")
+        img_bytes = await anyio.to_thread.run_sync(
+            render_page_image, str(pdf_path), req.page_num, 130, "jpeg"
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Sayfa görseli alınamadı: {str(e)}")
         
     try:
         if req.check_mode:
-            annotations = check_page_answers(str(pdf_path), req.page_num, img_bytes, keys_pool, detailed=req.detailed)
+            annotations = await anyio.to_thread.run_sync(
+                check_page_answers, str(pdf_path), req.page_num, img_bytes, keys_pool, req.detailed
+            )
         else:
-            annotations = solve_page_hybrid(
+            annotations = await anyio.to_thread.run_sync(
+                solve_page_hybrid,
                 str(pdf_path), 
                 req.page_num, 
                 img_bytes, 
                 keys_pool, 
-                detailed=req.detailed,
-                cefr_level=req.cefr_level,
-                human_touch=req.human_touch
+                req.detailed,
+                req.cefr_level,
+                req.human_touch
             )
-        # Save to cache
+        # Save to cache via ultra-fast orjson
         try:
-            with open(cache_file, "w", encoding="utf-8") as f:
-                json.dump(annotations, f, ensure_ascii=False, indent=2)
+            with open(cache_file, "wb") as f:
+                f.write(orjson.dumps(annotations, option=orjson.OPT_INDENT_2))
         except Exception:
             pass
             
@@ -297,7 +396,9 @@ def solve_page(req: SolvePageRequest):
         raise HTTPException(status_code=500, detail=f"Yapay zeka çözümü sırasında hata oluştu: {str(e)}")
 
 @app.post("/api/export")
-def export_pdf(req: ExportRequest):
+async def export_pdf(req: ExportRequest):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", req.file_id):
+        raise HTTPException(status_code=400, detail="Geçersiz dosya kimliği.")
     pdf_path = UPLOADS_DIR / f"{req.file_id}.pdf"
     if not pdf_path.exists():
         raise HTTPException(status_code=404, detail="Orijinal PDF bulunamadı.")
@@ -307,24 +408,20 @@ def export_pdf(req: ExportRequest):
     out_filename = f"cozulmus_{suffix}_{export_id}.pdf"
     out_path = OUTPUTS_DIR / out_filename
     
-    # Merge disk cache so that ALL solved pages are included,
-    # even if client refreshed or only sent partial annotations
+    # Merge disk cache via orjson so that ALL solved pages are included
     merged_annotations = {}
-    
-    # 1. First, load all solved pages from CACHE_DIR for this file_id
     for c_path in CACHE_DIR.glob(f"{req.file_id}_*.json"):
         m = re.match(rf"^{req.file_id}_(\d+)\.json$", c_path.name)
         if m:
             p_num_str = m.group(1)
             try:
-                with open(c_path, "r", encoding="utf-8") as f:
-                    cached_data = json.load(f)
+                with open(c_path, "rb") as f:
+                    cached_data = orjson.loads(f.read())
                 if isinstance(cached_data, list) and cached_data:
                     merged_annotations[p_num_str] = cached_data
             except Exception:
                 pass
 
-    # 2. Then overlay / override with annotations passed from client (e.g. user manual edits)
     if isinstance(req.pages_annotations, dict):
         for p_num_str, annots in req.pages_annotations.items():
             if isinstance(annots, list) and annots:
@@ -335,12 +432,13 @@ def export_pdf(req: ExportRequest):
         selected_pages = sorted([int(k) for k in merged_annotations.keys()])
 
     try:
-        export_annotated_pdf(
-            pdf_path=str(pdf_path),
-            pages_annotations=merged_annotations,
-            output_path=str(out_path),
-            mode=req.mode,
-            selected_pages=selected_pages
+        await anyio.to_thread.run_sync(
+            export_annotated_pdf,
+            str(pdf_path),
+            merged_annotations,
+            str(out_path),
+            req.mode,
+            selected_pages
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF oluşturulurken hata: {str(e)}")
@@ -353,17 +451,18 @@ def export_pdf(req: ExportRequest):
 
 @app.get("/api/download/{filename}")
 def download_file(filename: str):
-    file_path = OUTPUTS_DIR / filename
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Dosya bulunamadı.")
+    safe_name = Path(filename).name
+    file_path = (OUTPUTS_DIR / safe_name).resolve()
+    if not file_path.is_relative_to(OUTPUTS_DIR.resolve()) or not file_path.exists():
+        raise HTTPException(status_code=404, detail="Dosya bulunamadı veya geçersiz istek.")
     return FileResponse(
         path=str(file_path),
-        filename=filename,
+        filename=safe_name,
         media_type="application/pdf"
     )
 
 @app.post("/api/export-zip")
-def export_zip(req: ZipExportRequest):
+async def export_zip(req: ZipExportRequest):
     import zipfile
     if not req.files:
         raise HTTPException(status_code=400, detail="Dışa aktarılacak dosya bulunamadı.")
@@ -372,48 +471,51 @@ def export_zip(req: ZipExportRequest):
     zip_filename = f"PrepMate_Cozulmus_Odevler_{zip_id}.zip"
     zip_path = OUTPUTS_DIR / zip_filename
     
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        for idx, f_req in enumerate(req.files, 1):
-            src_pdf = UPLOADS_DIR / f"{f_req.file_id}.pdf"
-            if not src_pdf.exists():
-                continue
-            temp_pdf_name = f"Odev_{idx}_{f_req.file_id[:6]}.pdf"
-            temp_out = OUTPUTS_DIR / f"temp_{temp_pdf_name}"
+    def _create_zip():
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for idx, f_req in enumerate(req.files, 1):
+                src_pdf = UPLOADS_DIR / f"{f_req.file_id}.pdf"
+                if not src_pdf.exists():
+                    continue
+                temp_pdf_name = f"Odev_{idx}_{f_req.file_id[:6]}.pdf"
+                temp_out = OUTPUTS_DIR / f"temp_{temp_pdf_name}"
 
-            merged_annotations = {}
-            for c_path in CACHE_DIR.glob(f"{f_req.file_id}_*.json"):
-                m = re.match(rf"^{f_req.file_id}_(\d+)\.json$", c_path.name)
-                if m:
-                    p_num_str = m.group(1)
-                    try:
-                        with open(c_path, "r", encoding="utf-8") as f:
-                            cached_data = json.load(f)
-                        if isinstance(cached_data, list) and cached_data:
-                            merged_annotations[p_num_str] = cached_data
-                    except Exception:
-                        pass
-            if isinstance(f_req.pages_annotations, dict):
-                for p_num_str, annots in f_req.pages_annotations.items():
-                    if isinstance(annots, list) and annots:
-                        merged_annotations[str(p_num_str)] = annots
+                merged_annotations = {}
+                for c_path in CACHE_DIR.glob(f"{f_req.file_id}_*.json"):
+                    m = re.match(rf"^{f_req.file_id}_(\d+)\.json$", c_path.name)
+                    if m:
+                        p_num_str = m.group(1)
+                        try:
+                            with open(c_path, "rb") as f:
+                                cached_data = orjson.loads(f.read())
+                            if isinstance(cached_data, list) and cached_data:
+                                merged_annotations[p_num_str] = cached_data
+                        except Exception:
+                            pass
+                if isinstance(f_req.pages_annotations, dict):
+                    for p_num_str, annots in f_req.pages_annotations.items():
+                        if isinstance(annots, list) and annots:
+                            merged_annotations[str(p_num_str)] = annots
 
-            sel_pages = f_req.selected_pages
-            if f_req.mode == "only_homework" and not sel_pages:
-                sel_pages = sorted([int(k) for k in merged_annotations.keys()])
+                sel_pages = f_req.selected_pages
+                if f_req.mode == "only_homework" and not sel_pages:
+                    sel_pages = sorted([int(k) for k in merged_annotations.keys()])
 
-            try:
-                export_annotated_pdf(
-                    pdf_path=str(src_pdf),
-                    pages_annotations=merged_annotations,
-                    output_path=str(temp_out),
-                    mode=f_req.mode,
-                    selected_pages=sel_pages
-                )
-                zip_file.write(temp_out, arcname=temp_pdf_name)
-                temp_out.unlink(missing_ok=True)
-            except Exception:
-                continue
-                
+                try:
+                    export_annotated_pdf(
+                        pdf_path=str(src_pdf),
+                        pages_annotations=merged_annotations,
+                        output_path=str(temp_out),
+                        mode=f_req.mode,
+                        selected_pages=sel_pages
+                    )
+                    zip_file.write(temp_out, arcname=temp_pdf_name)
+                    temp_out.unlink(missing_ok=True)
+                except Exception:
+                    continue
+
+    await anyio.to_thread.run_sync(_create_zip)
+
     return {
         "success": True,
         "download_url": f"/api/download-zip/{zip_filename}",
@@ -422,14 +524,95 @@ def export_zip(req: ZipExportRequest):
 
 @app.get("/api/download-zip/{filename}")
 def download_zip(filename: str):
-    file_path = OUTPUTS_DIR / filename
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="ZIP dosyası bulunamadı.")
+    safe_name = Path(filename).name
+    file_path = (OUTPUTS_DIR / safe_name).resolve()
+    if not file_path.is_relative_to(OUTPUTS_DIR.resolve()) or not file_path.exists():
+        raise HTTPException(status_code=404, detail="ZIP dosyası bulunamadı veya geçersiz istek.")
     return FileResponse(
         path=str(file_path),
-        filename=filename,
+        filename=safe_name,
         media_type="application/zip"
     )
+
+# -------------------------------------------------------------
+# 🤖 Co-Worker Agent & Study Heatmap Endpoints
+# -------------------------------------------------------------
+
+@app.post("/api/chat/stream")
+async def chat_stream_endpoint(req: ChatStreamRequest):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", req.file_id):
+        raise HTTPException(status_code=400, detail="Geçersiz dosya kimliği.")
+    pdf_path = UPLOADS_DIR / f"{req.file_id}.pdf"
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="PDF bulunamadı.")
+
+    keys = extract_keys_pool(req.api_key)
+    if not keys:
+        raise HTTPException(status_code=400, detail="API Anahtarı bulunamadı! Lütfen anahtarınızı ekleyin.")
+    active_key = keys[0]
+
+    async def event_generator():
+        try:
+            async for chunk in stream_chat_response(
+                file_id=req.file_id,
+                page_num=req.page_num,
+                pdf_path=str(pdf_path),
+                messages=req.messages,
+                api_key=active_key,
+                mode=req.mode
+            ):
+                payload = json.dumps({"text": chunk}, ensure_ascii=False)
+                yield f"data: {payload}\n\n"
+            yield "data: [DONE]\n\n"
+        except Exception as e:
+            err_payload = json.dumps({"error": str(e)}, ensure_ascii=False)
+            yield f"data: {err_payload}\n\n"
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
+@app.get("/api/doc-markdown/{file_id}")
+async def get_doc_markdown(file_id: str, page: Optional[int] = None):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", file_id):
+        raise HTTPException(status_code=400, detail="Geçersiz dosya kimliği.")
+    pdf_path = UPLOADS_DIR / f"{file_id}.pdf"
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="PDF bulunamadı.")
+
+    cache_md = CACHE_DIR / f"{file_id}_doc.md"
+    if page is not None and page > 0:
+        md = await anyio.to_thread.run_sync(extract_page_markdown, str(pdf_path), page)
+    else:
+        md = await anyio.to_thread.run_sync(extract_pdf_to_markdown, str(pdf_path), str(cache_md))
+
+    summary = get_markdown_summary(md)
+    return {
+        "file_id": file_id,
+        "page": page,
+        "markdown": md,
+        "summary": summary
+    }
+
+@app.get("/api/study-heatmap/{file_id}")
+def get_study_heatmap_endpoint(file_id: str):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", file_id):
+        raise HTTPException(status_code=400, detail="Geçersiz dosya kimliği.")
+    return get_heatmap_data(file_id)
+
+@app.post("/api/study-heatmap/record")
+def record_study_heatmap_endpoint(req: HeatmapRecordRequest):
+    if not re.match(r"^[a-zA-Z0-9_-]+$", req.file_id):
+        raise HTTPException(status_code=400, detail="Geçersiz dosya kimliği.")
+    updated = record_heatmap_event(req.file_id, req.page_num, req.event_type)
+    return {"status": "ok", "data": updated}
 
 # Mount static folder for frontend
 app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")

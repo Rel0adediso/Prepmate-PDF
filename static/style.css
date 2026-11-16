@@ -446,3 +446,55 @@ body {
 .acrobat-correction-annotation:hover .explanation-tooltip {
   display: block;
 }
+
+/* Co-Worker Markdown Body Styling */
+.coworker-markdown-body p {
+  margin-bottom: 0.5rem;
+}
+.coworker-markdown-body p:last-child {
+  margin-bottom: 0;
+}
+.coworker-markdown-body ul {
+  list-style-type: disc;
+  margin-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.coworker-markdown-body ol {
+  list-style-type: decimal;
+  margin-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.coworker-markdown-body li {
+  margin-bottom: 0.25rem;
+}
+.coworker-markdown-body strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+.coworker-markdown-body em {
+  color: #d4a373;
+}
+.coworker-markdown-body h1,
+.coworker-markdown-body h2,
+.coworker-markdown-body h3 {
+  font-weight: 700;
+  color: #e58f74;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.coworker-markdown-body blockquote {
+  border-left: 2px solid #cc785c;
+  padding-left: 0.5rem;
+  margin-left: 0;
+  color: #d4a373;
+  font-style: italic;
+}
+.coworker-markdown-body pre {
+  background: #171614;
+  border: 1px solid #383530;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 11px;
+}

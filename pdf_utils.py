@@ -1,6 +1,7 @@
 import pymupdf
 import io
 import os
+import re
 
 def get_pdf_info(pdf_path: str) -> dict:
     doc = pymupdf.open(pdf_path)
@@ -136,18 +137,25 @@ def export_annotated_pdf(
                 if not text or text.lower() in ["ok", "ok.", "n/a", "none"]:
                     continue
                 
+                # Normalize special characters so standard PDF Helvetica renders cleanly without '?'
+                text = text.replace("\u2022", "- ").replace("\u2013", "-").replace("\u2014", "-")
+                text = text.replace("\u2018", "'").replace("\u2019", "'").replace("\u201c", '"').replace("\u201d", '"')
+                text = re.sub(r"^-\s*-\s*", "- ", text, flags=re.MULTILINE)
+                
                 font_size = float(item.get("font_size", 11))
                 
                 # Adobe Acrobat style: Helvetica, pure black, crisp text
                 target_font_size = float(item.get("font_size", 11))
                 fit_success = False
                 
-                # Dynamically try sizes down to 8pt to fit the box neatly
-                for sz in range(int(target_font_size), 7, -1):
+                # Dynamically try sizes down to 6.5pt to fit the box neatly
+                min_sz = 6.5 if (item.get("is_table_cell") or target_font_size <= 9.5) else 7.5
+                curr_sz = target_font_size
+                while curr_sz >= min_sz:
                     rc = page.insert_textbox(
                         rect,
                         text,
-                        fontsize=float(sz),
+                        fontsize=float(curr_sz),
                         fontname="helv",
                         color=(0, 0, 0),
                         align=int(item.get("align", 0))
@@ -155,6 +163,7 @@ def export_annotated_pdf(
                     if rc >= 0:
                         fit_success = True
                         break
+                    curr_sz -= 0.5
                 
                 if not fit_success:
                     page.insert_text(

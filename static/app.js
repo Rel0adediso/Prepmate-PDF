@@ -240,16 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (data.key_count) state.keyCount = data.key_count;
 
-      if (data.saved_key) {
-        state.apiKey = data.saved_key;
-        localStorage.setItem('gemini_api_key', data.saved_key);
-        const keys = state.apiKey.split(/[\r\n,;]+/).map(k => k.trim()).filter(Boolean);
-        state.keyCount = keys.length || 1;
-        const lbl = keys.length > 1 ? `${keys.length} Hesap / Anahtar` : (state.apiKey.startsWith('sk-or-') ? 'OpenRouter Aktif' : 'Gemini 3.8 Aktif');
-        updateApiKeyUI(true, lbl);
-      } else if (data.has_env_key && !state.apiKey) {
+      if (data.has_saved_key || data.has_env_key) {
         state.apiKey = 'ENV_KEY_ACTIVE';
-        updateApiKeyUI(true, data.key_type ? `${data.key_type} Aktif` : 'Sistem Anahtarı Aktif');
+        if (data.saved_key && apiKeyInput) {
+          apiKeyInput.placeholder = `Mevcut: ${data.saved_key}`;
+        }
+        updateApiKeyUI(true, data.key_type ? `${data.key_type}` : 'AI Anahtarı Aktif');
       } else if (state.apiKey && state.apiKey !== 'ENV_KEY_ACTIVE') {
         const keys = state.apiKey.split(/[\r\n,;]+/).map(k => k.trim()).filter(Boolean);
         state.keyCount = keys.length || 1;
@@ -768,6 +764,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Refresh progress sidebar active spread indicator
     updateProgressSidebarUI();
+
+    // Notify Co-Worker Agent of active page change & record study heatmap view
+    if (typeof window.onPageChangedForCoworker === 'function') {
+      window.onPageChangedForCoworker(leftPage);
+    }
   }
 
   function syncContainerDimensions(containerEl, imgEl) {

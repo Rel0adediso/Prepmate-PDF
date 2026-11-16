@@ -1,0 +1,3215 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrepMate 2.0 — Modern Native Studio</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked.js for fast Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- Google Fonts: Newsreader & Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            claude: {
+              bg: '#141413',
+              desk: '#11100e',
+              sidebar: '#181715',
+              surface: '#1f1e1a',
+              card: '#262420',
+              cardHover: '#302d28',
+              border: 'rgba(255, 245, 235, 0.08)',
+              borderStrong: 'rgba(255, 245, 235, 0.16)',
+              terracotta: '#cc785c',
+              terracottaHover: '#d97757',
+              terracottaLight: '#e89274',
+              sand: '#d4a373',
+              muted: '#9a9489',
+              text: '#fbf9f5'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body {
+      background-color: #141413;
+      color: #fbf9f5;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+    }
+
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 245, 235, 0.12); border-radius: 999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #cc785c; }
+
+    /* Glass Panels */
+    .glass-surface {
+      background: rgba(31, 30, 26, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 245, 235, 0.08);
+    }
+    .glow-card {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glow-card:hover {
+      border-color: rgba(204, 120, 92, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px -10px rgba(204, 120, 92, 0.2);
+    }
+
+    /* Paper Sheets */
+    .paper-sheet {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 245, 235, 0.08);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .paper-text {
+      transition: font-size 0.2s ease, line-height 0.2s ease;
+    }
+    .paper-mode-dark {
+      background: #1c1b18 !important;
+      color: #ece8e1 !important;
+    }
+    .paper-mode-sepia {
+      background: #25201a !important;
+      color: #f4ede2 !important;
+    }
+    .paper-mode-white {
+      background: #fbfbf9 !important;
+      color: #171614 !important;
+    }
+    .paper-mode-white .paper-text { color: #171614 !important; }
+    .paper-mode-white .paper-subtext { color: #5c564c !important; }
+
+    .book-spine-crease {
+      width: 14px;
+      background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(20,19,17,0.2) 50%, rgba(0,0,0,0.6) 100%);
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Neon Bounding Box Hover on Questions */
+    .question-block {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 10px 14px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .question-block:hover {
+      border-color: rgba(204, 120, 92, 0.6);
+      background-color: rgba(204, 120, 92, 0.08);
+      box-shadow: 0 0 20px -3px rgba(204, 120, 92, 0.25);
+    }
+    .question-block:hover .q-badge {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .q-badge {
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: all 0.2s ease;
+    }
+
+    /* Floating Selection Bubble */
+    #selectionBubble {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 60;
+    }
+
+    /* Drawer Transitions */
+    .collapsible-drawer {
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, padding 0.3s ease;
+    }
+
+    /* 3D Flashcard Perspective & Flip Animation */
+    .flashcard-perspective {
+      perspective: 1200px;
+    }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .flashcard-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 1.5rem;
+    }
+    .flashcard-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Bionic Reading bolding */
+    .bionic-word b {
+      font-weight: 800;
+      color: #cc785c;
+    }
+    .paper-mode-dark .bionic-word b {
+      color: #e89274;
+    }
+    .paper-mode-sepia .bionic-word b {
+      color: #b05c3b;
+    }
+    .paper-mode-white .bionic-word b {
+      color: #9c4224;
+    }
+
+    /* Kvieta HUD Glow */
+    .kvieta-hud-glow {
+      box-shadow: 0 10px 30px -10px rgba(204, 120, 92, 0.35);
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col text-sm antialiased select-none bg-[#141413]">
+
+  <!-- Floating Zen Exit Indicator (Visible only in Zen Mode) -->
+  <div id="zenExitIndicator" class="fixed top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#181715]/95 backdrop-blur-md border border-[#34312b] text-xs text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-2.5 z-50 cursor-pointer shadow-2xl transition-all duration-300 opacity-60 hover:opacity-100 hidden" onclick="toggleZenMode()" title="Zen Modundan Çık">
+    <span class="text-xs">🧘 Odak Modu</span>
+    <span class="text-[10px] bg-[#262420] text-[#d4a373] px-2 py-0.5 rounded-md border border-[#3d3a33] font-mono">ESC ile Çık</span>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. TOP GLOBAL NAVIGATION BAR -->
+  <!-- ========================================== -->
+  <header id="mainHeader" class="h-13 bg-[#181715] border-b border-[#2a2824] px-4 flex items-center justify-between shrink-0 z-40 transition-all duration-300">
+    <!-- Left: Brand + Navigation -->
+    <div class="flex items-center space-x-3">
+      <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#cc785c] via-[#d97757] to-[#e89274] flex items-center justify-center shadow-md shadow-[#cc785c]/30 shrink-0">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0 pr-3 border-r border-[#2a2824]">
+        <h1 class="font-serif text-base font-semibold text-[#fbf9f5] tracking-wide">PrepMate</h1>
+        <span class="text-xs font-serif italic text-[#cc785c]">2.0 Alpha-8</span>
+      </div>
+
+      <!-- Navigation Tabs: Home vs Studio -->
+      <div class="flex items-center space-x-1 bg-[#141413] p-1 rounded-xl border border-[#2a2824]">
+        <button onclick="switchView('welcome')" id="navHomeBtn" class="px-3 py-1 rounded-lg text-xs font-bold bg-[#262420] text-[#fbf9f5] transition flex items-center gap-1.5 shadow-sm">
+          <span>🏠</span> <span>Başlangıç</span>
+        </button>
+        <button onclick="switchView('studio')" id="navStudioBtn" class="px-3 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] transition flex items-center gap-1.5">
+          <span>📖</span> <span>Çalışma Masası</span>
+        </button>
+      </div>
+
+      <!-- Active Doc Name in Studio -->
+      <span id="activeDocTitle" class="hidden text-xs text-[#d4a373] font-mono pl-2 truncate max-w-xs"></span>
+    </div>
+
+    <!-- Center: Pomodoro & Ambience Audio HUD -->
+    <div class="flex items-center space-x-2 bg-[#1f1e1a] border border-[#2d2b26] px-3.5 py-1 rounded-full shadow-inner">
+      <span class="text-xs text-[#d4a373]">⏱️</span>
+      <span id="timerDisplay" class="font-mono font-bold text-xs text-[#fbf9f5] tracking-wider">25:00</span>
+      
+      <button id="timerToggleBtn" class="w-6 h-6 rounded-full bg-[#cc785c] hover:bg-[#d97757] text-white flex items-center justify-center transition shadow-sm" title="Başlat / Duraklat">
+        <span id="timerIcon" class="text-[10px]">▶</span>
+      </button>
+
+      <button id="timerResetBtn" onclick="resetTimer()" class="w-6 h-6 rounded-full bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-[#fbf9f5] flex items-center justify-center transition border border-[#34312b]" title="Süreyi Sıfırla (↻)">
+        <span class="text-[10px]">↻</span>
+      </button>
+
+      <!-- Preset Pills -->
+      <div class="hidden sm:flex items-center space-x-1 pl-1 border-l border-[#2d2b26]">
+        <button type="button" onclick="setTimerDuration(1500, this)" class="timer-pill text-[10px] font-bold px-2 py-0.5 rounded-lg bg-[#cc785c] text-white transition">25m</button>
+        <button type="button" onclick="setTimerDuration(2700, this)" class="timer-pill text-[10px] px-2 py-0.5 rounded-lg text-[#9a9489] hover:text-[#fbf9f5] transition">45m</button>
+        <button type="button" onclick="setTimerDuration(300, this)" class="timer-pill text-[10px] px-2 py-0.5 rounded-lg text-[#9a9489] hover:text-[#fbf9f5] transition">5m</button>
+        <button type="button" onclick="setTimerDuration(900, this)" class="timer-pill text-[10px] px-2 py-0.5 rounded-lg text-[#9a9489] hover:text-[#fbf9f5] transition">15m</button>
+      </div>
+
+      <!-- Ambience Sound Switcher -->
+      <button id="ambientSoundBtn" onclick="cycleAmbientSound()" class="w-6 h-6 rounded-full bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-[#d4a373] flex items-center justify-center transition border border-[#34312b] ml-1" title="Ambiyans Sesi (🌧️ Yağmur / ☕ Kafe / 💨 Beyaz Gürültü / 🔇 Kapalı)">
+        <span id="ambientIcon" class="text-xs">🌧️</span>
+      </button>
+    </div>
+
+    <!-- Right Controls: Daily Plan + Brain Map + Study Browser + Super Focus + Spotlight + Zen + Co-Worker -->
+    <div class="flex items-center space-x-2">
+      <!-- Daily Plan & Streak Pill -->
+      <button onclick="openDailyPlanModal()" id="headerDailyBtn" class="px-2.5 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-xs font-semibold text-[#fbf9f5] flex items-center gap-1.5 transition" title="Günlük Çalışma Planı & Ritim">
+        <span id="headerDailyPill">📅 0/3 • 🔥 1 Gün</span>
+      </button>
+
+      <!-- Brain Map Pill -->
+      <button onclick="openBrainMapModal()" class="w-7 h-7 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] flex items-center justify-center transition" title="Brain Map (Zihin Haritası & Konu Hakimiyeti)">
+        <span class="text-xs">🧠</span>
+      </button>
+
+      <!-- Research Station / Study Browser Pill -->
+      <button onclick="toggleStudyBrowser()" class="w-7 h-7 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] flex items-center justify-center transition" title="Araştırma İstasyonu (Web & Akademik Tarayıcı)">
+        <span class="text-xs">🌐</span>
+      </button>
+
+      <!-- Kvieta Super Focus Button -->
+      <button onclick="openFocusIntentionModal()" id="headerFocusBtn" class="px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#cc785c] to-[#e89274] hover:brightness-110 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm" title="Kvieta Süper Odak Modu">
+        <span class="text-xs">🎯</span>
+        <span class="hidden sm:inline">Odak</span>
+      </button>
+
+      <!-- Spotlight Trigger -->
+      <button onclick="openSpotlight()" class="flex items-center space-x-1.5 text-xs bg-[#262420] hover:bg-[#302d28] border border-[#34312b] px-2.5 py-1 rounded-xl text-[#9a9489] hover:text-[#fbf9f5] transition cursor-pointer">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <span class="font-mono text-[10px] bg-[#141413] px-1.5 py-0.5 rounded border border-[#34312b] text-[#d4a373]">Ctrl+K</span>
+      </button>
+
+      <!-- Zen Mode Trigger -->
+      <button onclick="toggleZenMode()" class="w-7 h-7 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] flex items-center justify-center transition" title="Zen Odak Modu (Ctrl+D)">
+        <span class="text-xs">🧘</span>
+      </button>
+
+      <!-- Settings Trigger -->
+      <button onclick="openSettingsModal()" class="w-7 h-7 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] flex items-center justify-center transition" title="Gemini API & Ayarlar">
+        <span class="text-xs">⚙️</span>
+      </button>
+
+      <!-- Co-Worker Toggle Pill -->
+      <button onclick="toggleDrawer('right')" class="flex items-center space-x-1.5 text-xs bg-[#262420] hover:bg-[#302d28] border border-[#34312b] px-3 py-1 rounded-xl text-[#fbf9f5] transition cursor-pointer">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span class="font-medium">Co-Worker</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 2. VIEW 1: CLEAN COURSE-FIRST DASHBOARD -->
+  <!-- ========================================== -->
+  <main id="welcomeView" class="flex-1 overflow-y-auto custom-scroll relative p-6 sm:p-10 flex flex-col justify-start max-w-4xl mx-auto w-full">
+    <!-- Ambient Inner Glow Orbs -->
+    <div class="absolute top-10 left-10 w-96 h-96 bg-[#cc785c]/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-[#d4a373]/08 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Hero Title -->
+    <div class="text-center mb-6 relative z-10 pt-4">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#cc785c]/15 border border-[#cc785c]/30 text-[#e58f74] text-xs font-bold mb-3 shadow-sm">
+        <span>✨ PrepMate Studio 2.0 Alpha-8</span>
+      </div>
+      <h2 class="font-serif text-3xl sm:text-4xl font-semibold text-[#fbf9f5] tracking-tight">Derslerini Yönet & Çalışmaya Başla</h2>
+      <p class="text-[#9a9489] text-xs sm:text-sm mt-2 max-w-lg mx-auto leading-relaxed">
+        Önce çalışmak istediğin dersi kaydet. Ardından ders kitaplarını ve ödev PDF'lerini ekleyerek yapay zeka destekli çalışma masasına geç.
+      </p>
+    </div>
+
+    <!-- Exam Countdown HUD Banner -->
+    <div id="examCountdownBanner" class="bg-gradient-to-r from-[#262420] via-[#1f1e1a] to-[#262420] border border-[#d4a373]/30 rounded-3xl p-5 mb-8 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl glow-card">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-[#cc785c]/20 border border-[#cc785c]/40 flex items-center justify-center text-2xl shrink-0">
+          🎯
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h4 id="examTitleDisplay" class="font-bold text-sm text-[#fbf9f5]">B2 Hazırlık Final Sınavı</h4>
+            <span id="examDaysBadge" class="px-2.5 py-0.5 rounded-full bg-[#cc785c]/20 text-[#e89274] font-mono text-[11px] font-bold border border-[#cc785c]/30">17 Gün Kaldı</span>
+          </div>
+          <p id="examTargetDisplay" class="text-xs text-[#9a9489] mt-0.5">Hedef: Toplam 50 Sayfa • Günlük Ritim Koruması Aktif</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="openExamTargetModal()" class="px-3.5 py-1.5 rounded-xl bg-[#262420] hover:bg-[#34312b] border border-[#34312b] text-xs font-semibold text-[#d4a373] hover:text-[#fbf9f5] transition flex items-center gap-1.5">
+          <span>✏️</span> <span>Sınav Hedefini Düzenle</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Course Creation Card -->
+    <div class="bg-[#1f1e1a] border border-[#34312b] hover:border-[#cc785c]/40 rounded-3xl p-6 sm:p-8 shadow-xl relative z-10 mb-8 glow-card">
+      <div class="flex items-center space-x-3 mb-5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#cc785c] to-[#e89274] text-white flex items-center justify-center text-lg shadow-md shadow-[#cc785c]/30 shrink-0">
+          📚
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-[#fbf9f5]">Yeni Bir Ders Oluştur</h3>
+          <p class="text-xs text-[#9a9489]">Dersini adlandır, ikonunu seç ve çalışma alanını hazırla</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Course Title Input -->
+        <div>
+          <label class="block text-xs font-semibold text-[#d4a373] mb-1.5">Dersin Adı <span class="text-rose-400">*</span></label>
+          <input id="newCourseTitle" type="text" onkeydown="if(event.key === 'Enter') createCourseAction()" placeholder="Örn: İngilizce Hazırlık 101, Kalkülüs 1, Fizik 102..." class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-2xl px-4 py-3 text-sm text-[#fbf9f5] placeholder-[#9a9489] outline-none transition shadow-inner">
+        </div>
+
+        <!-- Course Icon Selector Pills -->
+        <div>
+          <label class="block text-xs font-semibold text-[#d4a373] mb-2">Ders İkonu / Branş Seçin:</label>
+          <div id="emojiPickerList" class="flex flex-wrap gap-2">
+            <button type="button" onclick="selectCourseIcon('🇬🇧', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#262420] border border-[#cc785c] text-xs font-bold text-[#fbf9f5] flex items-center gap-1.5 transition"><span>🇬🇧</span> <span>Dil / Hazırlık</span></button>
+            <button type="button" onclick="selectCourseIcon('📐', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition"><span>📐</span> <span>Matematik / Kalkülüs</span></button>
+            <button type="button" onclick="selectCourseIcon('⚡', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition"><span>⚡</span> <span>Fizik</span></button>
+            <button type="button" onclick="selectCourseIcon('🧬', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition"><span>🧬</span> <span>Biyoloji</span></button>
+            <button type="button" onclick="selectCourseIcon('🧪', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition"><span>🧪</span> <span>Kimya</span></button>
+            <button type="button" onclick="selectCourseIcon('💻', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition"><span>💻</span> <span>Yazılım / CS</span></button>
+            <button type="button" onclick="selectCourseIcon('📚', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition"><span>📚</span> <span>Sosyal / Edebiyat</span></button>
+            <button type="button" onclick="selectCourseIcon('🎯', this)" class="icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition"><span>🎯</span> <span>Sınav / Test</span></button>
+          </div>
+        </div>
+
+        <!-- Description & Submit Button -->
+        <div class="flex flex-col sm:flex-row gap-3 pt-1">
+          <input id="newCourseDesc" type="text" onkeydown="if(event.key === 'Enter') createCourseAction()" placeholder="Açıklama veya seviye (örn: B2 Oxford & Cambridge, Final Hazırlık)" class="flex-1 bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-2xl px-4 py-2.5 text-xs text-[#fbf9f5] placeholder-[#9a9489] outline-none transition shadow-inner">
+          <button type="button" onclick="createCourseAction()" class="px-6 py-2.5 bg-[#cc785c] hover:bg-[#d97757] rounded-2xl text-xs font-bold text-white transition shadow-lg shadow-[#cc785c]/30 flex items-center justify-center gap-2 shrink-0">
+            <span>➕</span> <span>Dersi Oluştur ve Kaydet</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Courses & Documents Section -->
+    <div class="relative z-10 pb-8">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <h3 class="font-bold text-xs text-[#d4a373] uppercase tracking-wider">Kayıtlı Derslerin & Belgelerin</h3>
+        <span id="courseCountBadge" class="text-xs text-[#9a9489] font-mono">0 Ders</span>
+      </div>
+      <div id="savedProjectsList" class="space-y-4">
+        <!-- Dynamically injected from Rust state. -->
+        <div class="p-8 rounded-3xl bg-[#1f1e1a] border border-[#2d2b26] text-center text-xs text-[#9a9489] space-y-2">
+          <div class="text-3xl">📚</div>
+          <p class="font-semibold text-sm text-[#fbf9f5]">Henüz kayıtlı bir dersin yok</p>
+          <p class="max-w-md mx-auto">Yukarıdaki formdan dersinin adını yazıp "Dersi Oluştur ve Kaydet" butonuna basarak ilk dersini ekleyebilirsin.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 3. VIEW 2: FULL-WIDTH STUDIO WORKSPACE -->
+  <!-- ========================================== -->
+  <main id="studioView" class="hidden flex-1 flex overflow-hidden relative">
+
+    <!-- LEFT DRAWER: SOURCES & CHAPTERS (Collapses to width 0 completely!) -->
+    <aside id="leftDrawer" class="w-72 bg-[#181715] border-r border-[#2a2824] flex flex-col shrink-0 z-30 collapsible-drawer">
+      <div class="p-3 border-b border-[#2a2824] bg-[#1f1e1a] flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-2 overflow-hidden">
+          <span class="text-base">📚</span>
+          <span class="font-bold text-xs text-[#fbf9f5] truncate">Ders Belgeleri</span>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button onclick="postToRust('add_source_dialog')" class="text-xs bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#fbf9f5] px-2 py-0.5 rounded-md transition" title="Yeni Belge Ekle">➕</button>
+          <button onclick="toggleDrawer('left')" class="text-xs text-[#9a9489] hover:text-white p-1">✕</button>
+        </div>
+      </div>
+
+      <!-- Sources List -->
+      <div id="sourcesContainer" class="p-3 flex-1 overflow-y-auto custom-scroll space-y-2">
+        <div class="p-2.5 rounded-xl bg-[#262420] border border-[#cc785c]/40 text-xs text-[#fbf9f5] font-medium truncate" id="activeSourceBadge">
+          Belge Yüklendi
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER STUDIO CANVAS: EXPANDS TO 100% WHEN DRAWERS ARE CLOSED -->
+    <section id="centerStudio" class="flex-1 bg-[#11100e] flex flex-col overflow-hidden relative">
+      
+      <!-- Studio Header Controls Bar (Transitions completely out in Zen Mode!) -->
+      <div id="studioControls" class="px-6 py-2 bg-[#181715]/90 backdrop-blur-md border-b border-[#2a2824] flex items-center justify-between shrink-0 z-20 transition-all duration-300">
+        <div class="flex items-center space-x-3">
+          <!-- Toggle Left Drawer Button -->
+          <button onclick="toggleDrawer('left')" class="p-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#fbf9f5] flex items-center gap-1.5 text-xs font-medium transition" title="Belgeler Çekmecesini Aç / Kapat">
+            <span>📚</span>
+            <span id="leftDrawerBtnLabel">Belgeler</span>
+          </button>
+
+          <!-- TOC Chapter Selector -->
+          <div class="flex items-center space-x-2 border-l border-[#2a2824] pl-3">
+            <span class="text-xs text-[#9a9489]">Bölüm:</span>
+            <select id="chapterSelect" onchange="jumpChapter(this.value)" class="bg-[#1f1e1a] border border-[#2d2b26] focus:border-[#cc785c] text-xs font-semibold text-[#d4a373] rounded-xl px-3 py-1 outline-none cursor-pointer">
+              <option value="1">Sayfa 1</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Page View Mode (Single vs Spread) + Page Flip -->
+        <div class="flex items-center space-x-2">
+          <!-- Single vs Spread Toggle -->
+          <div class="flex items-center bg-[#1f1e1a] border border-[#2d2b26] rounded-xl p-0.5">
+            <button onclick="setSpreadMode('spread')" id="btnSpread" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#cc785c] text-white transition">📖 Çift Sayfa</button>
+            <button onclick="setSpreadMode('single')" id="btnSingle" class="px-2.5 py-1 rounded-lg text-xs text-[#9a9489] hover:text-white transition">📄 Tek Sayfa</button>
+          </div>
+
+          <div class="flex items-center space-x-1.5 bg-[#1f1e1a] border border-[#2d2b26] px-2.5 py-1 rounded-xl">
+            <button onclick="flipPrev()" class="text-[#fbf9f5] hover:text-[#cc785c] px-1 font-bold">◀</button>
+            <span id="pageSpreadIndicator" class="font-mono text-xs font-bold text-[#fbf9f5] px-1">Sayfa 1 / 1</span>
+            <button onclick="flipNext()" class="text-[#fbf9f5] hover:text-[#cc785c] px-1 font-bold">▶</button>
+          </div>
+
+          <!-- Paper Tint Selector -->
+          <div class="flex items-center bg-[#1f1e1a] border border-[#2d2b26] rounded-xl p-0.5" title="Kağıt Tonu">
+            <button onclick="setPaperMode('dark')" id="tintDarkBtn" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#cc785c] text-white transition">Koyu</button>
+            <button onclick="setPaperMode('sepia')" id="tintSepiaBtn" class="px-2 py-0.5 rounded-lg text-[10px] text-[#9a9489] hover:text-[#fbf9f5] transition">Sepya</button>
+            <button onclick="setPaperMode('white')" id="tintWhiteBtn" class="px-2 py-0.5 rounded-lg text-[10px] text-[#9a9489] hover:text-[#fbf9f5] transition">Beyaz</button>
+          </div>
+
+          <!-- Font Size Selector -->
+          <div class="hidden md:flex items-center bg-[#1f1e1a] border border-[#2d2b26] rounded-xl p-0.5" title="Metin Boyutu">
+            <button onclick="setFontSize('sm')" id="fontSmBtn" class="px-1.5 py-0.5 rounded-lg text-[10px] text-[#9a9489] hover:text-[#fbf9f5] transition">A-</button>
+            <button onclick="setFontSize('md')" id="fontMdBtn" class="px-1.5 py-0.5 rounded-lg text-[10px] font-bold bg-[#cc785c] text-white transition">A</button>
+            <button onclick="setFontSize('lg')" id="fontLgBtn" class="px-1.5 py-0.5 rounded-lg text-[10px] text-[#9a9489] hover:text-[#fbf9f5] transition">A+</button>
+            <button onclick="setFontSize('xl')" id="fontXlBtn" class="px-1.5 py-0.5 rounded-lg text-[10px] text-[#9a9489] hover:text-[#fbf9f5] transition">A++</button>
+          </div>
+
+          <!-- Accelerators: Bionic + Flashcards + Brain Map + Study Browser -->
+          <div class="flex items-center space-x-1 pl-1 border-l border-[#2a2824]">
+            <button onclick="toggleBionicReading()" id="bionicBtn" class="px-2 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] text-xs font-medium flex items-center gap-1 transition" title="Bionic Hızlı Okuma">
+              <span>🔤</span>
+              <span class="hidden lg:inline">Bionic</span>
+            </button>
+            <button onclick="openFlashcardsModal()" class="px-2 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] text-xs font-medium flex items-center gap-1 transition" title="3D Hafıza Kartları">
+              <span>🃏</span>
+              <span class="hidden lg:inline">Kartlar</span>
+            </button>
+            <button onclick="openBrainMapModal()" class="px-2 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] text-xs font-medium flex items-center gap-1 transition" title="Brain Map">
+              <span>🧠</span>
+              <span class="hidden lg:inline">Harita</span>
+            </button>
+            <button onclick="toggleStudyBrowser()" class="px-2 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] text-xs font-medium flex items-center gap-1 transition" title="Araştırma İstasyonu">
+              <span>🌐</span>
+              <span class="hidden lg:inline">Araştır</span>
+            </button>
+          </div>
+
+          <!-- Quick Export Dropdown -->
+          <div class="relative inline-block text-left">
+            <button onclick="toggleExportMenu()" class="p-1 px-2.5 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#fbf9f5] flex items-center gap-1.5 text-xs font-medium transition" title="Dışa Aktar">
+              <span>📤</span>
+              <span class="hidden sm:inline">Dışa Aktar</span>
+            </button>
+            <div id="exportMenuDropdown" class="hidden absolute right-0 mt-1.5 w-52 bg-[#1f1e1a] border border-[#34312b] rounded-2xl shadow-2xl p-1 z-50">
+              <button onclick="postToRust('export', { type: 'save_md' }); toggleExportMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-[#262420] text-[#fbf9f5] flex items-center gap-2 transition">
+                <span>📄</span> <span>Ders Çözümü (.md)</span>
+              </button>
+              <button onclick="postToRust('export', { type: 'save_mistakes_md' }); toggleExportMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-[#262420] text-rose-400 flex items-center gap-2 transition">
+                <span>📕</span> <span>Hata Defteri (.md)</span>
+              </button>
+              <button onclick="postToRust('export', { type: 'backup_json' }); toggleExportMenu();" class="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-[#262420] text-[#d4a373] flex items-center gap-2 transition">
+                <span>💾</span> <span>Tüm Veriler (.json)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kvieta Super Focus Non-Intrusive 68px Light HUD -->
+      <div id="kvietaFocusHUD" class="hidden px-6 py-2.5 bg-[#1b1916]/95 backdrop-blur-md border-b border-[#cc785c]/40 flex items-center justify-between text-xs shrink-0 z-20 kvieta-hud-glow transition-all duration-300">
+        <div class="flex items-center space-x-3 truncate flex-1 mr-4">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+          <div class="truncate">
+            <span class="text-[10px] text-[#cc785c] font-bold uppercase tracking-wider block">Kvieta Süper Odak</span>
+            <span id="focusHudIntentionText" class="font-medium text-[#fbf9f5] truncate block">Hedef: Belirlenmedi</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4 shrink-0">
+          <div class="text-right">
+            <span id="focusHudTimer" class="font-mono font-bold text-sm text-[#fbf9f5] tracking-wider">25:00</span>
+            <div class="w-24 bg-[#262420] h-1.5 rounded-full overflow-hidden mt-1 border border-[#34312b]">
+              <div id="focusHudProgress" class="h-full bg-gradient-to-r from-[#cc785c] to-emerald-400 transition-all duration-1000" style="width: 100%"></div>
+            </div>
+          </div>
+          <button onclick="toggleFocusPause()" id="focusHudPauseBtn" class="px-2.5 py-1 rounded-xl bg-[#262420] hover:bg-[#34312b] border border-[#34312b] text-xs font-semibold text-[#fbf9f5] transition">
+            ⏸️ Duraklat
+          </button>
+          <button onclick="openFocusClosureModal()" class="px-3 py-1 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-sm">
+            ✓ Tamamla
+          </button>
+        </div>
+      </div>
+
+      <!-- Reading Progress Bar -->
+      <div id="readingProgressBarContainer" class="px-6 py-1.5 bg-[#141413]/70 border-b border-[#22211e] flex items-center justify-between text-[11px] text-[#9a9489] shrink-0 transition-all duration-300">
+        <div class="flex-1 bg-[#1f1e1a] h-1.5 rounded-full overflow-hidden mr-3 border border-[#2d2b26]">
+          <div id="courseProgressBar" class="h-full bg-gradient-to-r from-[#cc785c] to-[#e89274] rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <span id="courseProgressText" class="font-mono text-[10px] text-[#d4a373] shrink-0">%0 • Syf 1 / 1</span>
+      </div>
+
+      <!-- Book Viewport: Renders REAL User PDF Pages -->
+      <div id="bookViewport" class="flex-1 flex items-center justify-center p-6 overflow-y-auto custom-scroll relative">
+
+        <div id="spreadContainer" class="flex items-stretch justify-center w-full max-w-6xl min-h-[680px] max-h-[820px] transition-all duration-300">
+          
+          <!-- Left Page (Paper 1) -->
+          <div id="leftSheet" class="paper-sheet paper-mode-dark flex-1 max-w-[560px] rounded-l-2xl p-8 overflow-y-auto custom-scroll flex flex-col relative border border-[#2d2b26]">
+            <!-- Header -->
+            <div class="border-b border-[#2d2b26] pb-3 mb-5">
+              <div class="flex justify-between items-center text-xs font-mono text-[#d4a373]">
+                <span id="leftDocTag">DERS BELGESİ</span>
+                <span id="leftPageTag">PAGE 1</span>
+              </div>
+              <h2 id="leftPageTitle" class="font-serif text-2xl font-bold text-[#fbf9f5] mt-1 paper-text">Sayfa 1</h2>
+            </div>
+
+            <!-- Dynamic Real Page Content -->
+            <div id="leftPageContent" class="space-y-3 flex-1 text-sm leading-relaxed paper-text">
+              <div class="p-4 text-center text-[#9a9489] text-xs">
+                Henüz bir belge açılmadı. Başlangıç ekranından veya 'Belgeler' menüsünden PDF yükleyin.
+              </div>
+            </div>
+
+            <div id="leftPageFooter" class="mt-auto pt-4 border-t border-[#2d2b26] text-right font-mono text-xs text-[#9a9489]">
+              - 1 -
+            </div>
+          </div>
+
+          <!-- Book Spine Crease -->
+          <div id="spineCrease" class="book-spine-crease shrink-0"></div>
+
+          <!-- Right Page (Paper 2) -->
+          <div id="rightSheet" class="paper-sheet paper-mode-dark flex-1 max-w-[560px] rounded-r-2xl p-8 overflow-y-auto custom-scroll flex flex-col relative border border-[#2d2b26]">
+            <!-- Header -->
+            <div class="border-b border-[#2d2b26] pb-3 mb-5">
+              <div class="flex justify-between items-center text-xs font-mono text-[#d4a373]">
+                <span id="rightDocTag">DERS BELGESİ</span>
+                <span id="rightPageTag">PAGE 2</span>
+              </div>
+              <h2 id="rightPageTitle" class="font-serif text-2xl font-bold text-[#fbf9f5] mt-1 paper-text">Sayfa 2</h2>
+            </div>
+
+            <!-- Dynamic Real Page Content -->
+            <div id="rightPageContent" class="space-y-3 flex-1 text-sm leading-relaxed paper-text">
+              <div class="p-4 text-center text-[#9a9489] text-xs">
+                (Tek sayfalı belge veya çift sayfa sonu)
+              </div>
+            </div>
+
+            <div id="rightPageFooter" class="mt-auto pt-4 border-t border-[#2d2b26] text-right font-mono text-xs text-[#9a9489]">
+              - 2 -
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Notion-Style Floating Selection Bubble -->
+      <div id="selectionBubble" onmousedown="event.preventDefault()" class="hidden glass-surface rounded-2xl p-1.5 shadow-2xl flex items-center space-x-1.5 border border-[#cc785c]/40">
+        <button onclick="bubbleAction('solve')" class="px-2.5 py-1 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold flex items-center gap-1 transition shadow-sm">
+          <span>⚡</span> <span>Çöz</span>
+        </button>
+        <button onclick="bubbleAction('hint')" class="px-2.5 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#d4a373] text-xs font-medium flex items-center gap-1 transition">
+          <span>💡</span> <span>İpucu</span>
+        </button>
+        <button onclick="bubbleAction('translate')" class="px-2.5 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] text-white text-xs font-medium flex items-center gap-1 transition">
+          <span>🇹🇷</span> <span>Çevir</span>
+        </button>
+        <button onclick="bubbleAction('search')" class="px-2.5 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] text-emerald-400 text-xs font-medium flex items-center gap-1 transition" title="Akademik Tarayıcıda Ara">
+          <span>🌐</span> <span>Ara</span>
+        </button>
+        <button onclick="bubbleAction('tts')" class="px-2.5 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] text-sky-400 text-xs font-medium flex items-center gap-1 transition" title="Sesli Dinle (TTS)">
+          <span>🔊</span> <span>Dinle</span>
+        </button>
+        <button onclick="bubbleAction('note')" class="px-2.5 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-white text-xs font-medium flex items-center gap-1 transition">
+          <span>📌</span> <span>Not Al</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT DRAWER: CO-WORKER & MISTAKE JOURNAL (Closed by default to give 100% full width to book) -->
+    <aside id="rightDrawer" class="w-80 bg-[#181715] border-l border-[#2a2824] flex flex-col shrink-0 z-30 collapsible-drawer">
+      <!-- Agent Tabs Header -->
+      <div class="p-2 border-b border-[#2a2824] bg-[#1f1e1a] flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-1 bg-[#141413] p-1 rounded-xl">
+          <button onclick="switchRightTab('chat')" id="rightTabChat" class="px-2 py-1 rounded-lg text-xs font-bold bg-[#262420] text-[#fbf9f5] transition">Co-Worker</button>
+          <button onclick="switchRightTab('mistakes')" id="rightTabMistakes" class="px-2 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-rose-400 transition">📕 Hata Defteri</button>
+          <button onclick="switchRightTab('notes')" id="rightTabNotes" class="px-2 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-[#d4a373] transition">📝 Notlarım</button>
+        </div>
+        <button onclick="toggleDrawer('right')" class="text-xs text-[#9a9489] hover:text-white p-1">✕</button>
+      </div>
+
+      <!-- Right Tab 1: Live Chat -->
+      <div id="rightViewChat" class="flex-1 flex flex-col overflow-hidden">
+        <div class="px-3 py-1.5 bg-[#141413] border-b border-[#2a2824] flex items-center justify-between text-[11px]">
+          <span id="geminiStatusBadge" onclick="openSettingsModal()" class="text-emerald-400 flex items-center gap-1 cursor-pointer hover:underline" title="Gemini API Anahtarı Ayarları">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Gemini 2.5 Flash Aktif
+          </span>
+          <span id="groundingBadge" class="text-[#9a9489] font-mono">Zemin Hazır</span>
+        </div>
+
+        <div id="chatMessages" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3">
+          <div class="flex items-start space-x-2">
+            <div class="w-6 h-6 rounded-lg bg-[#cc785c] flex items-center justify-center text-white text-xs shrink-0 font-bold">🤖</div>
+            <div id="agentGreetingText" class="bg-[#1f1e1a] border border-[#2d2b26] rounded-2xl rounded-tl-none p-3 text-xs text-[#fbf9f5] leading-relaxed shadow-sm">
+              Selam! 📖 PDF ders belgeni yüklediğinde buraya zemin olarak alacağım. Takıldığın soruları çözdürebilir, ipucu isteyebilir veya pratik yapabilirsin.
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-3 border-t border-[#2a2824] bg-[#1f1e1a] flex items-center space-x-2">
+          <input id="chatInput" type="text" onkeydown="if(event.key === 'Enter') sendChatMessage()" placeholder="Sorunu yaz veya 'rehber çıkar' de..." class="flex-1 bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] placeholder-[#9a9489] outline-none transition">
+          <button onclick="sendChatMessage()" class="w-8 h-8 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white flex items-center justify-center transition shadow-md shrink-0">
+            <span>➤</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Tab 2: Mistake Journal -->
+      <div id="rightViewMistakes" class="flex-1 flex flex-col overflow-hidden hidden p-3">
+        <div class="flex items-center justify-between mb-3">
+          <span class="font-bold text-xs text-[#fbf9f5]">Yanlış Havuzu</span>
+          <button onclick="triggerQuizFromMistakes()" class="text-[11px] bg-[#cc785c] hover:bg-[#d97757] text-white px-2.5 py-1 rounded-lg font-bold transition">
+            🎯 Telafi Quizi
+          </button>
+        </div>
+
+        <div id="mistakesContainer" class="flex-1 overflow-y-auto custom-scroll space-y-2">
+          <div class="p-4 text-center text-[#9a9489] text-xs">
+            Henüz kayıtlı bir yanlışın yok. Ödevlerini kontrol ettirdiğinde hataların buraya toplanır.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Tab 3: Notes -->
+      <div id="rightViewNotes" class="flex-1 flex flex-col overflow-hidden hidden p-3">
+        <div class="flex items-center justify-between mb-3">
+          <span class="font-bold text-xs text-[#fbf9f5]">Ders Notlarım</span>
+          <button onclick="openQuickNoteModal()" class="text-[11px] bg-[#cc785c] hover:bg-[#d97757] text-white px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1">
+            <span>➕</span> <span>Hızlı Not</span>
+          </button>
+        </div>
+
+        <div id="notesContainer" class="flex-1 overflow-y-auto custom-scroll space-y-2">
+          <div class="p-4 text-center text-[#9a9489] text-xs">
+            Henüz kayıtlı bir notunuz yok. Sayfadaki metni seçip '📌 Not Al' balonuyla not kaydedebilirsiniz.
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 4. SPOTLIGHT MODAL (CTRL+K) -->
+  <!-- ========================================== -->
+  <div id="spotlightModal" class="fixed inset-0 bg-black/60 backdrop-blur-md hidden items-start justify-center z-50 pt-24 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-xl w-full p-4 shadow-2xl relative">
+      <div class="flex items-center space-x-2 border-b border-[#2a2824] pb-3 mb-3">
+        <span class="text-base text-[#d4a373]">🔍</span>
+        <input id="spotlightInput" type="text" placeholder="Komut yaz... (örn: Sayfa, Hata Defteri, Quiz, Zen, Çöz)" class="flex-1 bg-transparent text-sm text-[#fbf9f5] placeholder-[#9a9489] outline-none">
+        <span class="text-[10px] font-mono bg-[#141413] text-[#9a9489] px-2 py-0.5 rounded border border-[#34312b]">ESC</span>
+      </div>
+
+      <div id="spotlightList" class="space-y-1 max-h-64 overflow-y-auto custom-scroll">
+        <button onclick="postToRust('open_pdf_dialog'); closeSpotlight();" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>📂</span> <span>Yeni PDF Belgesi Aç</span></div>
+          <span class="text-[10px] font-mono text-[#cc785c]">Dosya</span>
+        </button>
+
+        <button onclick="runSpotlightCmd('solve_active')" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>⚡</span> <span>Açık Olan Sayfayı Çöz (AI Solver)</span></div>
+          <span class="text-[10px] font-mono text-[#cc785c]">Aksiyon</span>
+        </button>
+
+        <button onclick="runSpotlightCmd('zen_mode')" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>🧘</span> <span>Zen Odak Modunu Aç / Kapat</span></div>
+          <span class="text-[10px] font-mono text-[#9a9489]">Ctrl+D</span>
+        </button>
+
+        <button onclick="runSpotlightCmd('toggle_rain')" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>🌧️</span> <span>Yağmur & Lofi Ambiyansını Aç / Kapat</span></div>
+          <span class="text-[10px] font-mono text-[#d4a373]">Ses</span>
+        </button>
+
+        <button onclick="runSpotlightCmd('settings')" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>⚙️</span> <span>Gemini API & Ayarlar</span></div>
+          <span class="text-[10px] font-mono text-[#9a9489]">Ayar</span>
+        </button>
+
+        <button onclick="runSpotlightCmd('export_md')" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>📄</span> <span>Ders Çözümlerini Markdown Olarak Kaydet</span></div>
+          <span class="text-[10px] font-mono text-emerald-400">Dışa Aktar</span>
+        </button>
+
+        <button onclick="runSpotlightCmd('export_mistakes')" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>📕</span> <span>Hata Defterini Markdown Olarak Kaydet</span></div>
+          <span class="text-[10px] font-mono text-rose-400">Dışa Aktar</span>
+        </button>
+
+        <button onclick="runSpotlightCmd('backup_json')" class="w-full text-left p-2.5 rounded-xl hover:bg-[#262420] flex items-center justify-between text-xs text-[#fbf9f5] transition">
+          <div class="flex items-center gap-2"><span>💾</span> <span>Tüm PrepMate Verilerini Yedekle (JSON)</span></div>
+          <span class="text-[10px] font-mono text-[#d4a373]">Yedek</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.1 SETTINGS MODAL (GEMINI API KEY) -->
+  <!-- ========================================== -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">⚙️</span>
+          <h3 class="font-bold text-sm text-[#fbf9f5]">PrepMate 2.0 Alpha-7 Ayarları</h3>
+        </div>
+        <button onclick="closeSettingsModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Google Gemini API Anahtarı:</label>
+          <div class="relative">
+            <input id="geminiApiKeyInput" type="password" placeholder="AIzaSy..." class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] placeholder-[#9a9489] outline-none font-mono">
+            <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-2.5 top-2 text-[#9a9489] hover:text-white text-xs">👁️</button>
+          </div>
+          <p class="text-[11px] text-[#9a9489] mt-1.5 leading-relaxed">
+            Co-Worker asistanı ve soru çözücü için Google AI Studio ücretsiz API anahtarı kullanabilirsiniz.
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[#cc785c] hover:underline font-medium ml-1">Ücretsiz Al ↗</a>
+          </p>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between">
+          <button type="button" onclick="testApiKeyAction()" class="px-3 py-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#d4a373] hover:text-[#fbf9f5] text-xs font-semibold transition flex items-center gap-1.5">
+            <span>⚡</span> <span>Bağlantıyı Test Et</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="closeSettingsModal()" class="px-3.5 py-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-white text-xs transition">
+              İptal
+            </button>
+            <button type="button" onclick="saveApiKeyAction()" class="px-4 py-1.5 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/30 flex items-center gap-1.5">
+              <span>💾</span> <span>Kaydet</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.2 EDIT COURSE MODAL -->
+  <!-- ========================================== -->
+  <div id="editCourseModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">✏️</span>
+          <h3 class="font-bold text-sm text-[#fbf9f5]">Dersi Düzenle</h3>
+        </div>
+        <button onclick="closeEditCourseModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <input type="hidden" id="editCourseIdx">
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Dersin Adı:</label>
+          <input id="editCourseTitle" type="text" class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Ders İkonu:</label>
+          <div id="editEmojiPickerList" class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="selectEditCourseIcon('🇬🇧', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">🇬🇧</button>
+            <button type="button" onclick="selectEditCourseIcon('📐', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">📐</button>
+            <button type="button" onclick="selectEditCourseIcon('⚡', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">⚡</button>
+            <button type="button" onclick="selectEditCourseIcon('🧬', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">🧬</button>
+            <button type="button" onclick="selectEditCourseIcon('🧪', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">🧪</button>
+            <button type="button" onclick="selectEditCourseIcon('💻', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">💻</button>
+            <button type="button" onclick="selectEditCourseIcon('📚', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">📚</button>
+            <button type="button" onclick="selectEditCourseIcon('🎯', this)" class="edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs">🎯</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Açıklama / Seviye:</label>
+          <input id="editCourseDesc" type="text" class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] outline-none">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeEditCourseModal()" class="px-3.5 py-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-white text-xs transition">
+            İptal
+          </button>
+          <button type="button" onclick="saveEditCourseAction()" class="px-4 py-1.5 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/30 flex items-center gap-1.5">
+            <span>💾</span> <span>Kaydet</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.3 QUICK NOTE MODAL -->
+  <!-- ========================================== -->
+  <div id="quickNoteModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">📝</span>
+          <h3 class="font-bold text-sm text-[#fbf9f5]">Hızlı Not Ekle</h3>
+        </div>
+        <button onclick="closeQuickNoteModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Not İçeriği:</label>
+          <textarea id="quickNoteContent" rows="4" placeholder="Kritik formül, kural veya hatırlatmanı buraya yaz..." class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl p-3 text-xs text-[#fbf9f5] placeholder-[#9a9489] outline-none resize-none leading-relaxed"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeQuickNoteModal()" class="px-3.5 py-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-white text-xs transition">
+            İptal
+          </button>
+          <button type="button" onclick="saveQuickNoteAction()" class="px-4 py-1.5 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/30 flex items-center gap-1.5">
+            <span>📌</span> <span>Notu Kaydet</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.4 KVIETA FOCUS INTENTION MODAL -->
+  <!-- ========================================== -->
+  <div id="focusIntentionModal" class="fixed inset-0 bg-black/75 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">🎯</span>
+          <div>
+            <h3 class="font-bold text-sm text-[#fbf9f5]">Kvieta Süper Odak Seansı</h3>
+            <p class="text-[11px] text-[#9a9489]">Niyet belirle, dikkat dağıtıcıları kapat, derin odaklan</p>
+          </div>
+        </div>
+        <button onclick="closeFocusIntentionModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Bu seansta tam olarak neyi bitireceksin? <span class="text-rose-400">*</span></label>
+          <input id="focusIntentionInput" type="text" placeholder="Örn: Kalkülüs Syf 12-15 integral alıştırmaları" class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2.5 text-xs text-[#fbf9f5] placeholder-[#9a9489] outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-2">Hedef Süre Seçimi:</label>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="selectFocusDuration(15, this)" class="focus-dur-btn flex-1 py-2 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-semibold text-[#9a9489] hover:text-white transition">15 Dakika</button>
+            <button type="button" onclick="selectFocusDuration(25, this)" class="focus-dur-btn flex-1 py-2 rounded-xl bg-[#262420] border border-[#cc785c] text-xs font-bold text-white transition">25 Dakika</button>
+            <button type="button" onclick="selectFocusDuration(45, this)" class="focus-dur-btn flex-1 py-2 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-semibold text-[#9a9489] hover:text-white transition">45 Dakika</button>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#141413] border border-[#2a2824] text-[11px] text-[#9a9489] flex items-start gap-2">
+          <span>🌿</span>
+          <p>Kvieta Felsefesi: Odak bittiğinde seni cezalandırmayız. 5 dk kala ve 1 dk kala nazikçe toparlanma uyarısı alırsın.</p>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeFocusIntentionModal()" class="px-3.5 py-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-white text-xs transition">
+            Vazgeç
+          </button>
+          <button type="button" onclick="startFocusSessionAction()" class="px-5 py-2 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/30 flex items-center gap-1.5">
+            <span>🎯</span> <span>Odağa Başla</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.5 KVIETA GENTLE WARNING PANEL -->
+  <!-- ========================================== -->
+  <div id="gentleWarningToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 max-w-md w-full px-5 py-3.5 bg-[#1b1916]/95 backdrop-blur-md border border-[#cc785c]/50 rounded-2xl shadow-2xl flex items-center justify-between text-xs text-[#fbf9f5] z-50 transition-all duration-500 transform translate-y-24 opacity-0 pointer-events-none">
+    <div class="flex items-center space-x-3">
+      <span class="text-xl" id="gentleWarningIcon">🌿</span>
+      <div>
+        <h4 id="gentleWarningTitle" class="font-bold text-xs text-[#d4a373]">5 Dakika Kaldı</h4>
+        <p id="gentleWarningMsg" class="text-[11px] text-[#9a9489]">Toparlanma vakti. Son soruları ve düşüncelerini toparlayabilirsin.</p>
+      </div>
+    </div>
+    <button onclick="dismissGentleWarning()" class="text-xs text-[#9a9489] hover:text-white p-1">✕</button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.6 KVIETA FOCUS CLOSURE SUMMARY MODAL -->
+  <!-- ========================================== -->
+  <div id="focusClosureModal" class="fixed inset-0 bg-black/75 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-2xl">🎉</span>
+          <div>
+            <h3 class="font-bold text-sm text-[#fbf9f5]">Oturum Tamamlandı!</h3>
+            <p class="text-[11px] text-[#9a9489]">Zihnini tebrik et ve seansını özetle</p>
+          </div>
+        </div>
+        <button onclick="closeFocusClosureModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="p-3.5 rounded-2xl bg-[#141413] border border-[#2a2824]">
+          <span class="text-[10px] text-[#d4a373] uppercase tracking-wider font-bold block mb-1">Başlangıç Niyetin:</span>
+          <p id="closureIntentionText" class="text-xs font-semibold text-[#fbf9f5]">Ders Çalışma</p>
+        </div>
+
+        <div class="flex items-center space-x-2.5 p-3 rounded-2xl bg-[#262420] border border-[#34312b]">
+          <input type="checkbox" id="closureGoalCheck" checked class="w-4 h-4 accent-[#cc785c] cursor-pointer">
+          <label for="closureGoalCheck" class="text-xs font-medium text-[#fbf9f5] cursor-pointer">
+            Belirlediğim niyeti başarıyla tamamladım
+          </label>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Bu seansta kaç sayfa çalıştın / okudun?</label>
+          <input id="closurePagesReadInput" type="number" min="0" value="2" class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] outline-none">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeFocusClosureModal()" class="px-3.5 py-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-white text-xs transition">
+            Kapat
+          </button>
+          <button type="button" onclick="finishFocusSessionAction()" class="px-5 py-2 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/30 flex items-center gap-1.5">
+            <span>💾</span> <span>Seansı Kaydet & Ritime İşle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.7 BRAIN MAP MODAL (SUBJECT MASTERY GRAPH) -->
+  <!-- ========================================== -->
+  <div id="brainMapModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#181715] border border-[#34312b] rounded-3xl max-w-5xl w-full h-[85vh] flex flex-col shadow-2xl relative overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-[#2a2824] bg-[#1f1e1a] flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+          <span class="text-2xl p-2 rounded-2xl bg-[#262420] border border-[#34312b]">🧠</span>
+          <div>
+            <h3 class="font-bold text-base text-[#fbf9f5] flex items-center gap-2">
+              Brain Map — Konu Hakimiyet Haritası
+              <span id="brainMapCourseTag" class="text-xs font-mono text-[#d4a373] bg-[#262420] px-2.5 py-0.5 rounded-full border border-[#34312b]">Ders</span>
+            </h3>
+            <p class="text-xs text-[#9a9489]">Ders konuları arasındaki bağlantılar ve anlık başarı haritası</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <!-- Legend -->
+          <div class="hidden sm:flex items-center space-x-2 text-[10px] font-mono bg-[#141413] px-3 py-1.5 rounded-xl border border-[#2a2824]">
+            <span class="flex items-center gap-1 text-emerald-400"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Güçlü (&gt;%75)</span>
+            <span class="flex items-center gap-1 text-amber-400"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Orta (%50-74)</span>
+            <span class="flex items-center gap-1 text-rose-400"><span class="w-2 h-2 rounded-full bg-rose-400"></span> Zayıf (&lt;%50)</span>
+          </div>
+          <button onclick="closeBrainMapModal()" class="text-[#9a9489] hover:text-white text-base p-1.5 rounded-xl hover:bg-[#262420] transition">✕</button>
+        </div>
+      </div>
+
+      <!-- Main Brain Map Area (SVG Canvas + Side Inspector) -->
+      <div class="flex-1 flex overflow-hidden relative bg-[#11100e]">
+        <!-- SVG Canvas Area -->
+        <div class="flex-1 h-full relative overflow-hidden flex items-center justify-center p-4">
+          <svg id="brainMapSvg" class="w-full h-full select-none" viewBox="0 0 800 500">
+            <!-- Dynamic connecting lines and nodes rendered via JS -->
+          </svg>
+        </div>
+
+        <!-- Node Inspector Details Drawer -->
+        <div id="brainMapNodeDetails" class="w-80 bg-[#181715] border-l border-[#2a2824] p-5 flex flex-col justify-between overflow-y-auto custom-scroll shrink-0">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span id="bmDetailStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border">Seviye</span>
+              <span id="bmDetailScore" class="font-mono font-bold text-xs text-[#d4a373]">%85 Hakimiyet</span>
+            </div>
+            <h4 id="bmDetailTitle" class="font-serif font-bold text-lg text-[#fbf9f5] mb-2">Konu Seçiniz</h4>
+            <p id="bmDetailDesc" class="text-xs text-[#9a9489] leading-relaxed mb-4">Haritadaki konulardan birine tıklayarak hakimiyet analizi ve pekiştirme seçeneklerini görüntüleyebilirsiniz.</p>
+            
+            <div class="p-3.5 rounded-2xl bg-[#141413] border border-[#2a2824] space-y-2 mb-4">
+              <div class="flex justify-between text-xs">
+                <span class="text-[#9a9489]">Hata Defteri Kaydı:</span>
+                <span id="bmDetailMistakes" class="font-mono text-[#fbf9f5]">0 Yanlış</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-[#9a9489]">Son Tekrar:</span>
+                <span class="font-mono text-[#fbf9f5]">Bugün</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-4 border-t border-[#2a2824]">
+            <button id="bmReinforceBtn" onclick="reinforceSelectedTopicAction()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#cc785c] to-[#e89274] hover:brightness-110 text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/30 flex items-center justify-center gap-2">
+              <span>⚡</span> <span>Zayıf Noktayı Pekiştir</span>
+            </button>
+            <p class="text-[10px] text-[#9a9489] text-center">Co-Worker bu konu için özet kural ve sınav sorusu hazırlar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.8 DAILY STUDY PLAN & RHYTHM MODAL -->
+  <!-- ========================================== -->
+  <div id="dailyPlanModal" class="fixed inset-0 bg-black/75 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4 shrink-0">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-2xl">📅</span>
+          <div>
+            <h3 class="font-bold text-sm text-[#fbf9f5]">Günlük Çalışma Planı & Ritim</h3>
+            <p class="text-[11px] text-[#9a9489]">Her gün bir adım daha ileriye</p>
+          </div>
+        </div>
+        <button onclick="closeDailyPlanModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <!-- Streak & Shield Status Card -->
+      <div class="bg-gradient-to-r from-[#262420] via-[#1b1916] to-[#262420] border border-[#cc785c]/30 rounded-2xl p-4 mb-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+          <span class="text-3xl">🔥</span>
+          <div>
+            <span class="text-[10px] text-[#cc785c] font-bold uppercase tracking-wider block">Çalışma Serisi</span>
+            <span id="modalStreakCount" class="font-mono font-bold text-base text-[#fbf9f5]">1 Günlük Seri</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Kvieta Ritim Kalkanı</span>
+          <span id="modalShieldsCount" class="font-mono font-semibold text-xs text-[#d4a373]">🛡️ 2 Kalkan Aktif</span>
+          <p class="text-[9px] text-[#9a9489]">Boş gününde serin korunur</p>
+        </div>
+      </div>
+
+      <!-- Task Cards List -->
+      <div id="dailyTasksListContainer" class="flex-1 overflow-y-auto custom-scroll space-y-2.5 mb-4 pr-1">
+        <!-- Dynamically populated from Rust state -->
+      </div>
+
+      <!-- Add New Custom Task Form -->
+      <div class="pt-3 border-t border-[#2a2824] flex items-center gap-2 shrink-0">
+        <input id="newDailyTaskTitle" type="text" placeholder="Yeni günlük hedef ekle (örn: 10 Soru Çöz)..." class="flex-1 bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] placeholder-[#9a9489] outline-none">
+        <button onclick="addDailyTaskAction()" class="px-3.5 py-2 bg-[#cc785c] hover:bg-[#d97757] rounded-xl text-xs font-bold text-white transition flex items-center gap-1 shrink-0">
+          <span>➕</span> <span>Ekle</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.9 RESEARCH STATION (STUDY BROWSER) DRAWER -->
+  <!-- ========================================== -->
+  <aside id="studyBrowserDrawer" class="fixed top-13 right-0 bottom-0 w-[520px] bg-[#181715] border-l border-[#2a2824] flex flex-col z-40 shadow-2xl transition-all duration-300 transform translate-x-full">
+    <!-- Header -->
+    <div class="p-3 border-b border-[#2a2824] bg-[#1f1e1a] flex items-center justify-between shrink-0">
+      <div class="flex items-center space-x-2">
+        <span class="text-base">🌐</span>
+        <h3 class="font-bold text-xs text-[#fbf9f5]">Araştırma İstasyonu</h3>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="openCurrentUrlExternally()" class="text-[11px] text-[#d4a373] hover:text-[#fbf9f5] flex items-center gap-1 bg-[#262420] px-2 py-0.5 rounded-lg border border-[#34312b]" title="Sistem Varsayılan Tarayıcısında Aç">
+          <span>🪟</span> <span>Dış Tarayıcıda Aç</span>
+        </button>
+        <button onclick="toggleStudyBrowser()" class="text-xs text-[#9a9489] hover:text-white p-1">✕</button>
+      </div>
+    </div>
+
+    <!-- Quick Academic Links Pills -->
+    <div class="px-3 py-2 bg-[#141413] border-b border-[#2a2824] flex items-center gap-1.5 overflow-x-auto custom-scroll shrink-0">
+      <button onclick="loadBrowserUrl('https://tureng.com/tr/turkce-ingilizce')" class="px-2.5 py-1 rounded-lg bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[11px] text-[#fbf9f5] font-medium shrink-0">🇹🇷 Tureng</button>
+      <button onclick="loadBrowserUrl('https://dictionary.cambridge.org/dictionary/english')" class="px-2.5 py-1 rounded-lg bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[11px] text-[#fbf9f5] font-medium shrink-0">🇬🇧 Cambridge</button>
+      <button onclick="loadBrowserUrl('https://www.desmos.com/calculator')" class="px-2.5 py-1 rounded-lg bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[11px] text-[#fbf9f5] font-medium shrink-0">📈 Desmos</button>
+      <button onclick="loadBrowserUrl('https://tr.wikipedia.org')" class="px-2.5 py-1 rounded-lg bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[11px] text-[#fbf9f5] font-medium shrink-0">📚 Wikipedia</button>
+      <button onclick="loadBrowserUrl('https://duckduckgo.com')" class="px-2.5 py-1 rounded-lg bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[11px] text-[#fbf9f5] font-medium shrink-0">🔍 DuckDuckGo</button>
+    </div>
+
+    <!-- URL / Search Bar -->
+    <div class="p-2.5 bg-[#181715] border-b border-[#2a2824] flex items-center gap-2 shrink-0">
+      <input id="browserUrlInput" type="text" onkeydown="if(event.key === 'Enter') navigateBrowserAction()" placeholder="Aramak için terim veya web adresi yazın..." class="flex-1 bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-1.5 text-xs text-[#fbf9f5] placeholder-[#9a9489] outline-none">
+      <button onclick="navigateBrowserAction()" class="px-3 py-1.5 bg-[#cc785c] hover:bg-[#d97757] rounded-xl text-xs font-bold text-white transition">Git</button>
+    </div>
+
+    <!-- Web View Frame Container -->
+    <div class="flex-1 relative bg-white">
+      <iframe id="studyBrowserFrame" src="https://duckduckgo.com" class="w-full h-full border-none" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+    </div>
+  </aside>
+
+  <!-- ========================================== -->
+  <!-- 4.10 3D FLASHCARDS MODAL -->
+  <!-- ========================================== -->
+  <div id="flashcardModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-lg w-full p-6 shadow-2xl relative flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-2xl">🃏</span>
+          <div>
+            <h3 class="font-bold text-sm text-[#fbf9f5]">3D Hafıza Kartları (Flashcards)</h3>
+            <span id="flashcardCounter" class="text-[11px] text-[#d4a373] font-mono">Kart 1 / 5</span>
+          </div>
+        </div>
+        <button onclick="closeFlashcardsModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <!-- 3D Flipping Card Container -->
+      <div class="flashcard-perspective w-full h-64 mb-4 select-none" onclick="flipFlashcard()">
+        <div id="flashcardInner" class="flashcard-inner">
+          <!-- Front Side -->
+          <div class="flashcard-front bg-gradient-to-tr from-[#262420] to-[#1c1b18] border border-[#3d3a33] p-6 flex flex-col justify-between shadow-xl">
+            <span class="text-[10px] text-[#cc785c] uppercase font-bold tracking-wider">❓ Soru / Kavram</span>
+            <p id="fcQuestionText" class="font-serif text-lg text-[#fbf9f5] leading-relaxed text-center my-auto">Kart yükleniyor...</p>
+            <span class="text-[10px] text-[#9a9489] text-center">Cevabı görmek için karta tıkla (Çevir)</span>
+          </div>
+          <!-- Back Side -->
+          <div class="flashcard-back bg-gradient-to-tr from-[#1b261e] to-[#181f19] border border-emerald-500/40 p-6 flex flex-col justify-between shadow-xl">
+            <span class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">💡 Doğru Yanıt / Çözüm</span>
+            <p id="fcAnswerText" class="text-sm text-[#fbf9f5] leading-relaxed text-center my-auto">Yanıt...</p>
+            <span class="text-[10px] text-emerald-400/80 text-center">Soruya dönmek için karta tıkla</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls: Prev / Next / Generate with Co-Worker -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="prevFlashcard()" class="px-4 py-2 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-xs font-semibold text-[#fbf9f5] transition flex items-center gap-1">
+          ◀ Önceki
+        </button>
+        <button onclick="generateFlashcardsWithAI()" class="px-3.5 py-2 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+          <span>✨</span> <span>Sayfadan Kart Üret</span>
+        </button>
+        <button onclick="nextFlashcard()" class="px-4 py-2 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-xs font-semibold text-[#fbf9f5] transition flex items-center gap-1">
+          Sonraki ▶
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4.11 EXAM TARGET MODAL -->
+  <!-- ========================================== -->
+  <div id="examTargetModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1f1e1a] border border-[#34312b] rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-[#2a2824] pb-3 mb-4">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-xl">🎯</span>
+          <h3 class="font-bold text-sm text-[#fbf9f5]">Sınav & Hedef Ayarla</h3>
+        </div>
+        <button onclick="closeExamTargetModal()" class="text-[#9a9489] hover:text-white text-xs p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Sınav Adı:</label>
+          <input id="examTitleInput" type="text" placeholder="Örn: B2 Hazırlık Final Sınavı" class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Sınav Tarihi:</label>
+          <input id="examDateInput" type="date" class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-[#d4a373] mb-1.5">Hedef Toplam Çalışma Sayfası:</label>
+          <input id="examPagesTargetInput" type="number" min="1" value="50" class="w-full bg-[#141413] border border-[#34312b] focus:border-[#cc785c] rounded-xl px-3 py-2 text-xs text-[#fbf9f5] outline-none">
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeExamTargetModal()" class="px-3.5 py-1.5 rounded-xl bg-[#262420] hover:bg-[#302d28] text-[#9a9489] hover:text-white text-xs transition">
+            İptal
+          </button>
+          <button type="button" onclick="saveExamTargetAction()" class="px-4 py-1.5 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/30 flex items-center gap-1.5">
+            <span>💾</span> <span>Kaydet</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 px-4 py-2.5 bg-[#262420] border border-[#cc785c] rounded-2xl text-xs text-[#fbf9f5] shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+    <span id="toastIcon">✨</span>
+    <span id="toastMsg">İşlem tamamlandı!</span>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. JAVASCRIPT APP CONTROLLER (ZERO FAKE DATA) -->
+  <!-- ========================================== -->
+  <script>
+    // State Store
+    let appState = {
+      projects: [],
+      active_project_idx: 0
+    };
+    let currentProject = null;
+    let currentPage = 1;
+
+    // Send IPC Message to Rust
+    function postToRust(action, payload = {}) {
+      if (window.ipc) {
+        window.ipc.postMessage(JSON.stringify({ action, ...payload }));
+      } else {
+        console.log("[IPC Dev]", action, payload);
+      }
+    }
+
+    // Initial state request on launch
+    window.addEventListener('DOMContentLoaded', () => {
+      postToRust('get_state');
+    });
+
+    // Course Icon State
+    let selectedCourseIcon = '🇬🇧';
+    function selectCourseIcon(icon, btn) {
+      selectedCourseIcon = icon;
+      document.querySelectorAll('.icon-pill').forEach(el => {
+        el.className = "icon-pill px-3 py-1.5 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] flex items-center gap-1.5 transition";
+      });
+      btn.className = "icon-pill px-3 py-1.5 rounded-xl bg-[#262420] border border-[#cc785c] text-xs font-bold text-[#fbf9f5] flex items-center gap-1.5 transition";
+    }
+
+    // Create New Course Action
+    function createCourseAction() {
+      const titleInput = document.getElementById('newCourseTitle');
+      const descInput = document.getElementById('newCourseDesc');
+      const title = titleInput.value.trim();
+      if (!title) {
+        titleInput.focus();
+        titleInput.classList.add('border-rose-500');
+        showToast("⚠️ Lütfen bir ders adı yazın!", "✏️");
+        setTimeout(() => titleInput.classList.remove('border-rose-500'), 2000);
+        return;
+      }
+      const desc = descInput.value.trim();
+      postToRust('create_course', {
+        title,
+        icon: selectedCourseIcon,
+        description: desc
+      });
+      titleInput.value = '';
+      descInput.value = '';
+    }
+
+    // Add Document (PDF) to specific course
+    function addDocToCourse(idx) {
+      postToRust('add_doc_to_course', { project_idx: idx });
+    }
+
+    // Enter Course Studio (Working Mode)
+    function enterCourseStudio(idx) {
+      if (appState.projects && appState.projects[idx]) {
+        const p = appState.projects[idx];
+        if (!p.sources || p.sources.length === 0 || !p.sources[0]?.pages_text?.length) {
+          showToast("⚠️ Bu derste henüz belge yok. Lütfen önce 'PDF Ekle' butonuna tıklayın.", "📂");
+          return;
+        }
+        loadProjectIntoStudio(p);
+        switchView('studio');
+        postToRust('switch_project', { page: idx });
+      }
+    }
+
+    // Called from Rust when State is updated
+    window.onStateUpdate = function(state) {
+      appState = state;
+      renderSavedProjectsList();
+      const countBadge = document.getElementById('courseCountBadge');
+      if (countBadge) {
+        countBadge.innerText = `${(appState.projects || []).length} Ders`;
+      }
+
+      // Update Daily Plan & Streak Header Pill
+      const dailyTasks = appState.daily_tasks || [];
+      const completedTasks = dailyTasks.filter(t => t.is_done).length;
+      const totalTasks = dailyTasks.length;
+      const streak = appState.streak_days || 1;
+      const dailyPill = document.getElementById('headerDailyPill');
+      if (dailyPill) {
+        dailyPill.innerText = `📅 ${completedTasks}/${totalTasks} • 🔥 ${streak} Gün`;
+      }
+
+      // Update Exam Target HUD Widget on Welcome view
+      if (appState.exam_target) {
+        const et = appState.exam_target;
+        const etTitle = document.getElementById('examTitleDisplay');
+        const etBadge = document.getElementById('examDaysBadge');
+        const etDisplay = document.getElementById('examTargetDisplay');
+        if (etTitle) etTitle.innerText = et.title || "Final Sınavı";
+        if (etDisplay) etDisplay.innerText = `Hedef: Toplam ${et.target_pages || 50} Sayfa • Günlük Ritim Koruması Aktif (${appState.rhythm_shields || 2} Kalkan)`;
+        
+        if (et.date_str && etBadge) {
+          const targetDate = new Date(et.date_str);
+          const now = new Date();
+          const diffTime = targetDate - now;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          if (!isNaN(diffDays)) {
+            etBadge.innerText = diffDays > 0 ? `${diffDays} Gün Kaldı` : (diffDays === 0 ? "Bugün Sınav Günü! 🎯" : "Sınav Tamamlandı");
+          }
+        }
+      }
+
+      // Update Gemini status badge in Co-Worker
+      const geminiBadge = document.getElementById('geminiStatusBadge');
+      if (geminiBadge) {
+        if (appState.gemini_api_key && appState.gemini_api_key.trim()) {
+          geminiBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Gemini 2.5 Aktif`;
+          geminiBadge.className = "text-emerald-400 flex items-center gap-1 cursor-pointer hover:underline";
+        } else {
+          geminiBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> API Anahtarı Gir`;
+          geminiBadge.className = "text-amber-400 flex items-center gap-1 cursor-pointer hover:underline";
+        }
+      }
+
+      if (appState.projects && appState.projects.length > 0) {
+        const idx = appState.active_project_idx || 0;
+        if (appState.projects[idx]) {
+          if (!currentProject || currentProject.id === appState.projects[idx].id) {
+            currentProject = appState.projects[idx];
+          }
+        }
+      } else {
+        currentProject = null;
+        switchView('welcome');
+      }
+
+      // Update Studio nav button dimming based on active documents
+      const navStudio = document.getElementById('navStudioBtn');
+      const hasLoadedDocs = currentProject && currentProject.sources && currentProject.sources.length > 0 && currentProject.sources[0]?.pages_text?.length > 0;
+      if (navStudio) {
+        if (hasLoadedDocs) {
+          navStudio.classList.remove('opacity-40');
+          navStudio.title = "Çalışma Masasına Geç";
+        } else {
+          navStudio.classList.add('opacity-40');
+          navStudio.title = "Önce bir ders belgesi (PDF) yükleyin";
+        }
+      }
+
+      if (currentProject) {
+        renderMistakesList();
+        renderNotesList();
+      }
+
+      // Re-render open modals if visible
+      const dailyModal = document.getElementById('dailyPlanModal');
+      if (dailyModal && !dailyModal.classList.contains('hidden')) {
+        renderDailyTasks();
+      }
+      const brainModal = document.getElementById('brainMapModal');
+      if (brainModal && !brainModal.classList.contains('hidden')) {
+        renderBrainMap();
+      }
+    };
+
+    // Called from Rust when a PDF is selected and extracted
+    window.onProjectLoaded = function(proj) {
+      loadProjectIntoStudio(proj);
+      switchView('studio');
+      showToast(`'${proj.title}' dersi çalışma masasında açıldı!`);
+    };
+
+    function renderSavedProjectsList() {
+      const container = document.getElementById('savedProjectsList');
+      if (!appState.projects || appState.projects.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 rounded-3xl bg-[#1f1e1a] border border-[#2d2b26] text-center text-xs text-[#9a9489] space-y-2">
+            <div class="text-3xl">📚</div>
+            <p class="font-semibold text-sm text-[#fbf9f5]">Henüz kayıtlı bir dersin yok</p>
+            <p class="max-w-md mx-auto">Yukarıdaki formdan dersinin adını yazıp "Dersi Oluştur ve Kaydet" butonuna basarak ilk dersini ekleyebilirsin.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = appState.projects.map((p, idx) => {
+        const hasDocs = p.sources && p.sources.length > 0;
+        return `
+          <div class="p-5 rounded-3xl bg-[#1f1e1a] border border-[#2d2b26] hover:border-[#cc785c]/60 transition-all duration-200 shadow-md">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3.5">
+                <span class="text-3xl p-2 rounded-2xl bg-[#262420] border border-[#34312b] shadow-inner">${escapeHtml(p.icon || '📚')}</span>
+                <div>
+                  <h4 class="font-bold text-sm text-[#fbf9f5] flex items-center gap-2">
+                    ${escapeHtml(p.title)}
+                    ${hasDocs 
+                      ? `<span class="text-[10px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-full font-mono">${p.sources.length} Belge</span>` 
+                      : `<span class="text-[10px] bg-amber-500/15 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-full font-mono">Belge Bekliyor</span>`}
+                  </h4>
+                  <p class="text-xs text-[#9a9489] mt-0.5">${escapeHtml(p.description || 'Ders Çalışma Alanı')}</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-1">
+                <button onclick="openEditCourseModal(${idx})" class="text-[#9a9489] hover:text-[#d4a373] p-1.5 rounded-xl hover:bg-[#262420] transition text-xs flex items-center gap-1" title="Dersi Düzenle">
+                  <span>✏️</span> <span>Düzenle</span>
+                </button>
+                <button onclick="deleteSavedProject(${idx})" class="text-[#9a9489] hover:text-rose-400 p-1.5 rounded-xl hover:bg-[#262420] transition text-xs flex items-center gap-1" title="Dersi Sil">
+                  <span>🗑️</span> <span>Sil</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Documents inside this course -->
+            <div class="mt-4 pt-3 border-t border-[#2a2824]">
+              ${hasDocs ? `
+                <div class="space-y-2 mb-3">
+                  ${p.sources.map((s) => `
+                    <div class="p-2.5 rounded-xl bg-[#141413] border border-[#2a2824] flex items-center justify-between text-xs">
+                      <div class="flex items-center space-x-2 truncate">
+                        <span class="text-[#cc785c]">📄</span>
+                        <span class="font-medium text-[#fbf9f5] truncate">${escapeHtml(s.name)}</span>
+                        <span class="text-[11px] text-[#9a9489] font-mono">(${s.pages_text?.length || 1} Syf)</span>
+                      </div>
+                      <span class="text-[10px] text-emerald-400 font-mono bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-900">Aktif</span>
+                    </div>
+                  `).join('')}
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="enterCourseStudio(${idx})" class="flex-1 py-2 px-4 rounded-xl bg-[#cc785c] hover:bg-[#d97757] text-white text-xs font-bold transition shadow-md shadow-[#cc785c]/25 flex items-center justify-center gap-2">
+                    <span>📖</span> <span>Derse Gir (Çalışma Masası) →</span>
+                  </button>
+                  <button onclick="addDocToCourse(${idx})" class="py-2 px-3 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-xs font-medium text-[#d4a373] hover:text-white transition flex items-center gap-1.5">
+                    <span>➕</span> <span>Yeni Belge Ekle</span>
+                  </button>
+                </div>
+              ` : `
+                <div class="p-4 rounded-2xl border-2 border-dashed border-[#34312b] hover:border-[#cc785c] bg-[#141413]/40 text-center cursor-pointer transition glow-card" onclick="addDocToCourse(${idx})">
+                  <div class="text-2xl mb-1">📂</div>
+                  <p class="text-xs font-bold text-[#fbf9f5]">Bu Derse Ders Kitabı veya Soru Bankası (PDF) Ekle</p>
+                  <p class="text-[11px] text-[#9a9489] mt-0.5">Ders belgenizi seçin; otomatik olarak yapay zeka destekli Çalışma Masasına aktarılacaktır.</p>
+                  <button type="button" class="mt-2.5 px-4 py-1.5 bg-[#cc785c] hover:bg-[#d97757] rounded-xl text-xs font-bold text-white transition shadow-sm inline-flex items-center gap-1.5">
+                    <span>📁</span> <span>PDF Belgesi Seç</span>
+                  </button>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectSavedProject(idx) {
+      enterCourseStudio(idx);
+    }
+
+    function deleteSavedProject(idx) {
+      if (confirm("Bu dersi ve içindeki belgeleri silmek istediğinize emin misiniz?")) {
+        postToRust('delete_project', { page: idx });
+        showToast("Ders projesi silindi.");
+      }
+    }
+
+    // Load Real Project into Studio Viewport
+    function loadProjectIntoStudio(proj) {
+      currentProject = proj;
+      currentPage = proj.current_page || 1;
+
+      // Update Header & Badge
+      const titleEl = document.getElementById('activeDocTitle');
+      if (proj.sources && proj.sources.length > 0) {
+        const activeSrc = proj.sources[proj.active_source_idx || 0];
+        titleEl.innerText = `${proj.icon || '📚'} ${proj.title} • ${activeSrc ? activeSrc.name : ''}`;
+        titleEl.classList.remove('hidden');
+        document.getElementById('activeSourceBadge').innerText = activeSrc ? activeSrc.name : proj.title;
+      } else {
+        titleEl.innerText = `${proj.icon || '📚'} ${proj.title}`;
+        titleEl.classList.remove('hidden');
+        document.getElementById('activeSourceBadge').innerText = proj.title;
+      }
+
+      document.getElementById('groundingBadge').innerText = `Zemin: ${proj.title}`;
+      document.getElementById('agentGreetingText').innerHTML = `
+        Selam! 📖 <span class="text-[#d4a373] font-semibold">${escapeHtml(proj.title)}</span> belgeni hafızama aldım. Sayfadaki soruları çözdürebilir veya ipucu alabilirsin.
+      `;
+
+      // Populate sources list in leftDrawer with click-to-switch & delete actions
+      const sourcesContainer = document.getElementById('sourcesContainer');
+      if (proj.sources && proj.sources.length > 0) {
+        sourcesContainer.innerHTML = proj.sources.map((s, idx) => {
+          const isActive = idx === (proj.active_source_idx || 0);
+          return `
+            <div onclick="switchActiveSource(${idx})" class="p-2.5 rounded-xl cursor-pointer transition flex items-center justify-between ${isActive ? 'bg-[#262420] border border-[#cc785c] text-white shadow-sm' : 'bg-[#141413] border border-[#2d2b26] text-[#9a9489] hover:text-[#fbf9f5] hover:bg-[#1a1916]'}">
+              <div class="flex items-center space-x-2 truncate flex-1 pr-2">
+                <span class="${isActive ? 'text-[#cc785c]' : 'text-[#9a9489]'}">📄</span>
+                <span class="text-xs font-medium truncate">${escapeHtml(s.name)}</span>
+              </div>
+              <div class="flex items-center space-x-1 shrink-0">
+                <span class="text-[10px] font-mono text-[#9a9489]">${s.pages_text?.length || 1} syf</span>
+                <button onclick="deleteSourceAction(event, ${idx})" class="p-1 text-[11px] text-[#9a9489] hover:text-rose-400" title="Belgeyi Kaldır">✕</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        sourcesContainer.innerHTML = `<div class="p-2 text-xs text-[#9a9489]">Henüz belge eklenmedi.</div>`;
+      }
+
+      // Populate TOC Chapters
+      const select = document.getElementById('chapterSelect');
+      if (proj.chapters && proj.chapters.length > 0) {
+        select.innerHTML = proj.chapters.map(c => `
+          <option value="${c.page}">${escapeHtml(c.title)}</option>
+        `).join('');
+      } else {
+        select.innerHTML = `<option value="1">Sayfa 1</option>`;
+      }
+
+      renderMistakesList();
+      renderNotesList();
+      renderCurrentSpread();
+    }
+
+    function switchActiveSource(srcIdx) {
+      postToRust('switch_source', { page: srcIdx });
+    }
+
+    function deleteSourceAction(event, srcIdx) {
+      event.stopPropagation();
+      postToRust('delete_source', { page: srcIdx });
+    }
+
+    // Render Real Pages
+    function renderCurrentSpread() {
+      if (!currentProject || !currentProject.sources || currentProject.sources.length === 0) {
+        document.getElementById('leftPageContent').innerHTML = `
+          <div class="p-8 text-center text-[#9a9489] text-xs">
+            Henüz bir belge eklenmedi. Başlangıç ekranından veya 'Belgeler' menüsünden PDF yükleyin.
+          </div>
+        `;
+        document.getElementById('rightPageContent').innerHTML = `
+          <div class="p-8 text-center text-[#9a9489] text-xs">
+            (Belge yok)
+          </div>
+        `;
+        document.getElementById('pageSpreadIndicator').innerText = `Sayfa 0 / 0`;
+        const pBar = document.getElementById('courseProgressBar');
+        if (pBar) pBar.style.width = `0%`;
+        const pText = document.getElementById('courseProgressText');
+        if (pText) pText.innerText = `%0 • Syf 0 / 0`;
+        return;
+      }
+      const src = currentProject.sources[currentProject.active_source_idx || 0];
+      const pages = src?.pages_text || [];
+      const totalPages = pages.length || 1;
+
+      // Indicator
+      const nextP = Math.min(currentPage + 1, totalPages);
+      if (spreadMode === 'spread') {
+        document.getElementById('pageSpreadIndicator').innerText = `Sayfa ${currentPage} — ${nextP} / ${totalPages}`;
+      } else {
+        document.getElementById('pageSpreadIndicator').innerText = `Sayfa ${currentPage} / ${totalPages}`;
+      }
+
+      // Update Reading Progress Bar
+      const pct = Math.min(100, Math.round((currentPage / totalPages) * 100));
+      const pBar = document.getElementById('courseProgressBar');
+      const pText = document.getElementById('courseProgressText');
+      if (pBar) pBar.style.width = `${pct}%`;
+      if (pText) pText.innerText = `%${pct} Tamamlandı • Syf ${currentPage} / ${totalPages}`;
+
+      // Reset scroll position on page flip so user starts at the top
+      const leftSheet = document.getElementById('leftSheet');
+      const rightSheet = document.getElementById('rightSheet');
+      if (leftSheet) leftSheet.scrollTop = 0;
+      if (rightSheet) rightSheet.scrollTop = 0;
+
+      // Render Left Page
+      const leftIdx = currentPage - 1;
+      const leftText = pages[leftIdx] || "Sayfa içeriği bulunamadı.";
+      renderPageHtml('left', leftText, currentPage, currentProject.title);
+
+      // Render Right Page
+      const rightIdx = currentPage;
+      const rightText = (spreadMode === 'spread' && rightIdx < totalPages) ? pages[rightIdx] : "";
+      renderPageHtml('right', rightText, nextP, currentProject.title);
+
+      // Sync TOC select dropdown to current page
+      const select = document.getElementById('chapterSelect');
+      if (select && select.options.length > 0) {
+        let matchedVal = select.options[0].value;
+        for (let opt of select.options) {
+          const optPage = parseInt(opt.value);
+          if (optPage <= currentPage) {
+            matchedVal = opt.value;
+          }
+        }
+        select.value = matchedVal;
+      }
+    }
+
+    // Safe Page Block Cache (Prevents single quote & newline syntax errors in onclick!)
+    window._pageBlocks = { left: [], right: [] };
+
+    function onBlockClick(side, idx) {
+      const blocks = window._pageBlocks[side] || [];
+      const text = blocks[idx] || "";
+      if (text) {
+        focusQuestion(idx + 1, text);
+      }
+    }
+
+    let isBionicActive = false;
+    function toggleBionicReading() {
+      isBionicActive = !isBionicActive;
+      const btn = document.getElementById('bionicBtn');
+      if (btn) {
+        if (isBionicActive) {
+          btn.className = "px-2 py-1 rounded-xl bg-[#cc785c] text-white text-xs font-bold flex items-center gap-1 transition shadow-sm";
+          showToast("Bionic Hızlı Okuma Aktif! 🔤");
+        } else {
+          btn.className = "px-2 py-1 rounded-xl bg-[#262420] hover:bg-[#302d28] border border-[#34312b] text-[#9a9489] hover:text-[#fbf9f5] text-xs font-medium flex items-center gap-1 transition";
+          showToast("Bionic Okuma Kapatıldı");
+        }
+      }
+      renderCurrentSpread();
+    }
+
+    function applyBionicReading(rawText) {
+      if (!isBionicActive) return escapeHtml(rawText);
+      return rawText.split(/(\s+)/).map(token => {
+        if (/^\s+$/.test(token)) return escapeHtml(token);
+        if (token.length <= 2) {
+          return `<span class="bionic-word"><b>${escapeHtml(token)}</b></span>`;
+        }
+        const half = Math.ceil(token.length * 0.45);
+        const first = escapeHtml(token.slice(0, half));
+        const second = escapeHtml(token.slice(half));
+        return `<span class="bionic-word"><b>${first}</b>${second}</span>`;
+      }).join('');
+    }
+
+    function renderPageHtml(side, text, pageNum, docTitle) {
+      const contentEl = document.getElementById(side + 'PageContent');
+      const tagEl = document.getElementById(side + 'DocTag');
+      const pageTagEl = document.getElementById(side + 'PageTag');
+      const titleEl = document.getElementById(side + 'PageTitle');
+      const footerEl = document.getElementById(side + 'PageFooter');
+
+      tagEl.innerText = (docTitle || 'Ders Belgesi').toUpperCase();
+      pageTagEl.innerText = `PAGE ${pageNum}`;
+      titleEl.innerText = `Sayfa ${pageNum}`;
+      footerEl.innerText = `- ${pageNum} -`;
+
+      if (!text || text.trim() === '') {
+        window._pageBlocks[side] = [];
+        contentEl.innerHTML = `
+          <div class="p-8 text-center text-[#9a9489] text-xs">
+            (Bu sayfa boş veya taranmış görsel içeriyor)
+          </div>
+        `;
+        return;
+      }
+
+      // Split real paragraphs / lines into readable hoverable question blocks
+      const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p !== '');
+      if (paragraphs.length > 1) {
+        window._pageBlocks[side] = paragraphs;
+        contentEl.innerHTML = paragraphs.map((para, i) => `
+          <div class="question-block" onclick="onBlockClick('${side}', ${i})">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs font-bold text-[#d4a373]">Paragraf / Soru ${i+1}</span>
+              <span class="q-badge text-[10px] bg-[#cc785c] text-white px-2 py-0.5 rounded-full font-bold">⚡ Tıkla & Çöz</span>
+            </div>
+            <p class="text-sm leading-relaxed paper-text whitespace-pre-line">${applyBionicReading(para)}</p>
+          </div>
+        `).join('');
+      } else {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
+        window._pageBlocks[side] = lines;
+        contentEl.innerHTML = lines.map((line, i) => `
+          <div class="question-block" onclick="onBlockClick('${side}', ${i})">
+            <p class="text-sm leading-relaxed paper-text">${applyBionicReading(line)}</p>
+          </div>
+        `).join('');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function flipNext() {
+      if (!currentProject || !currentProject.sources) return;
+      const src = currentProject.sources[currentProject.active_source_idx || 0];
+      const total = src?.pages_text?.length || 1;
+      const step = spreadMode === 'spread' ? 2 : 1;
+      if (currentPage + step <= total) {
+        currentPage += step;
+        postToRust('jump_page', { page: currentPage });
+        renderCurrentSpread();
+      } else {
+        showToast("Kitabın son sayfasına ulaştınız.");
+      }
+    }
+
+    function flipPrev() {
+      if (!currentProject || !currentProject.sources) return;
+      const step = spreadMode === 'spread' ? 2 : 1;
+      if (currentPage - step >= 1) {
+        currentPage -= step;
+        postToRust('jump_page', { page: currentPage });
+        renderCurrentSpread();
+      } else if (currentPage > 1) {
+        currentPage = 1;
+        postToRust('jump_page', { page: 1 });
+        renderCurrentSpread();
+      }
+    }
+
+    function jumpChapter(val) {
+      currentPage = parseInt(val) || 1;
+      postToRust('jump_page', { page: currentPage });
+      renderCurrentSpread();
+    }
+
+    // View Switching with Navigation Guard (Prevents entering studio if empty!)
+    function switchView(view) {
+      const welcome = document.getElementById('welcomeView');
+      const studio = document.getElementById('studioView');
+      const navHome = document.getElementById('navHomeBtn');
+      const navStudio = document.getElementById('navStudioBtn');
+
+      if (view === 'studio') {
+        if (!currentProject || !currentProject.sources || currentProject.sources.length === 0 || !currentProject.sources[0]?.pages_text?.length) {
+          showToast("⚠️ Çalışma moduna geçmek için önce bir ders oluşturup ders belgesi (PDF) eklemelisiniz!", "📚");
+          return;
+        }
+        welcome.classList.add('hidden');
+        studio.classList.remove('hidden');
+        navStudio.className = "px-3 py-1 rounded-lg text-xs font-bold bg-[#262420] text-[#fbf9f5] transition flex items-center gap-1.5 shadow-sm";
+        navHome.className = "px-3 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] transition flex items-center gap-1.5";
+      } else {
+        if (zenMode) toggleZenMode(); // exit zen mode if navigating back to home
+        welcome.classList.remove('hidden');
+        studio.classList.add('hidden');
+        navHome.className = "px-3 py-1 rounded-lg text-xs font-bold bg-[#262420] text-[#fbf9f5] transition flex items-center gap-1.5 shadow-sm";
+        navStudio.className = "px-3 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-[#fbf9f5] transition flex items-center gap-1.5";
+      }
+    }
+
+    // DRAWER COLLAPSE (COLLAPSES WIDTH TO ZERO GENUINELY!)
+    let leftDrawerOpen = false;
+    let rightDrawerOpen = false;
+
+    // Both start closed by default so book gets 100% full width!
+    document.getElementById('leftDrawer').classList.add('w-0', 'p-0', 'opacity-0', 'pointer-events-none', 'border-0');
+    document.getElementById('leftDrawer').classList.remove('w-72');
+    document.getElementById('rightDrawer').classList.add('w-0', 'p-0', 'opacity-0', 'pointer-events-none', 'border-0');
+    document.getElementById('rightDrawer').classList.remove('w-80');
+
+    function toggleDrawer(side) {
+      if (side === 'left') {
+        leftDrawerOpen = !leftDrawerOpen;
+        const d = document.getElementById('leftDrawer');
+        const lbl = document.getElementById('leftDrawerBtnLabel');
+        if (leftDrawerOpen) {
+          d.classList.remove('w-0', 'p-0', 'opacity-0', 'pointer-events-none', 'border-0');
+          d.classList.add('w-72');
+          lbl.innerText = "Gizle";
+        } else {
+          d.classList.add('w-0', 'p-0', 'opacity-0', 'pointer-events-none', 'border-0');
+          d.classList.remove('w-72');
+          lbl.innerText = "Belgeler";
+        }
+      } else if (side === 'right') {
+        rightDrawerOpen = !rightDrawerOpen;
+        const d = document.getElementById('rightDrawer');
+        if (rightDrawerOpen) {
+          d.classList.remove('w-0', 'p-0', 'opacity-0', 'pointer-events-none', 'border-0');
+          d.classList.add('w-80');
+        } else {
+          d.classList.add('w-0', 'p-0', 'opacity-0', 'pointer-events-none', 'border-0');
+          d.classList.remove('w-80');
+        }
+      }
+    }
+
+    // Spread Mode Toggle
+    let spreadMode = 'spread';
+    function setSpreadMode(mode) {
+      spreadMode = mode;
+      const rightSheet = document.getElementById('rightSheet');
+      const spine = document.getElementById('spineCrease');
+      const leftSheet = document.getElementById('leftSheet');
+      const btnSpread = document.getElementById('btnSpread');
+      const btnSingle = document.getElementById('btnSingle');
+
+      if (mode === 'single') {
+        rightSheet.classList.add('hidden');
+        spine.classList.add('hidden');
+        leftSheet.classList.remove('rounded-l-2xl', 'max-w-[560px]');
+        leftSheet.classList.add('rounded-2xl', 'max-w-[760px]');
+        btnSingle.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-[#cc785c] text-white transition";
+        btnSpread.className = "px-2.5 py-1 rounded-lg text-xs text-[#9a9489] hover:text-white transition";
+        showToast("📄 Tek Sayfa Odak Görünümü");
+      } else {
+        rightSheet.classList.remove('hidden');
+        spine.classList.remove('hidden');
+        leftSheet.classList.add('rounded-l-2xl', 'max-w-[560px]');
+        leftSheet.classList.remove('rounded-2xl', 'max-w-[760px]');
+        btnSpread.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-[#cc785c] text-white transition";
+        btnSingle.className = "px-2.5 py-1 rounded-lg text-xs text-[#9a9489] hover:text-white transition";
+        showToast("📖 Çift Sayfa Kitap Görünümü");
+      }
+      renderCurrentSpread();
+    }
+
+    // Paper Tint
+    function setPaperMode(mode) {
+      const left = document.getElementById('leftSheet');
+      const right = document.getElementById('rightSheet');
+      ['dark', 'sepia', 'white'].forEach(m => {
+        left.classList.remove('paper-mode-' + m);
+        right.classList.remove('paper-mode-' + m);
+        document.getElementById('tint' + m.charAt(0).toUpperCase() + m.slice(1) + 'Btn').className = "px-2 py-0.5 rounded-lg text-[10px] text-[#9a9489] hover:text-[#fbf9f5] transition";
+      });
+      left.classList.add('paper-mode-' + mode);
+      right.classList.add('paper-mode-' + mode);
+      document.getElementById('tint' + mode.charAt(0).toUpperCase() + mode.slice(1) + 'Btn').className = "px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#cc785c] text-white transition";
+      showToast("Kağıt tonu: " + mode.toUpperCase());
+    }
+
+    // Zen Mode (Pure distraction-free: hides header AND studio secondary controls)
+    let zenMode = false;
+    function toggleZenMode() {
+      const studio = document.getElementById('studioView');
+      if (studio.classList.contains('hidden')) {
+        showToast("Odak modu sadece Çalışma Masasında kullanılabilir.");
+        return;
+      }
+
+      zenMode = !zenMode;
+      const header = document.getElementById('mainHeader');
+      const studioControls = document.getElementById('studioControls');
+      const progressBar = document.getElementById('readingProgressBarContainer');
+      const zenExit = document.getElementById('zenExitIndicator');
+
+      if (zenMode) {
+        header.classList.add('-translate-y-full', 'h-0', 'p-0', 'overflow-hidden', 'border-0', 'opacity-0', 'pointer-events-none');
+        studioControls.classList.add('-translate-y-full', 'h-0', 'p-0', 'overflow-hidden', 'border-0', 'opacity-0', 'pointer-events-none');
+        if (progressBar) progressBar.classList.add('-translate-y-full', 'h-0', 'py-0', 'overflow-hidden', 'border-0', 'opacity-0', 'pointer-events-none');
+        if (leftDrawerOpen) toggleDrawer('left');
+        if (rightDrawerOpen) toggleDrawer('right');
+        zenExit.classList.remove('hidden');
+        showToast("🧘 Odak Modu Aktif (Çıkmak için ESC)");
+      } else {
+        header.classList.remove('-translate-y-full', 'h-0', 'p-0', 'overflow-hidden', 'border-0', 'opacity-0', 'pointer-events-none');
+        studioControls.classList.remove('-translate-y-full', 'h-0', 'p-0', 'overflow-hidden', 'border-0', 'opacity-0', 'pointer-events-none');
+        if (progressBar) progressBar.classList.remove('-translate-y-full', 'h-0', 'py-0', 'overflow-hidden', 'border-0', 'opacity-0', 'pointer-events-none');
+        zenExit.classList.add('hidden');
+        showToast("Normal çalışma moduna dönüldü.");
+      }
+    }
+
+    // Settings Modal Handlers (Gemini API Key)
+    function openSettingsModal() {
+      const modal = document.getElementById('settingsModal');
+      const input = document.getElementById('geminiApiKeyInput');
+      input.value = appState.gemini_api_key || '';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      input.focus();
+    }
+
+    function closeSettingsModal() {
+      const modal = document.getElementById('settingsModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function toggleApiKeyVisibility() {
+      const input = document.getElementById('geminiApiKeyInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function saveApiKeyAction() {
+      const input = document.getElementById('geminiApiKeyInput');
+      const key = input.value.trim();
+      postToRust('save_api_key', { key });
+      closeSettingsModal();
+    }
+
+    function testApiKeyAction() {
+      const input = document.getElementById('geminiApiKeyInput');
+      const key = input.value.trim();
+      if (!key) {
+        showToast("⚠️ Test etmek için lütfen bir API anahtarı girin.", "🔑");
+        return;
+      }
+      showToast("⚡ Gemini API bağlantısı test ediliyor...", "⏳");
+      postToRust('test_gemini_key', { key });
+    }
+
+    // Export Dropdown
+    function toggleExportMenu() {
+      const dropdown = document.getElementById('exportMenuDropdown');
+      if (dropdown) dropdown.classList.toggle('hidden');
+    }
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('exportMenuDropdown');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        const btn = e.target.closest('button[onclick*="toggleExportMenu"]');
+        if (!btn && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      }
+    });
+
+    // Font Size Control
+    let currentFontSize = 'md';
+    function setFontSize(size) {
+      currentFontSize = size;
+      const left = document.getElementById('leftPageContent');
+      const right = document.getElementById('rightPageContent');
+      const sizeMap = {
+        'sm': { fs: '13px', lh: '1.5' },
+        'md': { fs: '14.5px', lh: '1.65' },
+        'lg': { fs: '16.5px', lh: '1.75' },
+        'xl': { fs: '18.5px', lh: '1.85' },
+      };
+      const cfg = sizeMap[size] || sizeMap['md'];
+      if (left) {
+        left.style.fontSize = cfg.fs;
+        left.style.lineHeight = cfg.lh;
+      }
+      if (right) {
+        right.style.fontSize = cfg.fs;
+        right.style.lineHeight = cfg.lh;
+      }
+      ['sm', 'md', 'lg', 'xl'].forEach(s => {
+        const btn = document.getElementById('font' + s.charAt(0).toUpperCase() + s.slice(1) + 'Btn');
+        if (btn) {
+          if (s === size) {
+            btn.className = "px-1.5 py-0.5 rounded-lg text-[10px] font-bold bg-[#cc785c] text-white transition";
+          } else {
+            btn.className = "px-1.5 py-0.5 rounded-lg text-[10px] text-[#9a9489] hover:text-[#fbf9f5] transition";
+          }
+        }
+      });
+      showToast("Yazı boyutu: " + size.toUpperCase());
+    }
+
+    // Edit Course Modal Handlers
+    let editCourseSelectedIcon = '📚';
+    function openEditCourseModal(idx) {
+      if (!appState.projects || !appState.projects[idx]) return;
+      const p = appState.projects[idx];
+      document.getElementById('editCourseIdx').value = idx;
+      document.getElementById('editCourseTitle').value = p.title || '';
+      document.getElementById('editCourseDesc').value = p.description || '';
+      editCourseSelectedIcon = p.icon || '📚';
+      document.querySelectorAll('.edit-icon-pill').forEach(btn => {
+        if (btn.innerText.includes(editCourseSelectedIcon)) {
+          btn.className = "edit-icon-pill px-2.5 py-1 rounded-lg bg-[#262420] border border-[#cc785c] text-xs font-bold text-white";
+        } else {
+          btn.className = "edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs text-[#9a9489] hover:text-[#fbf9f5]";
+        }
+      });
+
+      const modal = document.getElementById('editCourseModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeEditCourseModal() {
+      const modal = document.getElementById('editCourseModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function selectEditCourseIcon(icon, btn) {
+      editCourseSelectedIcon = icon;
+      document.querySelectorAll('.edit-icon-pill').forEach(b => {
+        b.className = "edit-icon-pill px-2.5 py-1 rounded-lg bg-[#141413] border border-[#2d2b26] text-xs text-[#9a9489] hover:text-[#fbf9f5]";
+      });
+      btn.className = "edit-icon-pill px-2.5 py-1 rounded-lg bg-[#262420] border border-[#cc785c] text-xs font-bold text-white";
+    }
+
+    function saveEditCourseAction() {
+      const idx = parseInt(document.getElementById('editCourseIdx').value);
+      const title = document.getElementById('editCourseTitle').value.trim();
+      const desc = document.getElementById('editCourseDesc').value.trim();
+      if (!title) {
+        showToast("Lütfen bir ders adı yazın.");
+        return;
+      }
+      postToRust('update_course', {
+        project_idx: idx,
+        title,
+        icon: editCourseSelectedIcon,
+        description: desc
+      });
+      closeEditCourseModal();
+    }
+
+    // Quick Note Modal Handlers
+    function openQuickNoteModal() {
+      document.getElementById('quickNoteModal').classList.remove('hidden');
+      document.getElementById('quickNoteModal').classList.add('flex');
+      document.getElementById('quickNoteContent').value = '';
+      document.getElementById('quickNoteContent').focus();
+    }
+
+    function closeQuickNoteModal() {
+      document.getElementById('quickNoteModal').classList.add('hidden');
+      document.getElementById('quickNoteModal').classList.remove('flex');
+    }
+
+    function saveQuickNoteAction() {
+      const content = document.getElementById('quickNoteContent').value.trim();
+      if (!content) {
+        showToast("Lütfen bir not yazın.");
+        return;
+      }
+      postToRust('pin_page_to_notes', { text: content });
+      closeQuickNoteModal();
+    }
+
+    // Spotlight (Ctrl+K)
+    function openSpotlight() {
+      document.getElementById('spotlightModal').classList.remove('hidden');
+      document.getElementById('spotlightModal').classList.add('flex');
+      const inp = document.getElementById('spotlightInput');
+      inp.value = '';
+      filterSpotlight('');
+      inp.focus();
+    }
+
+    function closeSpotlight() {
+      document.getElementById('spotlightModal').classList.add('hidden');
+      document.getElementById('spotlightModal').classList.remove('flex');
+    }
+
+    function filterSpotlight(q) {
+      const query = q.toLowerCase().trim();
+      const buttons = document.querySelectorAll('#spotlightList button');
+      buttons.forEach(btn => {
+        btn.style.display = btn.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    document.getElementById('spotlightInput').addEventListener('input', (e) => filterSpotlight(e.target.value));
+
+    // Global Keyboard Shortcuts (Ctrl+K, Ctrl+D, Escape, ArrowLeft, ArrowRight)
+    window.addEventListener('keydown', (e) => {
+      const isInput = document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSpotlight();
+        return;
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        toggleZenMode();
+        return;
+      } else if (e.key === 'Escape') {
+        if (!document.getElementById('spotlightModal').classList.contains('hidden')) {
+          closeSpotlight();
+        } else if (!document.getElementById('settingsModal').classList.contains('hidden')) {
+          closeSettingsModal();
+        } else if (!document.getElementById('editCourseModal').classList.contains('hidden')) {
+          closeEditCourseModal();
+        } else if (!document.getElementById('quickNoteModal').classList.contains('hidden')) {
+          closeQuickNoteModal();
+        } else if (zenMode) {
+          toggleZenMode();
+        }
+        return;
+      }
+
+      // Page Turning via Keyboard Arrow Keys when not typing
+      if (!isInput) {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+          flipNext();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          flipPrev();
+        }
+      }
+    });
+
+    function runSpotlightCmd(cmd) {
+      closeSpotlight();
+      if (cmd === 'solve_active') {
+        switchView('studio');
+        if (!rightDrawerOpen) toggleDrawer('right');
+        sendAgentPrompt(`Şu an açık olan ${currentPage}. sayfadaki alıştırmaları çöz ve açıkla.`);
+      } else if (cmd === 'zen_mode') {
+        toggleZenMode();
+      } else if (cmd === 'toggle_rain') {
+        cycleAmbientSound();
+      } else if (cmd === 'settings') {
+        openSettingsModal();
+      } else if (cmd === 'export_md') {
+        postToRust('export', { type: 'save_md' });
+      } else if (cmd === 'export_mistakes') {
+        postToRust('export', { type: 'save_mistakes_md' });
+      } else if (cmd === 'backup_json') {
+        postToRust('export', { type: 'backup_json' });
+      }
+    }
+
+    // Web Audio Multi-Ambience Engine (Rain, Cafe, White Noise)
+    let audioCtx = null;
+    let ambientSourceNode = null;
+    let ambientGain = null;
+    let currentAmbience = 'off';
+
+    function cycleAmbientSound() {
+      const modes = ['off', 'rain', 'cafe', 'white'];
+      const nextIdx = (modes.indexOf(currentAmbience) + 1) % modes.length;
+      setAmbientSound(modes[nextIdx]);
+    }
+
+    function setAmbientSound(mode) {
+      currentAmbience = mode;
+      const icon = document.getElementById('ambientIcon');
+      stopAmbientSound();
+
+      if (mode === 'off') {
+        if (icon) icon.innerText = "🔇";
+        showToast("Ambiyans sesi kapatıldı.");
+        return;
+      }
+
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const bufferSize = audioCtx.sampleRate * 2;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1);
+        }
+
+        ambientSourceNode = audioCtx.createBufferSource();
+        ambientSourceNode.buffer = buffer;
+        ambientSourceNode.loop = true;
+
+        ambientGain = audioCtx.createGain();
+
+        if (mode === 'rain') {
+          if (icon) icon.innerText = "🌧️";
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 850;
+          ambientGain.gain.setValueAtTime(0.22, audioCtx.currentTime);
+          ambientSourceNode.connect(filter);
+          filter.connect(ambientGain);
+          showToast("🌧️ Yağmur ambiyansı açıldı.");
+        } else if (mode === 'cafe') {
+          if (icon) icon.innerText = "☕";
+          const filter1 = audioCtx.createBiquadFilter();
+          filter1.type = 'bandpass';
+          filter1.frequency.value = 450;
+          filter1.Q.value = 1.2;
+          ambientGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+          ambientSourceNode.connect(filter1);
+          filter1.connect(ambientGain);
+          showToast("☕ Kütüphane / Kafe uğultusu açıldı.");
+        } else if (mode === 'white') {
+          if (icon) icon.innerText = "💨";
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 2400;
+          ambientGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          ambientSourceNode.connect(filter);
+          filter.connect(ambientGain);
+          showToast("💨 Beyaz gürültü (Odak fısıltısı) açıldı.");
+        }
+
+        ambientGain.connect(audioCtx.destination);
+        ambientSourceNode.start();
+      } catch (e) {
+        console.log("[Audio Error]", e);
+      }
+    }
+
+    function stopAmbientSound() {
+      if (ambientSourceNode && ambientGain) {
+        try {
+          ambientGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+          setTimeout(() => {
+            if (ambientSourceNode) {
+              ambientSourceNode.stop();
+              ambientSourceNode = null;
+            }
+          }, 260);
+        } catch(e) {
+          ambientSourceNode = null;
+        }
+      }
+    }
+
+    // Pomodoro Finish Chime
+    function playChimeSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const t = audioCtx.currentTime;
+        // Chime tone 1: D5 (587.33 Hz)
+        const osc1 = audioCtx.createOscillator();
+        const g1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(587.33, t);
+        g1.gain.setValueAtTime(0.2, t);
+        g1.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+        osc1.connect(g1);
+        g1.connect(audioCtx.destination);
+        osc1.start(t);
+        osc1.stop(t + 1.2);
+
+        // Chime tone 2: A5 (880 Hz) slightly delayed
+        const osc2 = audioCtx.createOscillator();
+        const g2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(880, t + 0.15);
+        g2.gain.setValueAtTime(0.18, t + 0.15);
+        g2.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+        osc2.connect(g2);
+        g2.connect(audioCtx.destination);
+        osc2.start(t + 0.15);
+        osc2.stop(t + 1.6);
+      } catch (e) {
+        console.log("[Chime Error]", e);
+      }
+    }
+
+    // Pomodoro Timer
+    let timerSecs = 1500;
+    let defaultTimerDuration = 1500;
+    let timerActive = false;
+    let timerInt = null;
+
+    function setTimerDuration(seconds, btn) {
+      defaultTimerDuration = seconds;
+      timerSecs = seconds;
+      if (timerActive) {
+        clearInterval(timerInt);
+        timerActive = false;
+        document.getElementById('timerIcon').innerText = '▶';
+      }
+      updateTimerDisplay();
+      document.querySelectorAll('.timer-pill').forEach(p => {
+        p.className = "timer-pill text-[10px] px-2 py-0.5 rounded-lg text-[#9a9489] hover:text-[#fbf9f5] transition";
+      });
+      if (btn) {
+        btn.className = "timer-pill text-[10px] font-bold px-2 py-0.5 rounded-lg bg-[#cc785c] text-white transition";
+      }
+      const mins = Math.floor(seconds / 60);
+      showToast(`⏱️ Zamanlayıcı: ${mins} dakika`);
+    }
+
+    function resetTimer() {
+      if (timerActive) {
+        clearInterval(timerInt);
+        timerActive = false;
+        document.getElementById('timerIcon').innerText = '▶';
+      }
+      timerSecs = defaultTimerDuration;
+      updateTimerDisplay();
+      showToast("Zamanlayıcı sıfırlandı.", "↻");
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSecs / 60).toString().padStart(2, '0');
+      const s = (timerSecs % 60).toString().padStart(2, '0');
+      document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+    }
+
+    function toggleTimer() {
+      timerActive = !timerActive;
+      document.getElementById('timerIcon').innerText = timerActive ? '⏸' : '▶';
+      if (timerActive) {
+        timerInt = setInterval(() => {
+          if (timerSecs > 0) {
+            timerSecs--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInt);
+            timerActive = false;
+            document.getElementById('timerIcon').innerText = '▶';
+            playChimeSound();
+            showToast("⏱️ Süre doldu! Harika odaklandın, mola vakti.", "☕");
+          }
+        }, 1000);
+      } else {
+        clearInterval(timerInt);
+      }
+    }
+    document.getElementById('timerToggleBtn').onclick = toggleTimer;
+
+    // Toast
+    function showToast(msg, icon = "✨") {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      document.getElementById('toastIcon').innerText = icon;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // Context Bubble (Correct Relative Positioning)
+    document.addEventListener('mouseup', (e) => {
+      const bubble = document.getElementById('selectionBubble');
+      if (bubble && bubble.contains(e.target)) return;
+
+      const selection = window.getSelection();
+      const text = selection.toString().trim();
+      if (text.length > 3) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        const centerStudio = document.getElementById('centerStudio');
+        const studioRect = centerStudio ? centerStudio.getBoundingClientRect() : { top: 0, left: 0 };
+
+        bubble.style.top = `${rect.top - studioRect.top - 10}px`;
+        bubble.style.left = `${rect.left - studioRect.left + rect.width / 2}px`;
+        bubble.classList.remove('hidden');
+        bubble.dataset.selectedText = text;
+      } else {
+        bubble.classList.add('hidden');
+      }
+    });
+
+    function bubbleAction(action) {
+      const bubble = document.getElementById('selectionBubble');
+      const text = bubble.dataset.selectedText || "";
+      bubble.classList.add('hidden');
+      if (action === 'search') {
+        openStudyBrowserWithQuery(text);
+        return;
+      }
+      if (action === 'tts') {
+        speakText(text);
+        return;
+      }
+      if (!rightDrawerOpen) toggleDrawer('right');
+      if (action === 'solve') {
+        sendAgentPrompt(`Şu soruyu detaylıca çöz: "${text}"`);
+      } else if (action === 'hint') {
+        sendAgentPrompt(`Şu soru için doğrudan cevabı vermeden sokratik yönlendirici bir ipucu ver: "${text}"`);
+      } else if (action === 'translate') {
+        sendAgentPrompt(`Şu metnin Türkçe çevirisini ve kritik kelime anlamlarını açıkla: "${text}"`);
+      } else if (action === 'note') {
+        postToRust('pin_page_to_notes', { text });
+      }
+    }
+
+    function focusQuestion(num, text) {
+      if (!rightDrawerOpen) toggleDrawer('right');
+      showToast(`Soru ${num} seçildi.`);
+      sendAgentPrompt(`Sayfa ${currentPage}'teki Soru ${num} için çözüm ve açıklama yap: "${text}"`);
+    }
+
+    // Co-Worker Chat & AI Loading State
+    let lastUserPrompt = "";
+    let lastAiReply = "";
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      sendAgentPrompt(text);
+    }
+
+    function sendAgentPrompt(text) {
+      lastUserPrompt = text;
+      const container = document.getElementById('chatMessages');
+      const userDiv = document.createElement('div');
+      userDiv.className = "flex justify-end";
+      userDiv.innerHTML = `<div class="bg-[#cc785c] text-white rounded-2xl rounded-tr-none p-3 text-xs leading-relaxed max-w-[85%] shadow-sm">${escapeHtml(text)}</div>`;
+      container.appendChild(userDiv);
+
+      // Remove any existing thinking bubble
+      const prevBubble = document.getElementById('aiThinkingBubble');
+      if (prevBubble) prevBubble.remove();
+
+      // Show Thinking Bubble
+      const thinkingDiv = document.createElement('div');
+      thinkingDiv.id = "aiThinkingBubble";
+      thinkingDiv.className = "flex items-start space-x-2";
+      thinkingDiv.innerHTML = `
+        <div class="w-6 h-6 rounded-lg bg-[#cc785c] flex items-center justify-center text-white text-xs shrink-0 font-bold animate-pulse">🤖</div>
+        <div class="bg-[#1f1e1a] border border-[#2d2b26] rounded-2xl rounded-tl-none p-3 text-xs text-[#d4a373] flex items-center gap-2 shadow-sm">
+          <span class="inline-block w-2 h-2 rounded-full bg-[#cc785c] animate-ping"></span>
+          <span class="animate-pulse">PrepMate analiz ediyor ve çözüyor...</span>
+        </div>
+      `;
+      container.appendChild(thinkingDiv);
+      container.scrollTop = container.scrollHeight;
+
+      postToRust('chat_message', { text });
+    }
+
+    window.onRustChatReply = function(reply) {
+      lastAiReply = reply;
+      const container = document.getElementById('chatMessages');
+      const thinkingBubble = document.getElementById('aiThinkingBubble');
+      if (thinkingBubble) thinkingBubble.remove();
+
+      const agentDiv = document.createElement('div');
+      agentDiv.className = "flex items-start space-x-2";
+      agentDiv.innerHTML = `
+        <div class="w-6 h-6 rounded-lg bg-[#cc785c] flex items-center justify-center text-white text-xs shrink-0 font-bold">🤖</div>
+        <div class="bg-[#1f1e1a] border border-[#2d2b26] rounded-2xl rounded-tl-none p-3 text-xs text-[#fbf9f5] leading-relaxed max-w-[90%] shadow-sm">
+          <div>${typeof marked !== 'undefined' ? marked.parse(reply) : reply}</div>
+          <div class="mt-2.5 pt-2 border-t border-[#2a2824] flex items-center justify-end gap-2">
+            <button onclick="speakText(lastAiReply)" class="text-[11px] text-[#9a9489] hover:text-[#d4a373] bg-[#141413] hover:bg-[#262420] border border-[#2d2b26] px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer" title="Cevabı Sesli Dinle">
+              <span>🔊</span> <span>Dinle</span>
+            </button>
+            <button onclick="addLastReplyToMistakes()" class="text-[11px] text-[#9a9489] hover:text-rose-400 bg-[#141413] hover:bg-[#262420] border border-[#2d2b26] px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="Bu soruyu / çözümü Hata Defterime kaydet">
+              <span>📕</span> <span>Hata Defterime Ekle</span>
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(agentDiv);
+      container.scrollTop = container.scrollHeight;
+    };
+
+    function addLastReplyToMistakes() {
+      postToRust('add_mistake', {
+        question: lastUserPrompt || "Ders Sorusu",
+        student_answer: "Eksik / Hatalı Çözüm",
+        correct_answer: "Doğru Açıklama & Çözüm",
+        explanation: lastAiReply || "Açıklama kaydedildi."
+      });
+    }
+
+    function switchRightTab(tab) {
+      const chat = document.getElementById('rightViewChat');
+      const mistakes = document.getElementById('rightViewMistakes');
+      const notes = document.getElementById('rightViewNotes');
+      const tChat = document.getElementById('rightTabChat');
+      const tMistakes = document.getElementById('rightTabMistakes');
+      const tNotes = document.getElementById('rightTabNotes');
+
+      chat.classList.add('hidden');
+      mistakes.classList.add('hidden');
+      notes.classList.add('hidden');
+
+      tChat.className = "px-2 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-white transition";
+      tMistakes.className = "px-2 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-rose-400 transition";
+      tNotes.className = "px-2 py-1 rounded-lg text-xs font-medium text-[#9a9489] hover:text-[#d4a373] transition";
+
+      if (tab === 'chat') {
+        chat.classList.remove('hidden');
+        tChat.className = "px-2 py-1 rounded-lg text-xs font-bold bg-[#262420] text-[#fbf9f5] transition";
+      } else if (tab === 'mistakes') {
+        mistakes.classList.remove('hidden');
+        renderMistakesList();
+        tMistakes.className = "px-2 py-1 rounded-lg text-xs font-bold bg-[#262420] text-rose-400 transition";
+      } else if (tab === 'notes') {
+        notes.classList.remove('hidden');
+        renderNotesList();
+        tNotes.className = "px-2 py-1 rounded-lg text-xs font-bold bg-[#262420] text-[#d4a373] transition";
+      }
+    }
+
+    function renderMistakesList() {
+      const container = document.getElementById('mistakesContainer');
+      const mistakes = currentProject?.mistakes || [];
+      const badge = document.getElementById('rightTabMistakes');
+      if (badge) {
+        badge.innerText = `📕 Hata Defteri (${mistakes.length})`;
+      }
+
+      if (!mistakes || mistakes.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-[#9a9489] text-xs space-y-2">
+            <div class="text-2xl">📕</div>
+            <p class="font-semibold text-[#fbf9f5]">Henüz kayıtlı bir yanlışın yok</p>
+            <p class="text-[11px] leading-relaxed">Ödev veya soru çözerken hatalarını buraya toplayabilir, telafi quizleri ile pekiştirebilirsin.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = mistakes.map(m => `
+        <div class="p-3 rounded-2xl bg-[#141413] border border-[#2a2824] hover:border-[#cc785c]/40 space-y-2 transition shadow-sm">
+          <div class="flex items-start justify-between">
+            <span class="text-xs font-bold text-[#d4a373] truncate">${escapeHtml(m.question || 'Soru')}</span>
+            <button onclick="deleteMistakeAction('${m.id}')" class="text-[10px] text-[#9a9489] hover:text-emerald-400 px-2 py-0.5 rounded bg-[#262420] transition cursor-pointer" title="Çözüldü olarak kaldır">
+              ✓ Anladım
+            </button>
+          </div>
+          <div class="text-xs space-y-1">
+            <div class="text-rose-400 bg-rose-950/20 px-2 py-1 rounded-lg">
+              <span class="font-semibold">Senin Yanıtın:</span> ${escapeHtml(m.student_answer || '-')}
+            </div>
+            <div class="text-emerald-400 bg-emerald-950/20 px-2 py-1 rounded-lg">
+              <span class="font-semibold">Doğru Yanıt:</span> ${escapeHtml(m.correct_answer || '-')}
+            </div>
+            ${m.explanation ? `<p class="text-[#9a9489] text-[11px] leading-relaxed pt-1">${escapeHtml(m.explanation)}</p>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteMistakeAction(id) {
+      postToRust('delete_mistake', { text: id });
+    }
+
+    function triggerQuizFromMistakes() {
+      if (!rightDrawerOpen) toggleDrawer('right');
+      showToast("🎯 Hata defterinden telafi quizi başlatıldı!");
+      sendAgentPrompt("Hata defterimde kayıtlı olan eksiklerimden 3 soruluk pratik bir telafi testi hazırla.");
+    }
+
+    // Notes List Renderer
+    function renderNotesList() {
+      const container = document.getElementById('notesContainer');
+      const notes = currentProject?.notes || [];
+      const badge = document.getElementById('rightTabNotes');
+      if (badge) {
+        badge.innerText = `📝 Notlarım (${notes.length})`;
+      }
+
+      if (!notes || notes.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-[#9a9489] text-xs space-y-2">
+            <div class="text-2xl">📝</div>
+            <p class="font-semibold text-[#fbf9f5]">Henüz kayıtlı bir notunuz yok</p>
+            <p class="text-[11px] leading-relaxed">Çalışma masasında metin seçip açılan baloncuktan <b>'📌 Not Al'</b> diyerek veya yukarıdaki <b>'➕ Hızlı Not'</b> butonuyla not ekleyebilirsiniz.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = notes.map(n => `
+        <div class="p-3 rounded-2xl bg-[#141413] border border-[#2a2824] hover:border-[#cc785c]/40 space-y-2 transition shadow-sm">
+          <div class="flex items-start justify-between">
+            <span class="text-xs font-bold text-[#d4a373] truncate">${escapeHtml(n.title || 'Ders Notu')}</span>
+            <div class="flex items-center space-x-1 shrink-0">
+              <button onclick="copyNoteContentById('${escapeHtml(n.id)}')" class="text-[10px] text-[#9a9489] hover:text-[#fbf9f5] px-1.5 py-0.5 rounded bg-[#262420] transition cursor-pointer" title="Kopyala">📋</button>
+              <button onclick="deleteNoteAction('${escapeHtml(n.id)}')" class="text-[10px] text-[#9a9489] hover:text-rose-400 px-1.5 py-0.5 rounded bg-[#262420] transition cursor-pointer" title="Sil">🗑️</button>
+            </div>
+          </div>
+          <p class="text-xs text-[#fbf9f5] leading-relaxed whitespace-pre-line bg-[#1c1b18] p-2.5 rounded-xl border border-[#262420]">${escapeHtml(n.content)}</p>
+          <div class="flex items-center justify-between text-[10px] text-[#9a9489]">
+            <span>${escapeHtml(n.source_ref || '')}</span>
+            <span>${escapeHtml(n.timestamp || '')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function copyNoteContentById(id) {
+      const note = (currentProject?.notes || []).find(n => n.id === id);
+      if (note && note.content) {
+        navigator.clipboard.writeText(note.content);
+        showToast("Not panoya kopyalandı! 📋");
+      }
+    }
+
+    function deleteNoteAction(id) {
+      postToRust('delete_note', { text: id });
+    }
+
+    // =========================================================================
+    // KVIETA SUPER FOCUS CONTROLLER
+    // =========================================================================
+    let focusIntention = "";
+    let focusDurationMins = 25;
+    let focusRemainingSecs = 1500;
+    let focusTotalSecs = 1500;
+    let focusTimerInterval = null;
+    let focusIsPaused = false;
+    let focusPagesStart = 1;
+    let gentleWarning5mTriggered = false;
+    let gentleWarning1mTriggered = false;
+
+    function openFocusIntentionModal() {
+      const modal = document.getElementById('focusIntentionModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      const input = document.getElementById('focusIntentionInput');
+      if (input) {
+        input.value = focusIntention || (currentProject ? `${currentProject.title} dersini odaklanarak çalış` : "Ders çalış ve eksikleri tamamla");
+        input.focus();
+      }
+    }
+
+    function closeFocusIntentionModal() {
+      const modal = document.getElementById('focusIntentionModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function selectFocusDuration(mins, btn) {
+      focusDurationMins = mins;
+      document.querySelectorAll('.focus-dur-btn').forEach(b => {
+        b.className = "focus-dur-btn flex-1 py-2 rounded-xl bg-[#141413] border border-[#2d2b26] text-xs font-semibold text-[#9a9489] hover:text-white transition";
+      });
+      btn.className = "focus-dur-btn flex-1 py-2 rounded-xl bg-[#262420] border border-[#cc785c] text-xs font-bold text-white transition";
+    }
+
+    function startFocusSessionAction() {
+      const input = document.getElementById('focusIntentionInput');
+      focusIntention = (input ? input.value.trim() : "") || "Ders Çalışma & Odaklanma";
+      focusTotalSecs = focusDurationMins * 60;
+      focusRemainingSecs = focusTotalSecs;
+      focusIsPaused = false;
+      focusPagesStart = currentPage;
+      gentleWarning5mTriggered = false;
+      gentleWarning1mTriggered = false;
+
+      closeFocusIntentionModal();
+
+      // Show Light HUD
+      const hud = document.getElementById('kvietaFocusHUD');
+      hud.classList.remove('hidden');
+      hud.classList.add('flex');
+      document.getElementById('focusHudIntentionText').innerText = `Hedef: ${focusIntention}`;
+      updateFocusHudDisplay();
+
+      postToRust('start_focus_session', { intention: focusIntention, duration: focusDurationMins });
+
+      clearInterval(focusTimerInterval);
+      focusTimerInterval = setInterval(() => {
+        if (!focusIsPaused) {
+          focusRemainingSecs--;
+          updateFocusHudDisplay();
+
+          // Gentle Warning at 5m
+          if (focusRemainingSecs === 300 && !gentleWarning5mTriggered) {
+            gentleWarning5mTriggered = true;
+            showGentleWarning("5 Dakika Kaldı 🌿", "Harika gidiyorsun. Toparlanma vakti, son soruları ve düşüncelerini toparlayabilirsin.");
+          }
+
+          // Gentle Warning at 1m
+          if (focusRemainingSecs === 60 && !gentleWarning1mTriggered) {
+            gentleWarning1mTriggered = true;
+            showGentleWarning("1 Dakika Kaldı ⏳", "Son bir dakika. Seansını tamamlamaya hazırlan.");
+          }
+
+          if (focusRemainingSecs <= 0) {
+            clearInterval(focusTimerInterval);
+            playChimeSound();
+            openFocusClosureModal();
+          }
+        }
+      }, 1000);
+    }
+
+    function updateFocusHudDisplay() {
+      const mins = Math.floor(Math.max(0, focusRemainingSecs) / 60);
+      const secs = Math.max(0, focusRemainingSecs) % 60;
+      const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const timerEl = document.getElementById('focusHudTimer');
+      if (timerEl) timerEl.innerText = str;
+
+      const pct = Math.max(0, Math.min(100, (focusRemainingSecs / focusTotalSecs) * 100));
+      const progEl = document.getElementById('focusHudProgress');
+      if (progEl) progEl.style.width = `${pct}%`;
+    }
+
+    function toggleFocusPause() {
+      focusIsPaused = !focusIsPaused;
+      const btn = document.getElementById('focusHudPauseBtn');
+      if (btn) {
+        btn.innerText = focusIsPaused ? "▶ Devam Et" : "⏸️ Duraklat";
+      }
+    }
+
+    function showGentleWarning(title, msg) {
+      const toast = document.getElementById('gentleWarningToast');
+      document.getElementById('gentleWarningTitle').innerText = title;
+      document.getElementById('gentleWarningMsg').innerText = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        dismissGentleWarning();
+      }, 7000);
+    }
+
+    function dismissGentleWarning() {
+      const toast = document.getElementById('gentleWarningToast');
+      toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+    }
+
+    function openFocusClosureModal() {
+      const modal = document.getElementById('focusClosureModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('closureIntentionText').innerText = focusIntention;
+      const pagesDiff = Math.max(1, (currentPage - focusPagesStart) + 1);
+      const pagesInput = document.getElementById('closurePagesReadInput');
+      if (pagesInput) pagesInput.value = pagesDiff;
+    }
+
+    function closeFocusClosureModal() {
+      const modal = document.getElementById('focusClosureModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function finishFocusSessionAction() {
+      clearInterval(focusTimerInterval);
+      const hud = document.getElementById('kvietaFocusHUD');
+      if (hud) {
+        hud.classList.add('hidden');
+        hud.classList.remove('flex');
+      }
+
+      const pagesInput = document.getElementById('closurePagesReadInput');
+      const pagesRead = pagesInput ? parseInt(pagesInput.value) || 1 : 1;
+
+      postToRust('finish_focus_session', {
+        intention: focusIntention,
+        duration: focusDurationMins,
+        pages_read: pagesRead
+      });
+
+      closeFocusClosureModal();
+    }
+
+    // =========================================================================
+    // BRAIN MAP CONTROLLER
+    // =========================================================================
+    let selectedBrainMapNode = null;
+
+    function openBrainMapModal() {
+      const modal = document.getElementById('brainMapModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      const tag = document.getElementById('brainMapCourseTag');
+      if (tag) tag.innerText = currentProject ? currentProject.title : "Genel Ders";
+      renderBrainMap();
+    }
+
+    function closeBrainMapModal() {
+      const modal = document.getElementById('brainMapModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderBrainMap() {
+      const svg = document.getElementById('brainMapSvg');
+      if (!svg) return;
+
+      const topics = (currentProject && currentProject.mastery_topics && currentProject.mastery_topics.length > 0)
+        ? currentProject.mastery_topics
+        : [
+            { topic_name: "Temel Kavramlar & Tanımlar", score_pct: 85, status: "good" },
+            { topic_name: "Formüller & Metodoloji", score_pct: 65, status: "review" },
+            { topic_name: "Uygulama & Problem Çözümü", score_pct: 40, status: "critical" },
+            { topic_name: "Analiz & Çıkarım", score_pct: 70, status: "review" },
+            { topic_name: "İleri Seviye Soru Tipleri", score_pct: 30, status: "critical" },
+            { topic_name: "Pekiştirme ve Sentez", score_pct: 80, status: "good" }
+          ];
+
+      const count = topics.length;
+      const width = 800;
+      const height = 500;
+      const cx = width / 2;
+      const cy = height / 2;
+      const radiusX = 260;
+      const radiusY = 160;
+
+      const nodeCoords = topics.map((t, idx) => {
+        const angle = (idx / count) * 2 * Math.PI - Math.PI / 2;
+        const x = cx + radiusX * Math.cos(angle);
+        const y = cy + radiusY * Math.sin(angle);
+        return { ...t, idx, x, y };
+      });
+
+      let svgHtml = '';
+
+      for (let i = 0; i < count; i++) {
+        const from = nodeCoords[i];
+        const to = nodeCoords[(i + 1) % count];
+        svgHtml += `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#2a2824" stroke-width="2" stroke-dasharray="4,4" />`;
+        if (i % 2 === 0) {
+          svgHtml += `<line x1="${from.x}" y1="${from.y}" x2="${cx}" y2="${cy}" stroke="#22201c" stroke-width="1.5" />`;
+        }
+      }
+
+      svgHtml += `
+        <circle cx="${cx}" cy="${cy}" r="32" fill="#1f1e1a" stroke="#cc785c" stroke-width="2" filter="drop-shadow(0 0 12px rgba(204,120,92,0.4))" />
+        <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#fbf9f5" font-size="11" font-weight="bold" font-family="'JetBrains Mono', monospace">DERS</text>
+        <text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="#d4a373" font-size="9" font-family="sans-serif">MERKEZİ</text>
+      `;
+
+      nodeCoords.forEach(node => {
+        const score = node.score_pct || 70;
+        let strokeColor = "#34d399";
+        let fillColor = "#143322";
+        let textColor = "#6ee7b7";
+        if (score < 50) {
+          strokeColor = "#f43f5e";
+          fillColor = "#361517";
+          textColor = "#fda4af";
+        } else if (score < 75) {
+          strokeColor = "#fbbf24";
+          fillColor = "#332814";
+          textColor = "#fde68a";
+        }
+
+        const isSelected = selectedBrainMapNode && selectedBrainMapNode.topic_name === node.topic_name;
+        const radius = isSelected ? 38 : 34;
+        const strokeW = isSelected ? 3.5 : 2;
+
+        svgHtml += `
+          <g onclick="selectBrainMapNode(${node.idx})" class="cursor-pointer transition-transform hover:scale-110" style="transform-origin: ${node.x}px ${node.y}px;">
+            <circle cx="${node.x}" cy="${node.y}" r="${radius}" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${strokeW}" />
+            <text x="${node.x}" y="${node.y - 2}" text-anchor="middle" fill="#fbf9f5" font-size="11" font-weight="bold" font-family="sans-serif">
+              %${score}
+            </text>
+            <text x="${node.x}" y="${node.y + 13}" text-anchor="middle" fill="${textColor}" font-size="9" font-weight="600">
+              ${score >= 75 ? 'GÜÇLÜ' : (score >= 50 ? 'ORTA' : 'ZAYIF')}
+            </text>
+            <rect x="${node.x - 70}" y="${node.y + 42}" width="140" height="20" rx="10" fill="#181715" stroke="#2a2824" />
+            <text x="${node.x}" y="${node.y + 55}" text-anchor="middle" fill="#fbf9f5" font-size="9" font-weight="medium">
+              ${escapeHtml(node.topic_name.length > 18 ? node.topic_name.slice(0, 16) + '...' : node.topic_name)}
+            </text>
+          </g>
+        `;
+      });
+
+      svg.innerHTML = svgHtml;
+
+      if (!selectedBrainMapNode && nodeCoords.length > 0) {
+        selectBrainMapNode(0);
+      }
+    }
+
+    function selectBrainMapNode(idx) {
+      const topics = (currentProject && currentProject.mastery_topics && currentProject.mastery_topics.length > 0)
+        ? currentProject.mastery_topics
+        : [
+            { topic_name: "Temel Kavramlar & Tanımlar", score_pct: 85, status: "good" },
+            { topic_name: "Formüller & Metodoloji", score_pct: 65, status: "review" },
+            { topic_name: "Uygulama & Problem Çözümü", score_pct: 40, status: "critical" },
+            { topic_name: "Analiz & Çıkarım", score_pct: 70, status: "review" },
+            { topic_name: "İleri Seviye Soru Tipleri", score_pct: 30, status: "critical" },
+            { topic_name: "Pekiştirme ve Sentez", score_pct: 80, status: "good" }
+          ];
+
+      const node = topics[idx];
+      if (!node) return;
+      selectedBrainMapNode = node;
+
+      document.getElementById('bmDetailTitle').innerText = node.topic_name;
+      const score = node.score_pct || 70;
+      document.getElementById('bmDetailScore').innerText = `%${score} Hakimiyet`;
+
+      const badge = document.getElementById('bmDetailStatusBadge');
+      if (score >= 75) {
+        badge.innerText = "Güçlü Kavrama";
+        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-emerald-500/40 bg-emerald-950/40 text-emerald-300";
+        document.getElementById('bmDetailDesc').innerText = "Bu konunun temel ilkelerini iyi kavradınız. Soru çözerken hızlanmaya odaklanabilirsiniz.";
+      } else if (score >= 50) {
+        badge.innerText = "Tekrar Gerekli";
+        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-amber-500/40 bg-amber-950/40 text-amber-300";
+        document.getElementById('bmDetailDesc').innerText = "Temel mantık oturmuş ancak tuzak soru tiplerinde hata payı bulunuyor. Pekiştirme önerilir.";
+      } else {
+        badge.innerText = "Kritik Zayıf Nokta";
+        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-rose-500/40 bg-rose-950/40 text-rose-300";
+        document.getElementById('bmDetailDesc').innerText = "Bu konuda sık yanlış yapılmış. 'Zayıf Noktayı Pekiştir' butonuna basarak Co-Worker ile eksikleri kapatın.";
+      }
+
+      const mistakeCount = (currentProject?.mistakes || []).filter(m => (m.topic && m.topic.includes(node.topic_name)) || score < 50).length;
+      document.getElementById('bmDetailMistakes').innerText = `${mistakeCount} Yanlış Kayıtlı`;
+    }
+
+    function reinforceSelectedTopicAction() {
+      if (!selectedBrainMapNode) return;
+      const topicName = selectedBrainMapNode.topic_name;
+      closeBrainMapModal();
+      if (!rightDrawerOpen) toggleDrawer('right');
+      switchRightTab('chat');
+      postToRust('reinforce_topic', { title: topicName });
+    }
+
+    // =========================================================================
+    // DAILY STUDY PLAN CONTROLLER
+    // =========================================================================
+    function openDailyPlanModal() {
+      const modal = document.getElementById('dailyPlanModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      renderDailyTasks();
+    }
+
+    function closeDailyPlanModal() {
+      const modal = document.getElementById('dailyPlanModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderDailyTasks() {
+      const streak = appState.streak_days || 1;
+      const shields = appState.rhythm_shields || 2;
+      const streakEl = document.getElementById('modalStreakCount');
+      const shieldsEl = document.getElementById('modalShieldsCount');
+      if (streakEl) streakEl.innerText = `${streak} Günlük Seri`;
+      if (shieldsEl) shieldsEl.innerText = `🛡️ ${shields} Kalkan Aktif`;
+
+      const container = document.getElementById('dailyTasksListContainer');
+      const tasks = appState.daily_tasks || [];
+
+      if (tasks.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-[#9a9489]">Henüz görev bulunmuyor.</div>`;
+        return;
+      }
+
+      container.innerHTML = tasks.map(t => {
+        const isDone = t.is_done;
+        const progress = t.progress || 0;
+        const target = t.target || 1;
+        const pct = Math.min(100, Math.round((progress / target) * 100));
+
+        return `
+          <div class="p-3.5 rounded-2xl bg-[#141413] border ${isDone ? 'border-emerald-500/40 bg-emerald-950/10' : 'border-[#2a2824]'} flex items-start justify-between gap-3 transition">
+            <div class="flex items-start gap-3 flex-1">
+              <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleDailyTaskAction('${t.id}')" class="w-4 h-4 mt-0.5 accent-[#cc785c] cursor-pointer">
+              <div class="flex-1">
+                <span class="text-xs font-semibold ${isDone ? 'text-emerald-300 line-through' : 'text-[#fbf9f5]'} block">${escapeHtml(t.title)}</span>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <div class="flex-1 bg-[#262420] h-1.5 rounded-full overflow-hidden border border-[#34312b]">
+                    <div class="h-full bg-gradient-to-r from-[#cc785c] to-emerald-400 transition-all" style="width: ${pct}%"></div>
+                  </div>
+                  <span class="font-mono text-[10px] text-[#9a9489] shrink-0">${progress}/${target}</span>
+                </div>
+              </div>
+            </div>
+            ${isDone ? `<span class="text-[10px] font-bold text-emerald-400 font-mono bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800">TAMAM</span>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleDailyTaskAction(id) {
+      postToRust('toggle_daily_task', { task_id: id });
+    }
+
+    function addDailyTaskAction() {
+      const input = document.getElementById('newDailyTaskTitle');
+      const title = input ? input.value.trim() : "";
+      if (!title) return;
+      postToRust('add_daily_task', { title, target: 1 });
+      input.value = '';
+    }
+
+    // =========================================================================
+    // RESEARCH STATION (STUDY BROWSER) CONTROLLER
+    // =========================================================================
+    let currentBrowserUrl = "https://duckduckgo.com";
+
+    function toggleStudyBrowser() {
+      const drawer = document.getElementById('studyBrowserDrawer');
+      if (drawer.classList.contains('translate-x-full')) {
+        drawer.classList.remove('translate-x-full');
+      } else {
+        drawer.classList.add('translate-x-full');
+      }
+    }
+
+    function loadBrowserUrl(url) {
+      currentBrowserUrl = url;
+      const input = document.getElementById('browserUrlInput');
+      const frame = document.getElementById('studyBrowserFrame');
+      if (input) input.value = url;
+      if (frame) frame.src = url;
+    }
+
+    function navigateBrowserAction() {
+      const input = document.getElementById('browserUrlInput');
+      let val = input ? input.value.trim() : "";
+      if (!val) return;
+      if (!val.startsWith('http://') && !val.startsWith('https://')) {
+        if (val.includes('.') && !val.includes(' ')) {
+          val = 'https://' + val;
+        } else {
+          val = 'https://duckduckgo.com/?q=' + encodeURIComponent(val);
+        }
+      }
+      loadBrowserUrl(val);
+    }
+
+    function openCurrentUrlExternally() {
+      if (currentBrowserUrl) {
+        postToRust('open_external_url', { text: currentBrowserUrl });
+        showToast("Varsayılan tarayıcıda açıldı 🌐");
+      }
+    }
+
+    function openStudyBrowserWithQuery(query) {
+      const drawer = document.getElementById('studyBrowserDrawer');
+      drawer.classList.remove('translate-x-full');
+      loadBrowserUrl(`https://duckduckgo.com/?q=${encodeURIComponent(query)}`);
+    }
+
+    // =========================================================================
+    // 3D FLASHCARDS CONTROLLER
+    // =========================================================================
+    let flashcardsDeck = [
+      { q: "İntegral Temel Teoremi nedir?", a: "Sürekli bir fonksiyonun belirli integrali, ters türevi (antiderivative) kullanılarak hesaplanabilir: ∫[a,b] f(x)dx = F(b) - F(a)." },
+      { q: "Mitochondria'nın hücredeki görevi nedir?", a: "Hücresel solunum yoluyla ATP (enerji) üretir. Hücrenin enerji santralidir." },
+      { q: "Newton'un 2. Hareket Yasası nedir?", a: "F = m · a (Bir cisme etkiyen net kuvvet, cismin kütlesi ile ivmesinin çarpımına eşittir)." },
+      { q: "Present Perfect Continuous ne zaman kullanılır?", a: "Geçmişte başlayıp konuşma anında da devam eden veya etkisi süren eylemlerde kullanılır (have/has been + V_ing)." },
+      { q: "Ohm Yasası Formülü nedir?", a: "V = I · R (Gerilim = Akım × Direnç)." }
+    ];
+    let currentFlashcardIdx = 0;
+
+    function openFlashcardsModal() {
+      const modal = document.getElementById('flashcardModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      let deck = [];
+      if (currentProject && currentProject.mistakes && currentProject.mistakes.length > 0) {
+        currentProject.mistakes.forEach(m => {
+          deck.push({
+            q: m.question,
+            a: `${m.correct_answer}\n\n${m.explanation || ''}`
+          });
+        });
+      }
+      if (deck.length === 0) {
+        deck = [
+          { q: "İntegral Temel Teoremi nedir?", a: "Sürekli bir fonksiyonun belirli integrali, ters türevi (antiderivative) kullanılarak hesaplanabilir: ∫[a,b] f(x)dx = F(b) - F(a)." },
+          { q: "Mitochondria'nın hücredeki görevi nedir?", a: "Hücresel solunum yoluyla ATP (enerji) üretir. Hücrenin enerji santralidir." },
+          { q: "Newton'un 2. Hareket Yasası nedir?", a: "F = m · a (Bir cisme etkiyen net kuvvet, cismin kütlesi ile ivmesinin çarpımına eşittir)." },
+          { q: "Present Perfect Continuous ne zaman kullanılır?", a: "Geçmişte başlayıp konuşma anında da devam eden veya etkisi süren eylemlerde kullanılır (have/has been + V_ing)." },
+          { q: "Ohm Yasası Formülü nedir?", a: "V = I · R (Gerilim = Akım × Direnç)." }
+        ];
+      }
+      flashcardsDeck = deck;
+      currentFlashcardIdx = 0;
+      updateFlashcardView();
+    }
+
+    function closeFlashcardsModal() {
+      const modal = document.getElementById('flashcardModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function flipFlashcard() {
+      const inner = document.getElementById('flashcardInner');
+      if (inner) inner.classList.toggle('is-flipped');
+    }
+
+    function updateFlashcardView() {
+      const inner = document.getElementById('flashcardInner');
+      if (inner) inner.classList.remove('is-flipped');
+
+      const card = flashcardsDeck[currentFlashcardIdx] || { q: "Kart kalmadı.", a: "Yeni kartlar üretin." };
+      document.getElementById('fcQuestionText').innerText = card.q;
+      document.getElementById('fcAnswerText').innerText = card.a;
+      document.getElementById('flashcardCounter').innerText = `Kart ${currentFlashcardIdx + 1} / ${flashcardsDeck.length}`;
+    }
+
+    function nextFlashcard() {
+      if (currentFlashcardIdx < flashcardsDeck.length - 1) {
+        currentFlashcardIdx++;
+        updateFlashcardView();
+      } else {
+        currentFlashcardIdx = 0;
+        updateFlashcardView();
+      }
+    }
+
+    function prevFlashcard() {
+      if (currentFlashcardIdx > 0) {
+        currentFlashcardIdx--;
+        updateFlashcardView();
+      } else {
+        currentFlashcardIdx = flashcardsDeck.length - 1;
+        updateFlashcardView();
+      }
+    }
+
+    function generateFlashcardsWithAI() {
+      closeFlashcardsModal();
+      if (!rightDrawerOpen) toggleDrawer('right');
+      switchRightTab('chat');
+      showToast("🃏 Sayfa içeriğinden hafıza kartları üretiliyor...");
+      sendAgentPrompt("Bu sayfadaki en önemli 3 tanım veya kural için soru-cevap formatında hafıza kartı (flashcard) hazırla.");
+    }
+
+    // =========================================================================
+    // TEXT-TO-SPEECH (TTS) CONTROLLER
+    // =========================================================================
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) {
+        showToast("⚠️ Tarayıcınız ses sentezini desteklemiyor.");
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+
+      const turkishChars = /[çğıöşüÇĞİÖŞÜ]/;
+      if (turkishChars.test(text)) {
+        utterance.lang = 'tr-TR';
+      } else {
+        utterance.lang = 'en-US';
+      }
+
+      window.speechSynthesis.speak(utterance);
+      showToast("🔊 Metin seslendiriliyor...", "🔊");
+    }
+
+    // =========================================================================
+    // EXAM TARGET CONTROLLER
+    // =========================================================================
+    function openExamTargetModal() {
+      const modal = document.getElementById('examTargetModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (appState.exam_target) {
+        document.getElementById('examTitleInput').value = appState.exam_target.title || "";
+        document.getElementById('examDateInput').value = appState.exam_target.date_str || "2026-06-20";
+        document.getElementById('examPagesTargetInput').value = appState.exam_target.target_pages || 50;
+      }
+    }
+
+    function closeExamTargetModal() {
+      const modal = document.getElementById('examTargetModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveExamTargetAction() {
+      const title = document.getElementById('examTitleInput').value.trim() || "Final Sınavı";
+      const date_str = document.getElementById('examDateInput').value.trim() || "2026-06-20";
+      const target = parseInt(document.getElementById('examPagesTargetInput').value) || 50;
+
+      postToRust('save_exam_target', { title, date_str, target });
+      closeExamTargetModal();
+    }
+
+    // Configure marked.js for clean newlines
+    if (typeof marked !== 'undefined') {
+      marked.setOptions({ breaks: true, gfm: true });
+    }
+  </script>
+</body>
+</html>

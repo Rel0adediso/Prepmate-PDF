@@ -117,151 +117,198 @@ def deduplicate_overlapping_annotations(annotations: list[dict]) -> list[dict]:
 
 def extract_table_exercise_blanks(page) -> list[dict]:
     """
-    Extracts blanks ONLY from authentic fill-in exercise tables (e.g. Q&A tables, matching tables).
+    Extracts blanks from authentic fill-in exercise tables:
+    1. Column-based tables: e.g. Advantages vs Disadvantages, Pros & Cons, Vocabulary categorization (Technology / Benefits / Concerns), Arguments For vs Against, Causes vs Effects.
+    2. Row-based tables: e.g. Q&A tables, tense tables, matching tables with missing cells.
     Strictly skips:
-    - Pure grammar explanations, summary tables, reference charts (e.g. Affirmative/Negative, Spelling rules, Irregular verbs)
-    - Note boxes, warning callouts ('Note That', 'Common mistakes')
-    - Header/title banners
-    Uses the EXACT cell coordinates from PyMuPDF, NEVER approximate column division!
+    - Pure grammar explanations, summary tables, reference charts (e.g. Grammar Tip, Useful Expressions, Spelling rules, Irregular verbs)
+    - Note boxes, warning callouts where all cells are already filled with text.
+    Uses the EXACT cell coordinates from PyMuPDF with clean inner padding.
     """
     tabs = page.find_tables()
     table_blanks = []
     w_page = page.rect.width
     h_page = page.rect.height
     
-    EXPLANATION_KEYWORDS = [
-        "affirmative", "negative", "pronunciation", "spelling", "verb ending", 
-        "rule", "pattern", "base (v1)", "past (v2)", "time expressions", "use", 
-        "examples", "singular", "plural", "short answer", "note that", "mistakes",
-        "grammar focus", "we don't use", "we usually use", "final sound"
+    EXERCISE_HDR_WORDS = [
+        "advantages", "disadvantages", "benefits", "drawbacks", "concerns",
+        "technology", "arguments", "pros", "cons", "causes", "effects",
+        "for", "against", "reasons", "opinions", "problems", "solutions",
+        "group", "category", "categories", "positive", "negative",
+        "question", "answer", "subject", "verb", "item", "pattern", "meaning", "phrase", "example"
     ]
     
+    EXERCISE_INSTR_WORDS = [
+        "complete the table", "fill in the table", "fill the table", "in the table",
+        "into the table", "complete the chart", "group the following", "categories",
+        "brainstorm", "pros and cons", "benefits and drawbacks", "add some positive",
+        "into one of the", "write the missing", "answer the questions", "pros or cons",
+        "working in pairs", "in pairs"
+    ]
+    
+    TIP_KEYWORDS = [
+        "grammar tip", "useful expressions", "useful phrases", "did you know",
+        "common mistakes", "spelling rules", "irregular verbs", "pronunciation"
+    ]
+
+    blocks = page.get_text("blocks")
+
     for t in tabs.tables:
         # 1. Skip tiny tables, single-row banner headers, or icon boxes
-        if len(t.cells) <= 3 or t.row_count <= 1 or (t.bbox[3] - t.bbox[1]) < 30:
+        if len(t.cells) <= 2 or t.row_count <= 1 or (t.bbox[3] - t.bbox[1]) < 30:
             continue
             
         t_rect = pymupdf.Rect(t.bbox)
-        t_full_text = page.get_text("text", clip=t_rect).lower()
-
-        # Check text immediately above table (up to 45 pt above)
-        above_rect = pymupdf.Rect(t_rect.x0 - 20, max(0, t_rect.y0 - 45), t_rect.x1 + 20, t_rect.y0)
-        above_text = page.get_text("text", clip=above_rect).lower()
-        combined_ctx = (above_text + " " + t_full_text).strip()
+        t_full_text = page.get_text("text", clip=t_rect).strip()
+        t_low = t_full_text.lower()
 
         # Skip Multiple Choice options formatted as tables
-        if len(re.findall(r'\b[a-d]\.\s+', t_full_text)) >= 2:
+        if len(re.findall(r'\b[a-d]\.\s+', t_low)) >= 2:
             continue
 
-        # Skip callouts, note boxes, fact boxes, discussion prompts
-        CALLOUT_KEYWORDS = [
-            "interesting fact", "fun fact", "did you know", "note that", "common mistakes",
-            "common past simple mistakes", "case 1", "case 2", "warm-up", "discussion",
-            "in pairs", "watch the video", "tip:", "quote:", "application:", "rule states that",
-            "we don't use", "we usually use"
+        # Clean cells: remove small border margins and nested inner duplicate cells
+        raw_cells = [pymupdf.Rect(c) for c in t.cells if (c[2] - c[0]) > 25 and (c[3] - c[1]) > 12]
+        clean_cells = []
+        for c in raw_cells:
+            if not any((other != c and other.contains(c)) for other in raw_cells):
+                clean_cells.append(c)
+
+        if not clean_cells:
+            continue
+
+        # Check if table has any blank / empty cells
+        empty_cells = [
+            c for c in clean_cells 
+            if (not page.get_text("text", clip=c).strip() or page.get_text("text", clip=c).strip().rstrip(".").isdigit()) 
+            and c.height >= 18
         ]
-        if any(k in combined_ctx for k in CALLOUT_KEYWORDS):
+        if not empty_cells:
+            # Table is already fully filled with text (e.g. reference table, tip box)
             continue
 
-        # Skip pure grammar charts & reference summaries
-        has_expl_kw = sum(1 for kw in EXPLANATION_KEYWORDS if kw in t_full_text)
-        if has_expl_kw >= 1 and not any(k in combined_ctx for k in ["complete the table", "write the missing"]):
-            continue
-        if "information questions with did" in combined_ctx or "form of past simple" in combined_ctx:
+        # If table is clearly a tip / reference callout and not an exercise
+        if any(kw in t_low for kw in TIP_KEYWORDS) and not any(kw in t_low for kw in ["complete", "fill", "advantages", "benefits", "group"]):
             continue
 
-        # MUST have an explicit exercise instruction to complete / fill / answer the table
-        has_table_instr = any(k in combined_ctx for k in [
-            "complete the table", "fill in the table", "write the missing", 
-            "look at the gaps", "answer the questions", "complete the chart",
-            "write the questions", "fill the table", "fill in the gaps and complete"
-        ])
-        if not has_table_instr:
-            continue
-            
-        # 3. Group cells by row (y-coordinate)
-        cells = [pymupdf.Rect(c) for c in t.cells if (c[2] - c[0]) > 20 and (c[3] - c[1]) > 10]
-        if not cells:
-            continue
-            
-        # Cluster cells by vertical overlap
+        # Get task prompt above table (up to 250 pt above)
+        above_blocks = [b for b in blocks if b[3] <= t_rect.y0 + 10 and b[1] >= max(0, t_rect.y0 - 250)]
+        above_blocks.sort(key=lambda b: b[1])
+        above_text = " ".join(b[4].strip() for b in above_blocks).replace("\n", " ").strip()
+        
+        m_task = re.findall(r'([a-z]\.\s*Task:.*?)(?=[a-z]\.\s*Task:|$)', above_text, re.IGNORECASE)
+        if m_task:
+            task_prompt = m_task[-1].strip()
+        elif len(above_text) > 220:
+            task_prompt = above_text[-220:].strip()
+        else:
+            task_prompt = above_text
+
+        # Cluster cells into rows by vertical overlap
         rows = []
-        cells.sort(key=lambda c: (c.y0, c.x0))
-        for c in cells:
+        clean_cells.sort(key=lambda c: (c.y0, c.x0))
+        for c in clean_cells:
             matched_row = None
             for r in rows:
                 v_ovlp = max(0.0, min(c.y1, r[0].y1) - max(c.y0, r[0].y0))
-                if v_ovlp > 0.5 * min(c.height, r[0].height):
+                if v_ovlp > 0.4 * min(c.height, r[0].height):
                     matched_row = r
                     break
             if matched_row is not None:
                 matched_row.append(c)
             else:
                 rows.append([c])
-                
-        # Sort cells in each row by x0
+
         for r in rows:
             r.sort(key=lambda c: c.x0)
-            
-        # If table has a short header row (e.g. Question / Answer), identify if row 0 is header
-        first_row_words = [page.get_text("text", clip=c).strip().lower() for c in rows[0]]
-        first_row_text = " ".join(first_row_words)
-        is_header_row = (
-            len(first_row_text) <= 35 and
-            any(w in ["question", "answer", "subject", "verb", "item", "pattern"] for w in first_row_words)
-        )
-        start_row_idx = 1 if is_header_row else 0
+
+        if len(rows) < 2 or len(rows[0]) < 2:
+            continue
+
+        # Row 0 contains headers
+        headers = [(c, page.get_text("text", clip=c).strip().replace("\n", " ")) for c in rows[0]]
         
-        for r_idx in range(start_row_idx, len(rows)):
+        # Verify that row 0 looks like header row (short header titles, not long paragraphs)
+        if not all(len(h[1]) <= 60 for h in headers):
+            continue
+
+        # Check if table qualifies as an authentic exercise table
+        is_exercise = False
+        for _, h_text in headers:
+            h_low = h_text.lower()
+            if any(w in h_low for w in EXERCISE_HDR_WORDS):
+                is_exercise = True
+                break
+            if re.search(r'\(\d+\)', h_text): # e.g. (3), (4)
+                is_exercise = True
+                break
+
+        combined_search = (task_prompt + " " + t_low).lower()
+        if any(w in combined_search for w in EXERCISE_INSTR_WORDS):
+            is_exercise = True
+
+        # If still undecided, check if there are multiple substantial empty cells
+        if not is_exercise and len(empty_cells) >= 2 and any(c.height >= 40 for c in empty_cells):
+            is_exercise = True
+
+        if not is_exercise:
+            continue
+
+        # Process rows >= 1
+        for r_idx in range(1, len(rows)):
             row_cells = rows[r_idx]
-            if len(row_cells) < 2:
-                continue
-                
-            content_cells = [c for c in row_cells if c.width >= 35]
-            if len(content_cells) < 2:
-                continue
-                
-            cell_texts = [page.get_text("text", clip=c).strip() for c in content_cells]
+            cell_texts = [page.get_text("text", clip=c).strip() for c in row_cells]
             
-            for c_i, (c_rect, c_txt) in enumerate(zip(content_cells, cell_texts)):
-                is_blank = False
-                prefix_num = ""
-                
-                if not c_txt:
-                    is_blank = True
-                elif c_txt.strip().rstrip(".").isdigit(): # e.g. "2." or "3"
-                    is_blank = True
-                    prefix_num = c_txt.strip()
-                    
-                if is_blank:
-                    other_txts = [t for j, t in enumerate(cell_texts) if j != c_i and t and not t.strip().rstrip(".").isdigit()]
-                    if not other_txts:
-                        continue
-                    prompt_ctx = " | ".join(other_txts).replace("\n", " ")
-                    
-                    x0 = c_rect.x0
-                    x1 = c_rect.x1
-                    y0 = c_rect.y0
-                    y1 = c_rect.y1
-                    
-                    if prefix_num:
-                        x0 = min(x1 - 30, x0 + 18.0)
-                        
-                    ymin = int((y0 / h_page) * 1000)
-                    xmin = int(((x0 + 4) / w_page) * 1000)
-                    ymax = int((y1 / h_page) * 1000)
-                    xmax = int(((x1 - 4) / w_page) * 1000)
-                    
-                    table_blanks.append({
-                        "context": f"[Table Exercise Row {r_idx+1}: {prompt_ctx}]",
-                        "box_2d": [ymin, xmin, ymax, xmax],
-                        "font_size": 10,
-                        "y0": y0,
-                        "x0": x0,
-                        "width": (x1 - x0) - 8,
-                        "is_table_cell": True
-                    })
-                    
+            for c_i, (c_rect, c_txt) in enumerate(zip(row_cells, cell_texts)):
+                is_blank = (not c_txt or c_txt.strip().rstrip(".").isdigit())
+                if not is_blank:
+                    continue
+
+                # Match this cell to a header in row 0 by maximal horizontal overlap
+                best_hdr = ""
+                best_ovlp = 0.0
+                for h_rect, h_txt in headers:
+                    ovlp = max(0.0, min(c_rect.x1, h_rect.x1) - max(c_rect.x0, h_rect.x0))
+                    if ovlp > best_ovlp:
+                        best_ovlp = ovlp
+                        best_hdr = h_txt
+
+                other_txts = [t for j, t in enumerate(cell_texts) if j != c_i and t and not t.strip().rstrip(".").isdigit()]
+
+                if other_txts:
+                    prompt_ctx = f"[Table Row {r_idx+1} ({best_hdr}): " + " | ".join(other_txts) + "]"
+                elif best_hdr and task_prompt:
+                    prompt_ctx = f"[Table Column: {best_hdr} (Task: {task_prompt})]"
+                elif best_hdr:
+                    prompt_ctx = f"[Table Column: {best_hdr}]"
+                elif task_prompt:
+                    prompt_ctx = f"[Table Cell (Task: {task_prompt})]"
+                else:
+                    prompt_ctx = f"[Table Cell Row {r_idx+1}]"
+
+                # Inset coordinates by 4pt so text doesn't touch table borders
+                x0 = c_rect.x0 + 4.0
+                x1 = c_rect.x1 - 4.0
+                y0 = c_rect.y0 + 4.0
+                y1 = c_rect.y1 - 4.0
+
+                cell_h = c_rect.height
+                font_sz = 9 if cell_h >= 45 else 10
+
+                ymin = int((y0 / h_page) * 1000)
+                xmin = int(((x0 + 4) / w_page) * 1000)
+                ymax = int((y1 / h_page) * 1000)
+                xmax = int(((x1 - 4) / w_page) * 1000)
+
+                table_blanks.append({
+                    "context": prompt_ctx,
+                    "box_2d": [ymin, xmin, ymax, xmax],
+                    "font_size": font_sz,
+                    "y0": y0,
+                    "x0": x0,
+                    "width": (x1 - x0),
+                    "is_table_cell": True
+                })
+
     return table_blanks
 
 
@@ -366,6 +413,11 @@ def extract_page_blanks_and_lines(page) -> tuple[list[dict], list[dict], int]:
             if set(u["text"].strip('“"”’\'')).issubset({'.'}):
                 continue
             if len(u["text"]) < 8 and not any(c in u["text"] for c in ['_']):
+                continue
+
+        # Check if it is an ellipsis inside a reference list / tip box (e.g. '• As X said/suggested, …', '• X believes that...')
+        if any(kw in line_str.lower() for kw in ["useful expressions", "grammar tip", "useful phrases", "grammar and expression", "according to", "as x said", "x believes", "x points out", "x suggests", "x argues"]):
+            if not any(c in u["text"] for c in ['_']):
                 continue
 
         # Merge adjacent underscores on the same line (e.g. '____ _____________' for walk)
@@ -2284,7 +2336,9 @@ def solve_page_hybrid(pdf_path: str, page_num: int, image_bytes: bytes, api_key:
                 return hl_res
 
         has_written_exercise_instructions = any(k in page_text.lower() for k in [
-            "fill in", "fill the", "complete the", "put the verb", "write the correct", "rewrite the", "complete each"
+            "fill in", "fill the", "complete the", "put the verb", "write the correct", "rewrite the", "complete each",
+            "group the", "categorize", "classify", "brainstorm", "pros and cons", "advantages", "disadvantages",
+            "benefits", "drawbacks", "arguments", "table", "chart", "match", "matching", "choose", "circle"
         ])
         is_discussion_only = (
             any(k in page_text.lower() for k in [
@@ -2465,7 +2519,15 @@ Solve all exercises on this workbook page completely and realistically.
    - Output ONE concise, direct sentence answering that specific question.
    - Do NOT treat numbered lines as an uninterrupted essay; answer each question directly!
 
-11. STRICT WRITING LINE CONSTRAINTS:
+11. TABLE EXERCISE COLUMNS, CATEGORIZATION & PROS/CONS (e.g. '[Table Column: Technology (3)]', '[Table Column: Advantages]'):
+   - When a blank corresponds to a table column:
+     * If the column specifies a count in parentheses (e.g. 'Technology (3)', 'Benefits (4)', 'Concerns (4)'):
+       Look at the word bank / vocabulary list above the table on the page. Select and output EXACTLY that number of categorized items from the given word bank. Format as clean items separated by newlines with dashes (e.g. "- digital tools\\n- online platform\\n- access"). DO NOT invent words outside the word bank!
+     * If the column is for Advantages / Disadvantages / Arguments / Pros / Cons / Causes / Effects:
+       Provide 2 to 3 concise, authentic student bullet points separated by newlines with dashes (e.g. "- Flexible study schedule\\n- Learn at your own pace\\n- Saves commuting time").
+     * CRITICAL FORMATTING: ALWAYS use standard ASCII dash "- " (NEVER unicode bullet •) and separate items with newline (\\n) so they fit neatly inside the table cell!
+
+12. STRICT WRITING LINE CONSTRAINTS:
    - Distribute the writing into an array of EXACTLY {len(writing_lines)} strings in "writing_lines".
    - Each line MUST contain strictly 6 to 10 words (maximum 48 characters).
    - NEVER exceed 50 characters on any line so words are NEVER cut off at the edge of the ruled line!

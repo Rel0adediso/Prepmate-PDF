@@ -1,26 +1,31 @@
 <div align="center">
 
-# 🎓 PrepMate PDF
-### *AI-Powered English Workbook & Homework Solver*
+# 🎓 PrepMate
+### *Autonomous AI Study Studio (PrepMate 2.0) & PDF Workbook Solver*
 
 <p align="center">
   <b>English</b> &nbsp;|&nbsp; <a href="README_TR.md">Türkçe</a>
 </p>
 
 [![Release](https://img.shields.io/github/v/release/Rel0adediso/Prepmate-PDF?style=flat-square&color=cc785c&labelColor=292b26)](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/Rel0adediso/Prepmate-PDF/total?style=flat-square&color=d4a373&labelColor=292b26)](https://github.com/Rel0adediso/Prepmate-PDF/releases)
+[![Rust](https://img.shields.io/badge/Rust-2021%20Edition-cc785c?style=flat-square&labelColor=292b26&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Size](https://img.shields.io/badge/PrepMate%202.0-2.40%20MB-d4a373?style=flat-square&labelColor=292b26)](#)
 [![Python](https://img.shields.io/badge/python-3.10+-cc785c?style=flat-square&labelColor=292b26&logo=python&logoColor=white)](https://python.org)
 [![AI Engine](https://img.shields.io/badge/AI-Gemini%203.8%20%26%20OpenRouter-d4a373?style=flat-square&labelColor=292b26&logo=google&logoColor=white)](https://aistudio.google.com)
 [![License](https://img.shields.io/badge/license-MIT-cc785c?style=flat-square&labelColor=292b26)](#)
 
 <p align="center">
-  Autonomous AI workbook & homework solver engineered for college prep classes and ESL students.<br/>
-  Fills exercises with natural handwriting aesthetics and exports <b>Acrobat-standard vector PDFs</b>.
+  Next-generation personal study studio and autonomous AI workbook solver.<br/>
+  Featuring <b>PrepMate 2.0</b>: a <b>2.4 MB pure native Rust desktop app</b> with Kvieta focus engine, Brain Map, dual-page book spreads, and <b>Acrobat-grade vector PDF</b> solutions.
 </p>
 
 <p align="center">
+  <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-2.0.exe">
+    <img src="https://img.shields.io/badge/Download%20PrepMate%202.0%20(Rust%20Native%202.4MB)-Windows%20EXE-cc785c?style=for-the-badge&logo=windows&logoColor=white&labelColor=292b26" alt="Download PrepMate 2.0 (.EXE)" />
+  </a>
+  &nbsp;&nbsp;
   <a href="https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe">
-    <img src="https://img.shields.io/github/v/release/Rel0adediso/Prepmate-PDF?style=for-the-badge&logo=windows&logoColor=white&label=Download%20Windows%20App%20(.EXE)&color=cc785c&labelColor=292b26" alt="Download Windows App (.EXE)" />
+    <img src="https://img.shields.io/badge/Download%20Classic%20Solver-Windows%20EXE-d4a373?style=for-the-badge&logo=windows&logoColor=white&labelColor=292b26" alt="Download Classic Solver (.EXE)" />
   </a>
 </p>
 
@@ -28,46 +33,91 @@
 
 ---
 
-## 🚀 Quick Start in 10 Seconds
+## ⚡ Which Version to Choose?
 
-> **No coding, Python installation, or terminal commands needed!**
-> 1. Download **`PrepMate-PDF.exe`** directly from the **[1-Click Download Link](https://github.com/Rel0adediso/Prepmate-PDF/releases/latest/download/PrepMate-PDF.exe)**.
-> 2. Double-click the executable to launch the desktop app.
-> 3. Click **"🔑 AI Key"** in the top bar and paste your free key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-
----
-
-## 🌟 Why PrepMate PDF?
-
-| Feature | Generic OCR / AI Tools | 🎓 PrepMate PDF |
-| :--- | :---: | :---: |
-| **Interface & Design** | Cluttered, clinical, overwhelming | **Warm Obsidian & Terracotta editorial aesthetic** |
-| **PDF Quality** | Flattened, blurry screenshots | **Vector-crisp original resolution preserved** |
-| **Alignment Accuracy** | Overlaps lines and questions | **Pixel-perfect line & bounding box detection** |
-| **Night Study Mode** | Blinding white PDF background | **Parchment Mode: Soft warm paper filter** |
-| **Cheat Sheet Modal** | Tedious scrolling through pages | **Numbered answer list with 1-click clipboard copy** |
-| **Humanized Student Feel** | Robotic 100% perfection (suspicious) | **~95% realistic grade simulation with natural touch** |
-| **CEFR Level Control** | Uncontrolled vocabulary difficulty | **A1 to C1 proficiency level selector** |
-| **Mind-Maps & Diagrams** | Fails or skips circular layouts | **Full sunburst, branching & spider diagram solver** |
-| **Inline Proofreading** | Blindly writes answers | **5.8pt supralinear corrections over crossed-out words** |
-| **Undo / Redo Support** | Irreversible accidental deletions | **40-step comprehensive `Ctrl+Z` / `Ctrl+Y` stack** |
-| **Export Flexibility** | Dumps full textbook needlessly | **Homework-Only PDF, Full Textbook PDF, or Clipboard Image** |
+| Edition | Architecture | Binary Size | Startup | Key Strengths |
+| :--- | :--- | :---: | :---: | :--- |
+| **PrepMate 2.0** *(Recommended)* | **Pure Rust (`wry` + `tao`)** | **2.40 MB** | **<30 ms** | Kvieta Super Focus, Brain Map mastery graph, Daily Rhythm Shields, Research Station, Bionic Reading, 3D Flashcards, dual-page book reader, zero dependencies. |
+| **PrepMate Classic** | Python 3.10+ & FastAPI | ~60 MB | ~2 s | Deep vector PDF parser, full page handwriting injection, CEFR level calibrator, Acrobat vector compiler. |
 
 ---
 
-## 🛠️ Architecture & How It Works
+## 🌟 PrepMate 2.0 — Key Innovations
+
+### 🎯 1. Kvieta Super Focus Engine
+Inspired by the gentle, non-punitive focus architecture of **Kvieta** (`Rel0adediso/Kvieta-app`):
+- **Session Intentions (`FocusIntention`):** Set what you will accomplish before diving in (*e.g., "Calculus Pages 12-15 exercises"*).
+- **68px Ambient HUD (`SessionSurface`):** Unobtrusive top bar displaying current focus goal, timer, and smooth progress tracking.
+- **Gentle Closure Warnings:** Calm 5-minute and 1-minute reminders to wrap up your thoughts without panic.
+- **Focus Closure Summary:** Captures completed intentions, logged pages, and commits them to the daily rhythm log.
+
+### 🧠 2. Brain Map (Constellation Mastery Radar)
+- **Interactive SVG Constellation:** Dynamic subject nodes generated from your uploaded curriculum.
+- **Mastery Levels:** 🟢 Mastered (>75%), 🟡 Needs Review (50-74%), 🔴 Critical Weakness (<50%).
+- **Mistake Journal Synchronization:** Tracks unresolved errors per unit in real time.
+- **⚡ Targeted Weakness Drill:** 1-click Co-Worker prompt creating a 2-sentence concept rule and a targeted trap question.
+
+### 📅 3. Daily Study Plan & Rhythm Shields
+- Daily auto-advancing tasks: Reading pages, completing focus blocks, solving mistakes.
+- **Rhythm Shields (`🛡️ 2 Shields`):** Protects your streak when life gets busy.
+
+### 🌐 4. Research Station (In-App Study Browser)
+- Slide-over drawer with instant access to academic references:
+  - 🇹🇷 **Tureng** & 🇬🇧 **Cambridge Dictionary** (Bilingual definitions)
+  - 📈 **Desmos** (Interactive graphing calculator)
+  - 📚 **Wikipedia** & 🔍 **DuckDuckGo**
+- **1-Click Text Lookup:** Select any word or passage in the book to search instantly.
+- **Native OS Browser Bridge:** Clean handoff for protected sites via Windows default browser.
+
+### 🚀 5. Study Accelerators
+- **🔤 Bionic Reading:** Bolds the initial 45% of words to guide eye fixations and double reading speed.
+- **🃏 3D Flipping Flashcards:** Spatial flip animations (`preserve-3d`) auto-populated from your personal Mistake Journal.
+- **🔊 Text-to-Speech (TTS):** Natural speech synthesis in English and Turkish via Web Speech API.
+- **🎯 Exam Countdown HUD:** Real-time day counter and remaining page target on the welcome dashboard.
+
+### 📖 6. Dual-Page Editorial Book Reader
+- Two-page spread with center spine shadow (`spine crease`).
+- Paper modes: **Dark Charcoal** (`#1c1b18`), **Warm Sepia** (`#25201a`), and **Crisp White**.
+- Raycast-style command palette (`Ctrl + K`), Notion-style margin notes, and ambient rain/library focus audio.
+
+---
+
+## 🛠️ Architecture Overview
 
 ```mermaid
-flowchart LR
-    A["📄 Upload Workbook PDF"] --> B["🔍 Hybrid Vector Parser"]
-    B --> C1["Blanks & Lines"]
-    B --> C2["Tables & Matching"]
-    B --> C3["Mind-Maps & Sunburst"]
-    B --> C4["Essays & Paragraphs"]
-    C1 & C2 & C3 & C4 --> D["🧠 Gemini 3.8 / OpenRouter"]
-    D --> E["✨ Modern Canvas Preview"]
-    E --> F["📥 Vector PDF / ZIP / Image"]
+flowchart TD
+    subgraph Core["🦀 PrepMate 2.0 (Pure Rust Native)"]
+        A["📖 Dual-Page Book Engine"]
+        B["🎯 Kvieta Super Focus Engine"]
+        C["🧠 Brain Map Constellation"]
+        D["📅 Daily Rhythm Shields"]
+        E["🌐 Research Station Drawer"]
+        F["🚀 Study Accelerators (Bionic / Flashcards / TTS)"]
+    end
+    subgraph AI["🤖 Intelligent Co-Worker"]
+        G["Gemini 3.8 / OpenRouter Streaming"]
+        H["Mistake Journal & Diagnostic Drills"]
+    end
+    subgraph Export["📤 Output Studio"]
+        I["Vector Acrobat PDF"]
+        J["Markdown Notes / Cheat Sheet"]
+    end
+    Core <--> AI
+    Core --> Export
 ```
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+| :---: | :--- |
+| `Ctrl + K` | Open Raycast Command Palette (Omnibar) |
+| `Ctrl + D` / `F11` | Toggle Zen & Fullscreen Focus Mode |
+| `Ctrl + Z` | Undo last edit |
+| `Ctrl + Y` | Redo undone edit |
+| `←` / `→` | Previous / Next page spread |
+| `Escape` | Close active modals (Research Drawer, Focus Summary) |
 
 * **🎨 Warm Obsidian & Terracotta Aesthetic:** Editorial typography (`Newsreader` serif), warm accents, and an eye-soothing dark canvas.
 * **🌙 Eye-Care Parchment Mode:** Softens harsh white textbook glare into warm vintage parchment during late-night study hours.
@@ -111,6 +161,19 @@ flowchart LR
 
 ## 👨‍💻 For Developers (Running from Source)
 
+### 🦀 Building PrepMate 2.0 (Pure Rust Native)
+```bash
+# Prerequisites: Rust toolchain (stable-x86_64-pc-windows-gnu or msvc)
+cd prepmate-core
+
+# Run in development
+cargo run
+
+# Compile ultra-compact release executable (2.4 MB)
+cargo build --release
+```
+
+### 🐍 Running PrepMate Classic (Python / FastAPI)
 ```bash
 # 1. Clone repository
 git clone https://github.com/Rel0adediso/Prepmate-PDF.git
